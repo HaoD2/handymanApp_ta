@@ -1,0 +1,11 @@
+const double inputBorderRadius = 10.0;
+const double buttonBorderRadius = 8;
+const double buttonVerticalPadding = 12;
+const double inputContentPaddingHorizontal = 12.0;
+const double inputContentPaddingVertical = 8.0;
+const double bottomSheetBorderRadius = 16.0;
+const double boxRadius = 12.0;
+const double buttonPadding = 16.0;
+const double pagePadding = 18.0;
+const double subtitleListFontSize = 14.0;
+//const double buttonFontSize = 
