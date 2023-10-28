@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myhandyman_handyman/model/pekerjaan.dart';
+import 'package:myhandyman_handyman/page/checkPemesanan.dart';
 import 'package:myhandyman_handyman/page/message.dart';
 import 'package:myhandyman_handyman/page/profile.dart';
 import 'package:myhandyman_handyman/service/filtermenu.dart';
@@ -11,7 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class userHandyman extends StatelessWidget {
-  static const routeName = '/HandymanHome';
+  static const routeName = 'Handyman/HandymanHome';
   const userHandyman({super.key});
 
   @override
@@ -355,6 +356,17 @@ class _homeState extends State<home> {
                           'Jarak ke Lokasi: ${calculatedDistance.toStringAsFixed(2)} kilometer'),
                     ],
                   ),
+                  onTap: () {
+                    Navigator.of(context, rootNavigator: true)
+                        .pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return pemesanan_details(data: item.id);
+                        },
+                      ),
+                      (_) => false,
+                    );
+                  },
                   // Tambahkan logika untuk menangani item yang diklik di sini
                 );
               },

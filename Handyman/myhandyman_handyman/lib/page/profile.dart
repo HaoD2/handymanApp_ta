@@ -6,6 +6,7 @@ import 'package:myhandyman_handyman/service/authservice.dart';
 import 'package:myhandyman_handyman/service/changepassword.dart';
 
 class profileHandyman extends StatefulWidget {
+  static const routeName = '/Handyman/profile';
   const profileHandyman({super.key});
 
   @override

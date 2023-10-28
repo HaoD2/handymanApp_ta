@@ -15,6 +15,7 @@ import 'package:handyman_ta/pages/User/UI/showall_list.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
 import 'package:handyman_ta/pages/register.dart';
+import 'package:handyman_ta/pages/service/fcmAPI.dart';
 import 'package:handyman_ta/pages/service/loginRoute.dart';
 import 'package:handyman_ta/pages/service/verificationpage.dart';
 import 'constants/dimens.dart' as dimens;
@@ -22,7 +23,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+  await firebaseAPI().initNotification();
   runApp(
     const ProviderScope(
       child: MyApp(),

@@ -50,6 +50,12 @@ dependencies:
   fluttertoast: ^8.2.2
   form_builder_validators: ^9.1.0
   flutter_form_builder: ^9.1.1
+  firebase_storage: ^11.4.0
+  image_picker: ^1.0.4
+  flutter_map: ^5.0.0
+  geocoding: ^2.1.1
+  http: ^1.1.0
+  cached_network_image: ^3.3.0
 
 dev_dependencies:
   flutter_test:

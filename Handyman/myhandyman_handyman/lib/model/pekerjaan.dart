@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Pekerjaan {
+  final String id;
   final List<String> optionMenu;
   final String address;
   final Timestamp datetime;
@@ -16,6 +17,7 @@ class Pekerjaan {
   final String user;
 
   Pekerjaan({
+    required this.id,
     required this.optionMenu,
     required this.address,
     required this.datetime,
@@ -30,8 +32,9 @@ class Pekerjaan {
     required this.user,
   });
 
-  factory Pekerjaan.fromMap(Map<String, dynamic> data) {
+  factory Pekerjaan.fromMap(String id, Map<String, dynamic> data) {
     return Pekerjaan(
+      id: id, // Menambahkan ID dokumen
       optionMenu:
           (data['Option'] as List?)?.map((e) => e as String).toList() ?? [],
       address: data['address'] as String,
@@ -59,7 +62,10 @@ class FirebaseDataService {
       QuerySnapshot querySnapshot = await requestHandymanCollection.get();
       requestData.clear();
       querySnapshot.docs.forEach((doc) {
-        requestData.add(Pekerjaan.fromMap(doc.data() as Map<String, dynamic>));
+        final pekerjaanData = doc.data() as Map<String, dynamic>;
+        final pekerjaan =
+            Pekerjaan.fromMap(doc.id, pekerjaanData); // Menambahkan ID dokumen
+        requestData.add(pekerjaan);
       });
     } catch (e) {
       print("Gagal mengambil data: $e");
@@ -112,5 +118,20 @@ class FirebaseDataService {
     });
 
     return searchfilteredData;
+  }
+
+  Future<Pekerjaan?> getPekerjaanById(String id) async {
+    try {
+      DocumentSnapshot pekerjaanDoc =
+          await requestHandymanCollection.doc(id).get();
+      if (pekerjaanDoc.exists) {
+        final pekerjaanData = pekerjaanDoc.data() as Map<String, dynamic>;
+        return Pekerjaan.fromMap(id, pekerjaanData);
+      }
+    } catch (e) {
+      print("Gagal mengambil data: $e");
+    }
+
+    return null; // Mengembalikan null jika data tidak ditemukan atau ada kesalahan
   }
 }
