@@ -7,7 +7,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:myhandyman_handyman/page/login.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myhandyman_handyman/service/fcmAPI.dart';
 import 'constants/dimens.dart' as dimens;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
@@ -30,6 +32,15 @@ class MyApp extends StatefulWidget {
 final _firestoreInstance = FirebaseFirestore.instance;
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    firebaseAPI().request_permission();
+    firebaseAPI().initInfo();
+    print("uid : ");
+    print(FirebaseAuth.instance.currentUser?.uid);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

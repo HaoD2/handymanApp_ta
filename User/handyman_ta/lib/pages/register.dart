@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
+import 'package:handyman_ta/pages/service/fcmAPI.dart';
 import 'package:handyman_ta/pages/service/verificationpage.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -163,15 +164,18 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void postDetailsToFirestore(String email) async {
+    String? fcmToken = await firebaseAPI().initNotification();
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
     await ref.doc(user!.uid).set({
+      'uid': _auth.currentUser?.uid,
       'email': email,
       'status': 1,
       'status_verif': 0,
       'status_handyman': 0,
       'status_akun': 1,
+      'token_messaging': ""
     });
     Navigator.pushReplacement(
       context,

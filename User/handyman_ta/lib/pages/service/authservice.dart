@@ -8,6 +8,10 @@ class AuthService {
     return _auth.currentUser;
   }
 
+  Future<String?> getCurrentUserEmail() async {
+    return _auth.currentUser?.email;
+  }
+
   Future<String?> signInWithEmailAndPassword(
       String email, String password) async {
     try {

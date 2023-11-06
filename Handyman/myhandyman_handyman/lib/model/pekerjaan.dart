@@ -14,40 +14,56 @@ class Pekerjaan {
   final String otherOption;
   final String status;
   final String tipe_Pekerjaan;
+  final String taken_by;
   final String user;
 
-  Pekerjaan({
-    required this.id,
-    required this.optionMenu,
-    required this.address,
-    required this.datetime,
-    required this.description,
-    required this.startTime,
-    required this.endTime,
-    required this.image,
-    required this.location,
-    required this.otherOption,
-    required this.status,
-    required this.tipe_Pekerjaan,
-    required this.user,
-  });
+  Pekerjaan(
+      {required this.id,
+      required this.optionMenu,
+      required this.address,
+      required this.datetime,
+      required this.description,
+      required this.startTime,
+      required this.endTime,
+      required this.image,
+      required this.location,
+      required this.otherOption,
+      required this.status,
+      required this.tipe_Pekerjaan,
+      required this.user,
+      required this.taken_by});
 
   factory Pekerjaan.fromMap(String id, Map<String, dynamic> data) {
     return Pekerjaan(
       id: id, // Menambahkan ID dokumen
       optionMenu:
           (data['Option'] as List?)?.map((e) => e as String).toList() ?? [],
-      address: data['address'] as String,
-      datetime: data['dateTime'] as Timestamp,
-      description: data['description'] as String,
-      startTime: data['start_time'] as String,
-      endTime: data['end_time'] as String,
-      image: data['image'] ?? "",
-      location: data['location'] as GeoPoint,
-      otherOption: data['other_option'] ?? "",
-      status: data['status'] ?? "",
-      tipe_Pekerjaan: data["tipe_Pekerjaan"],
-      user: data['user'] as String,
+      address: data['address'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      datetime: data['dateTime'] as Timestamp? ??
+          Timestamp
+              .now(), // Mengatasi nilai null dengan default Timestamp saat ini
+      description: data['description'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      startTime: data['start_time'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      endTime: data['end_time'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      image: data['image'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      location: data['location'] as GeoPoint? ??
+          GeoPoint(
+              0.0, 0.0), // Mengatasi nilai null dengan default GeoPoint (0, 0)
+      otherOption: data['other_option'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      status: data['status'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      tipe_Pekerjaan: data['tipe_Pekerjaan'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      taken_by: data['taken_by'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
+      user: data['user'] as String? ??
+          "", // Mengatasi nilai null dengan default string kosong
     );
   }
 }
@@ -68,7 +84,7 @@ class FirebaseDataService {
         requestData.add(pekerjaan);
       });
     } catch (e) {
-      print("Gagal mengambil data: $e");
+      print(e.toString());
     }
 
     return requestData;

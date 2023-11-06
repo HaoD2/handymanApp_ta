@@ -35,6 +35,41 @@ class _profileState extends State<profile> {
     return allData;
   }
 
+  Future logout() async {
+    const CircularProgressIndicator();
+    if (FirebaseAuth.instance.currentUser != null) {
+      String? email = FirebaseAuth.instance.currentUser!.email;
+      if (email != null) {
+        final usersCollection = FirebaseFirestore.instance.collection('users');
+
+// Lakukan query untuk mencari dokumen yang sesuai dengan email pengguna
+        usersCollection
+            .where('email', isEqualTo: email)
+            .get()
+            .then((querySnapshot) {
+          if (querySnapshot.docs.isNotEmpty) {
+            for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+              // Dokumen ditemukan, update nilai token di dalamnya
+              usersCollection.doc(doc.id).update({
+                'token_messaging': "", // Gantilah dengan nilai token yang baru
+              }).then((_) {
+                print('Dokumen berhasil di-update.');
+              }).catchError((error) {
+                print('Gagal meng-update dokumen: $error');
+              });
+            }
+          } else {
+            print('Dokumen tidak ditemukan berdasarkan email.');
+          }
+        }).catchError((error) {
+          print('Gagal melakukan query: $error');
+        });
+// Ganti dengan rute yang sesuai
+      }
+    }
+    await FirebaseAuth.instance.signOut();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -327,12 +362,13 @@ class _profileState extends State<profile> {
                                   fontSize: 15,
                                 ),
                               ),
-                              onTap: () {
+                              onTap: () async {
+                                await logout();
                                 Navigator.of(context, rootNavigator: true)
                                     .pushAndRemoveUntil(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
-                                      return const loginRoutePass();
+                                      return const userHomepage();
                                     },
                                   ),
                                   (_) => false,

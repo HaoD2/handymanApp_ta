@@ -129,6 +129,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
 
         setState(() {
           _currentPosition = position;
+          print(_currentPosition);
           locationController.text = address;
         });
       } catch (e) {
@@ -220,8 +221,43 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       String start_time = startTimeController.text;
       String end_time = endTimeController.text;
       Timestamp timestamp = Timestamp.fromDate(dateTime);
+      // Dapatkan referensi ke collection "request_handyman" di Firebase
+      final CollectionReference requestCollection =
+          FirebaseFirestore.instance.collection('request_handyman');
+      String today = DateTime.now()
+          .toLocal()
+          .toString()
+          .substring(0, 10)
+          .replaceAll("-", "");
+
+// Dapatkan nomor urut terakhir dari database
+      QuerySnapshot lastOrder = await requestCollection
+          .orderBy('uid', descending: true)
+          .limit(1)
+          .get();
+
+      int lastOrderNumber = 0;
+
+      if (lastOrder.docs.isNotEmpty) {
+        // Jika ada pemesanan sebelumnya, ambil nomor urutnya
+        lastOrderNumber =
+            int.parse(lastOrder.docs.first.get('uid').substring(13)) + 1;
+      }
+
+// Format nomor urut menjadi 6 digit dengan padding nol
+      String orderNumber = lastOrderNumber.toString().padLeft(6, '0');
+
+// Jika nomor urut masih 0, mulai dari "ORDER061123000001"
+      if (lastOrderNumber == 0) {
+        orderNumber = "000001";
+      }
+
+// Gabungkan semuanya untuk membuat kode unik
+      String uniqueCode = 'ORDER$today$orderNumber';
       // Lakukan operasi form submission sesuai kebutuhan Anda
       Map<String, dynamic> requestData = {
+        'uid': uniqueCode,
+        'tipe_pekerjaan': this.widget.layanan,
         'user': user,
         'status': "pending",
         'address': address,
@@ -240,11 +276,11 @@ class _ModulePemesananState extends State<ModulePemesanan> {
             : null,
       };
       Map<String, dynamic> requestAPI = {
-        'transaction_detail': {"order_id": 'ORDER30', "gross_amount": 90000},
+        'transaction_detail': {"order_id": uniqueCode, "gross_amount": 90000},
         'credit_card': {"secure": true},
         'item_details': [
           {
-            'id': 'HDR0000XX',
+            'id': uniqueCode,
             'price': 90000,
             'Option_Name': selectedOptions.toList(),
             'dateTime': dateTime.toString(),

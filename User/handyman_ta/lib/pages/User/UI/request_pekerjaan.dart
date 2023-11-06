@@ -42,6 +42,25 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
     return dataList;
   }
 
+  Future<List<DocumentSnapshot>?> getDataReqList() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return null; // Pengguna tidak masuk, mengembalikan null
+    }
+
+    // Mengambil semua dokumen dengan kondisi status adalah "pending" atau "acquired"
+    QuerySnapshot querySnapshot = await _request_handyman
+        .where('status', whereIn: ['pending', 'on-progress'])
+        .where('user', isEqualTo: user.email)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs;
+    } else {
+      return null; // Tidak ada dokumen yang cocok, mengembalikan null
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -297,161 +316,162 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                       color: const Color.fromARGB(255, 151, 148, 148),
                     ),
                     child: Container(
-                        alignment: Alignment.topRight,
-                        padding: const EdgeInsets.only(left: 15),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                  left: MediaQuery.of(context).size.width / 4),
-                              alignment: Alignment.topCenter,
-                              child: Row(
-                                children: [
-                                  const Text("Pesanan Saya",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 15,
-                                          fontFamily: 'OpenSans')),
-                                  Container(
-                                    margin: const EdgeInsets.only(left: 15),
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                          textStyle: const TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 10,
-                                              fontFamily: 'OpenSans')),
-                                      onPressed: () async {
-                                        AuthService authService = AuthService();
-                                        User? user =
-                                            await authService.getCurrentUser();
-                                        if (user != null) {
-                                          Navigator.of(context,
-                                                  rootNavigator: true)
-                                              .pushAndRemoveUntil(
-                                            MaterialPageRoute(
-                                              builder: (BuildContext context) {
-                                                return showAll_list(
-                                                    email: widget.email);
-                                              },
-                                            ),
-                                            (_) => false,
-                                          );
-                                        } else {
-                                          showDialog(
-                                            context: context,
-                                            barrierDismissible:
-                                                false, // Mencegah pengguna menutup dialog dengan mengklik latar belakang
+                      alignment: Alignment.topRight,
+                      padding: const EdgeInsets.only(left: 15),
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width / 4),
+                            alignment: Alignment.topCenter,
+                            child: Row(
+                              children: [
+                                const Text("Pesanan Saya",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                        fontFamily: 'OpenSans')),
+                                Container(
+                                  margin: const EdgeInsets.only(left: 15),
+                                  child: TextButton(
+                                    style: TextButton.styleFrom(
+                                        textStyle: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 10,
+                                            fontFamily: 'OpenSans')),
+                                    onPressed: () async {
+                                      AuthService authService = AuthService();
+                                      User? user =
+                                          await authService.getCurrentUser();
+                                      if (user != null) {
+                                        Navigator.of(context,
+                                                rootNavigator: true)
+                                            .pushAndRemoveUntil(
+                                          MaterialPageRoute(
                                             builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text('Login Required'),
-                                                content: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context,
-                                                                rootNavigator:
-                                                                    true)
-                                                            .pushAndRemoveUntil(
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return LoginPage();
-                                                            },
-                                                          ),
-                                                          (_) => false,
-                                                        );
-                                                      },
-                                                      child: Text('Login'),
-                                                    ),
-                                                    SizedBox(height: 16),
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context,
-                                                                rootNavigator:
-                                                                    true)
-                                                            .pushAndRemoveUntil(
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return LoginPage();
-                                                            },
-                                                          ),
-                                                          (_) => false,
-                                                        );
-                                                      },
-                                                      child: Text('Sign Up'),
-                                                    ),
-                                                    SizedBox(height: 16),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        // Tutup dialog jika tombol Cancel ditekan
-                                                      },
-                                                      child: Text('Cancel'),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
+                                              return showAll_list(
+                                                  email: widget.email);
                                             },
-                                          );
-                                        }
-                                      },
-                                      child: const Text('Lihat Semua'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                                child: FutureBuilder<dynamic>(
-                              initialData: const {},
-                              future: getdata(),
-                              builder:
-                                  (context, AsyncSnapshot<dynamic> snapshot) {
-                                if (!snapshot.hasData ||
-                                    snapshot.data == null ||
-                                    snapshot.data.isEmpty ||
-                                    snapshot.hasError) {
-                                  if (snapshot.data == {}) {
-                                    return Container();
-                                  } else {
-                                    // print("masuk");
-
-                                    return SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height -
-                                              200,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                }
-                                print("email ini ${widget.email}");
-
-                                return SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height - 200,
-                                  child: ListView.builder(
-                                    itemCount: snapshot.data.length,
-                                    itemBuilder: (_, int index) {
-                                      return Container(
-                                        child: Text(snapshot.data[index]
-                                                ["nama_layanan"]
-                                            .toString()),
-                                      );
+                                          ),
+                                          (_) => false,
+                                        );
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible:
+                                              false, // Mencegah pengguna menutup dialog dengan mengklik latar belakang
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Login Required'),
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return LoginPage();
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
+                                                    },
+                                                    child: Text('Login'),
+                                                  ),
+                                                  SizedBox(height: 16),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return LoginPage();
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
+                                                    },
+                                                    child: Text('Sign Up'),
+                                                  ),
+                                                  SizedBox(height: 16),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      // Tutup dialog jika tombol Cancel ditekan
+                                                    },
+                                                    child: Text('Cancel'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }
                                     },
+                                    child: const Text('Lihat Semua'),
                                   ),
-                                );
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            child: FutureBuilder<List<DocumentSnapshot>?>(
+                              future: getDataReqList(),
+                              builder: (context,
+                                  AsyncSnapshot<List<DocumentSnapshot>?>
+                                      snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else if (snapshot.hasData &&
+                                    snapshot.data != null &&
+                                    snapshot.data!.isNotEmpty) {
+                                  var data = snapshot.data![0].data()
+                                      as Map<String, dynamic>;
+                                  return Column(
+                                    children: [
+                                      Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              '${data['tipe_pekerjaan']}')),
+                                      Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              'End Time: ${data['end_time']}')),
+                                      Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              'Start Time: ${data['start_time']}')),
+                                      Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              'Address: ${data['address']}')),
+                                      Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              'Status: ${data['status']}')),
+                                    ],
+                                  );
+                                } else {
+                                  return Text('No data available');
+                                }
                               },
-                            )),
-                          ],
-                        )),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

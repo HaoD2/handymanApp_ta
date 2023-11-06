@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,11 +22,16 @@ import 'package:handyman_ta/pages/service/verificationpage.dart';
 import 'constants/dimens.dart' as dimens;
 import 'package:firebase_auth/firebase_auth.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('handling a background message ${message.messageId}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
   await firebaseAPI().initNotification();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -43,6 +49,15 @@ class MyApp extends StatefulWidget {
 final _firestoreInstance = FirebaseFirestore.instance;
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    firebaseAPI().request_permission();
+    firebaseAPI().initInfo();
+    print("uid : ");
+    print(FirebaseAuth.instance.currentUser?.uid);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -93,53 +108,53 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Auth extends StatelessWidget {
-  const Auth({super.key});
+// class Auth extends StatelessWidget {
+//   const Auth({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Something went wrong'));
-        } else if (snapshot.hasData) {
-          final user = snapshot.data!;
-          if (user.emailVerified) {
-            // Email terverifikasi, periksa status_verif di Firestore
-            return FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text('Something went wrong'));
-                } else {
-                  final data = snapshot.data!.data() as Map<String, dynamic>;
-                  if (data['status_verif'] == 0) {
-                    // Email terverifikasi tetapi status_verif = 0 (belum diverifikasi di Firestore)
-                    return verificationPage(email: user.email);
-                  } else {
-                    // Email terverifikasi dan status_verif = 1 (sudah diverifikasi di Firestore)
-                    return const userHomepage();
-                  }
-                }
-              },
-            );
-          } else {
-            // Email belum terverifikasi, tampilkan LoginPage
-            return const userHomepage();
-          }
-        } else {
-          // Tidak ada user yang terautentikasi, tampilkan LoginPage
-          return const userHomepage();
-        }
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<User?>(
+//       stream: FirebaseAuth.instance.authStateChanges(),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } else if (snapshot.hasError) {
+//           return const Center(child: Text('Something went wrong'));
+//         } else if (snapshot.hasData) {
+//           final user = snapshot.data!;
+//           if (user.emailVerified) {
+//             // Email terverifikasi, periksa status_verif di Firestore
+//             return FutureBuilder<DocumentSnapshot>(
+//               future: FirebaseFirestore.instance
+//                   .collection('users')
+//                   .doc(user.uid)
+//                   .get(),
+//               builder: (context, snapshot) {
+//                 if (snapshot.connectionState == ConnectionState.waiting) {
+//                   return const Center(child: CircularProgressIndicator());
+//                 } else if (snapshot.hasError) {
+//                   return const Center(child: Text('Something went wrong'));
+//                 } else {
+//                   final data = snapshot.data!.data() as Map<String, dynamic>;
+//                   if (data['status_verif'] == 0) {
+//                     // Email terverifikasi tetapi status_verif = 0 (belum diverifikasi di Firestore)
+//                     return verificationPage(email: user.email);
+//                   } else {
+//                     // Email terverifikasi dan status_verif = 1 (sudah diverifikasi di Firestore)
+//                     return const userHomepage();
+//                   }
+//                 }
+//               },
+//             );
+//           } else {
+//             // Email belum terverifikasi, tampilkan LoginPage
+//             return const userHomepage();
+//           }
+//         } else {
+//           // Tidak ada user yang terautentikasi, tampilkan LoginPage
+//           return const userHomepage();
+//         }
+//       },
+//     );
+//   }
+// }

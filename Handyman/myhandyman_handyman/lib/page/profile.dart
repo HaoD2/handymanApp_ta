@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myhandyman_handyman/page/login.dart';
 import 'package:myhandyman_handyman/service/authservice.dart';
+import 'package:http/http.dart' as http;
 import 'package:myhandyman_handyman/service/changepassword.dart';
 
 class profileHandyman extends StatefulWidget {
@@ -35,6 +38,41 @@ class _profileHandymanState extends State<profileHandyman> {
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
     print(allData);
     return allData;
+  }
+
+  Future logout() async {
+    const CircularProgressIndicator();
+    if (FirebaseAuth.instance.currentUser != null) {
+      String? email = FirebaseAuth.instance.currentUser!.email;
+      if (email != null) {
+        final usersCollection = FirebaseFirestore.instance.collection('users');
+
+// Lakukan query untuk mencari dokumen yang sesuai dengan email pengguna
+        usersCollection
+            .where('email', isEqualTo: email)
+            .get()
+            .then((querySnapshot) {
+          if (querySnapshot.docs.isNotEmpty) {
+            for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+              // Dokumen ditemukan, update nilai token di dalamnya
+              usersCollection.doc(doc.id).update({
+                'token_messaging': "", // Gantilah dengan nilai token yang baru
+              }).then((_) {
+                print('Dokumen berhasil di-update.');
+              }).catchError((error) {
+                print('Gagal meng-update dokumen: $error');
+              });
+            }
+          } else {
+            print('Dokumen tidak ditemukan berdasarkan email.');
+          }
+        }).catchError((error) {
+          print('Gagal melakukan query: $error');
+        });
+// Ganti dengan rute yang sesuai
+      }
+    }
+    await FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -310,7 +348,8 @@ class _profileHandymanState extends State<profileHandyman> {
                                   fontSize: 15,
                                 ),
                               ),
-                              onTap: () {
+                              onTap: () async {
+                                await logout();
                                 Navigator.of(context, rootNavigator: true)
                                     .pushAndRemoveUntil(
                                   MaterialPageRoute(

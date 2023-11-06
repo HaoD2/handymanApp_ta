@@ -226,6 +226,7 @@ class _homeState extends State<home> {
       print("masuk fecth data filter");
       FilteredByDistance();
     } else {
+      print("masuk fecth data filter");
       fetchData();
     }
   }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -5,6 +6,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:myhandyman_handyman/service/authservice.dart';
+import 'package:myhandyman_handyman/service/fcmAPI.dart';
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/loginHandyman';
@@ -26,8 +28,42 @@ class _LoginPageState extends State<LoginPage> {
           usernameController.text.trim(), passwordController.text.trim());
       if (loginResult == null) {
         // Login berhasil, arahkan ke halaman UserHome
-        Navigator.pushReplacementNamed(
-            context, userHandyman.routeName); // Ganti dengan rute yang sesuai
+        String? fcmToken = await firebaseAPI().initNotification();
+        if (FirebaseAuth.instance.currentUser != null) {
+          String? email = FirebaseAuth.instance.currentUser!.email;
+          print("ini + $email");
+          print("ini + $fcmToken");
+          if (email != null) {
+            final usersCollection =
+                FirebaseFirestore.instance.collection('users');
+
+// Lakukan query untuk mencari dokumen yang sesuai dengan email pengguna
+            usersCollection
+                .where('email', isEqualTo: email)
+                .get()
+                .then((querySnapshot) {
+              if (querySnapshot.docs.isNotEmpty) {
+                for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+                  // Dokumen ditemukan, update nilai token di dalamnya
+                  usersCollection.doc(doc.id).update({
+                    'token_messaging':
+                        fcmToken, // Gantilah dengan nilai token yang baru
+                  }).then((_) {
+                    print('Dokumen berhasil di-update.');
+                  }).catchError((error) {
+                    print('Gagal meng-update dokumen: $error');
+                  });
+                }
+              } else {
+                print('Dokumen tidak ditemukan berdasarkan email.');
+              }
+            }).catchError((error) {
+              print('Gagal melakukan query: $error');
+            });
+          }
+          Navigator.pushReplacementNamed(
+              context, userHandyman.routeName); // Ganti dengan rute yang sesuai
+        }
       } else {
         // Login gagal, tampilkan pesan kesalahan kepada pengguna
         // Kamu dapat menggunakan pesan kesalahan dari loginResult

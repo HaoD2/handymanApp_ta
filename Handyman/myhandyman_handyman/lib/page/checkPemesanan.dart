@@ -5,10 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:myhandyman_handyman/model/message.dart';
 import 'package:myhandyman_handyman/model/pekerjaan.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,11 +31,57 @@ class pemesanan_details extends StatefulWidget {
 
 class _pemesanan_detailsState extends State<pemesanan_details> {
   Pekerjaan? pekerjaan;
+  bool isLoading = false;
   List<Pekerjaan> datas = [];
   @override
   void initState() {
     super.initState();
     fetchData();
+  }
+
+  void Retrieve() async {
+    final CollectionReference usersCollection =
+        FirebaseFirestore.instance.collection('users');
+
+    QuerySnapshot querySnapshot = await usersCollection
+        .where('token_messaging',
+            isEqualTo:
+                'dDA58M8FToOpgXoAM-6LB-:APA91bGRyoxvayq2c-FMRhajlwINwh5XTkAdFIyjmp9ZqoPbnzBdwd8HzPsOVwy0TdJLf0T5c1f0egH9JcjnUHQ7grXfK5LvBKjhn7F4VEc8rE09wluYxa1jmU6NVPjctZ0mpA_wRlOK')
+        .get();
+    final email = querySnapshot.docs.first['email'];
+    final res = await http.post(
+        Uri.parse("https://fcm.googleapis.com/fcm/send"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'priority': 'high',
+          'data': {
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'status': 'done',
+            'body': 'MyHandyman',
+            'title': 'Halo ' + email + ' kamu berhasil mendapatkan Handyman !',
+          },
+          'notification': {
+            'body': 'MyHandyman',
+            'title': 'Halo ' + email + ' kamu berhasil mendapatkan Handyman !',
+            'android_channel_id': "dbFood"
+          },
+          "to":
+              'dDA58M8FToOpgXoAM-6LB-:APA91bGRyoxvayq2c-FMRhajlwINwh5XTkAdFIyjmp9ZqoPbnzBdwd8HzPsOVwy0TdJLf0T5c1f0egH9JcjnUHQ7grXfK5LvBKjhn7F4VEc8rE09wluYxa1jmU6NVPjctZ0mpA_wRlOK'
+        }));
+    if (res.statusCode == 200) {
+      print('>>>>>>>>>>>>>>>>>>>>success');
+      final responseData = jsonDecode(res.body);
+      InsertData(this.widget.data,
+          FirebaseAuth.instance.currentUser!.email.toString());
+    } else {
+      print(res.body);
+      print(res.statusCode.toString() + ">>>>>");
+      print('>>>>>>>>>>>>>>>>>>>>gagal');
+    }
   }
 
   Future<void> fetchData() async {
@@ -45,6 +93,98 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
         print(pekerjaan?.address);
       });
     }
+  }
+
+  Future<void> InsertData(String id, String newTakenBy) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      // Mengambil referensi dokumen yang sesuai berdasarkan ID
+      final documentReference =
+          firestore.collection('request_handyman').doc(id);
+
+      // Memperbarui dokumen
+      await documentReference.update({
+        'taken_by':
+            newTakenBy, // Menetapkan nilai taken_by menjadi nama pengguna Firebase
+        'status': 'on-progress', // Menetapkan status menjadi "on-progress"
+      });
+      documentReference.get().then((documentSnapshot) {
+        if (documentSnapshot.exists) {
+          // Mendapatkan nilai dari field "user" dalam dokumen "request_handyman"
+          String userField = documentSnapshot.data()?['user'];
+
+          // Mencari dokumen pengguna yang cocok dalam koleksi "users"
+          firestore
+              .collection('users')
+              .where('email', isEqualTo: userField)
+              .get()
+              .then((querySnapshot) {
+            if (querySnapshot.docs.isNotEmpty) {
+              // Mendapatkan UID dari dokumen pengguna yang cocok
+              String uid = querySnapshot.docs[0].data()['uid'];
+              createMessage(FirebaseAuth.instance.currentUser!.uid, uid);
+            } else {
+              print('Pengguna tidak ditemukan.');
+            }
+          });
+        } else {
+          print('Dokumen "request_handyman" tidak ditemukan.');
+        }
+      });
+
+      // Delay selama 3 detik
+      await Future.delayed(Duration(seconds: 3));
+
+      setState(() {
+        isLoading = false; // Sembunyikan tampilan loading setelah selesai.
+      });
+      showSuccessDialog();
+      print('Data berhasil diperbarui.');
+    } catch (e) {
+      print('Gagal memperbarui data: $e');
+    }
+  }
+
+  Future<void> createMessage(String uid_pengirim, String uid_penerima) async {
+    try {
+      Message_Log pesanBaru = Message_Log(
+          penerimaUID: uid_penerima,
+          pengirimUID: uid_pengirim,
+          isDone: true,
+          isiPesan: "",
+          waktu: "");
+      FirebaseFirestore.instance
+          .collection('log_pesan')
+          .add(pesanBaru.toMap())
+          .then((value) {
+        // Menghapus teks dari input pesan.
+      }).catchError((error) {
+        print('Terjadi kesalahan: $error');
+      });
+    } catch (e) {
+      print('Gagal memperbarui data: $e');
+    }
+  }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Data berhasil diperbarui!'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -171,10 +311,17 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
                       padding: const EdgeInsets.all(10.0),
                       child: ElevatedButton(
                         child: Text('Submit'),
-                        onPressed: () {},
+                        onPressed: () {
+                          Retrieve();
+                        },
                       ),
                     ),
                   ),
+                  if (isLoading)
+                    Center(
+                      child:
+                          CircularProgressIndicator(), // Tampilkan indikator loading.
+                    ),
                 ],
               ),
             )
