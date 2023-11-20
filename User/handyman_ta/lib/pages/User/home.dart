@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:handyman_ta/pages/Model/pekerjaan.dart';
-import 'package:handyman_ta/pages/User/UI/message.dart';
+import 'package:handyman_ta/pages/User/UI/kontak.dart';
 import 'package:handyman_ta/pages/User/UI/profile.dart';
 import 'package:handyman_ta/pages/User/UI/request_pekerjaan.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
@@ -177,17 +177,33 @@ class _homeState extends State<home> {
             height: 250,
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.only(top: 50, right: 250),
-                  child: const Text(
-                    'Welcome',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontSize: 18,
+                Row(
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.only(top: 50, right: 50, left: 50),
+                      child: const Text(
+                        'Welcome',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                    Container(
+                      padding: const EdgeInsets.only(top: 50, left: 125),
+                      child: IconButton(
+                        icon: Icon(Icons.notifications),
+                        onPressed: () {
+                          // Tambahkan logika notifikasi di sini
+                          // Misalnya tampilkan snackbar atau navigasi ke layar notifikasi
+                          // Sesuaikan dengan kebutuhan aplikasi kamu
+                        },
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),

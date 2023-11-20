@@ -67,6 +67,7 @@ dependencies:
   webview_flutter: ^4.4.1
   modal_progress_hud_nsn: ^0.4.0
   firebase_messaging: ^14.7.2
+  timeago: ^3.6.0
 
 
 dev_dependencies:

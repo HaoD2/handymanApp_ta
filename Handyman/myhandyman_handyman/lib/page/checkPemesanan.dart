@@ -10,8 +10,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:myhandyman_handyman/model/kontak_user.dart';
 import 'package:myhandyman_handyman/model/message.dart';
 import 'package:myhandyman_handyman/model/pekerjaan.dart';
+import 'package:myhandyman_handyman/page/kontak.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -22,8 +24,10 @@ import 'package:latlong2/latlong.dart';
 
 class pemesanan_details extends StatefulWidget {
   final data;
+  final email;
+  final uid;
   static const routeName = '/Handyman/checkPemesananDetails';
-  const pemesanan_details({super.key, this.data});
+  const pemesanan_details({super.key, this.data, this.email, this.uid});
 
   @override
   State<pemesanan_details> createState() => _pemesanan_detailsState();
@@ -44,34 +48,35 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
         FirebaseFirestore.instance.collection('users');
 
     QuerySnapshot querySnapshot = await usersCollection
-        .where('token_messaging',
-            isEqualTo:
-                'dDA58M8FToOpgXoAM-6LB-:APA91bGRyoxvayq2c-FMRhajlwINwh5XTkAdFIyjmp9ZqoPbnzBdwd8HzPsOVwy0TdJLf0T5c1f0egH9JcjnUHQ7grXfK5LvBKjhn7F4VEc8rE09wluYxa1jmU6NVPjctZ0mpA_wRlOK')
+        .where('email', isEqualTo: this.widget.email)
         .get();
-    final email = querySnapshot.docs.first['email'];
-    final res = await http.post(
-        Uri.parse("https://fcm.googleapis.com/fcm/send"),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization':
-              'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-        },
-        body: jsonEncode(<String, dynamic>{
-          'priority': 'high',
-          'data': {
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'status': 'done',
-            'body': 'MyHandyman',
-            'title': 'Halo ' + email + ' kamu berhasil mendapatkan Handyman !',
-          },
-          'notification': {
-            'body': 'MyHandyman',
-            'title': 'Halo ' + email + ' kamu berhasil mendapatkan Handyman !',
-            'android_channel_id': "dbFood"
-          },
-          "to":
-              'dDA58M8FToOpgXoAM-6LB-:APA91bGRyoxvayq2c-FMRhajlwINwh5XTkAdFIyjmp9ZqoPbnzBdwd8HzPsOVwy0TdJLf0T5c1f0egH9JcjnUHQ7grXfK5LvBKjhn7F4VEc8rE09wluYxa1jmU6NVPjctZ0mpA_wRlOK'
-        }));
+    final token_sent = querySnapshot.docs.first['token_messaging'];
+    final res =
+        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization':
+                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
+            },
+            body: jsonEncode(<String, dynamic>{
+              'priority': 'high',
+              'data': {
+                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                'status': 'done',
+                'body': 'MyHandyman',
+                'title': 'Halo ' +
+                    this.widget.email +
+                    ' kamu berhasil mendapatkan Handyman !',
+              },
+              'notification': {
+                'body': 'MyHandyman',
+                'title': 'Halo ' +
+                    this.widget.email +
+                    ' kamu berhasil mendapatkan Handyman !',
+                'android_channel_id': "dbFood"
+              },
+              "to": token_sent
+            }));
     if (res.statusCode == 200) {
       print('>>>>>>>>>>>>>>>>>>>>success');
       final responseData = jsonDecode(res.body);
@@ -113,21 +118,10 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
         if (documentSnapshot.exists) {
           // Mendapatkan nilai dari field "user" dalam dokumen "request_handyman"
           String userField = documentSnapshot.data()?['user'];
-
+          String taken_by = documentSnapshot.data()?['taken_by'];
+          String uid_pemesanan = documentSnapshot.data()?['uid'];
           // Mencari dokumen pengguna yang cocok dalam koleksi "users"
-          firestore
-              .collection('users')
-              .where('email', isEqualTo: userField)
-              .get()
-              .then((querySnapshot) {
-            if (querySnapshot.docs.isNotEmpty) {
-              // Mendapatkan UID dari dokumen pengguna yang cocok
-              String uid = querySnapshot.docs[0].data()['uid'];
-              createMessage(FirebaseAuth.instance.currentUser!.uid, uid);
-            } else {
-              print('Pengguna tidak ditemukan.');
-            }
-          });
+          createMessage(taken_by, userField, uid_pemesanan);
         } else {
           print('Dokumen "request_handyman" tidak ditemukan.');
         }
@@ -146,17 +140,33 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
     }
   }
 
-  Future<void> createMessage(String uid_pengirim, String uid_penerima) async {
+  Future<void> createMessage(
+      String uid_pengirim, String uid_penerima, String uid_pemesanan) async {
     try {
       Message_Log pesanBaru = Message_Log(
-          penerimaUID: uid_penerima,
-          pengirimUID: uid_pengirim,
+          penerimaEmail: uid_penerima,
+          pengirimEmail: uid_pengirim,
+          sent: "",
           isDone: true,
           isiPesan: "",
-          waktu: "");
+          waktu: DateTime.now(),
+          uid_pemesanan: this.widget.uid);
       FirebaseFirestore.instance
           .collection('log_pesan')
           .add(pesanBaru.toMap())
+          .then((value) {
+        // Menghapus teks dari input pesan.
+      }).catchError((error) {
+        print('Terjadi kesalahan: $error');
+      });
+      kontak_user kontak = kontak_user(
+          pengirimEmail: uid_pengirim,
+          penerimaEmail: uid_penerima,
+          uid_pemesanan: uid_pemesanan,
+          isDone: true);
+      FirebaseFirestore.instance
+          .collection('kontak')
+          .add(kontak.toMap())
           .then((value) {
         // Menghapus teks dari input pesan.
       }).catchError((error) {

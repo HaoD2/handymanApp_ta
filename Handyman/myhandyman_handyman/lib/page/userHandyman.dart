@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myhandyman_handyman/model/pekerjaan.dart';
 import 'package:myhandyman_handyman/page/checkPemesanan.dart';
-import 'package:myhandyman_handyman/page/message.dart';
+import 'package:myhandyman_handyman/page/kontak.dart';
 import 'package:myhandyman_handyman/page/profile.dart';
 import 'package:myhandyman_handyman/service/filtermenu.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
@@ -35,7 +35,7 @@ class mainMenu extends StatefulWidget {
 class _mainMenuState extends State<mainMenu> {
   BuildContext? mainContext;
   List<Widget> _buildScreens() {
-    return [home(), MessageMain(), profileHandyman()];
+    return [home(), KontakPage(), profileHandyman()];
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
@@ -362,7 +362,8 @@ class _homeState extends State<home> {
                         .pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return pemesanan_details(data: item.id);
+                          return pemesanan_details(
+                              data: item.id, email: item.user, uid: item.uid);
                         },
                       ),
                       (_) => false,

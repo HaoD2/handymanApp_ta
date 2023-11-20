@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/User/UI/option_menu.dart';
 import 'package:handyman_ta/pages/User/UI/showall_list.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
 import 'package:handyman_ta/pages/service/authservice.dart';
@@ -104,7 +105,7 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                   Container(
                     // Membuat Background Kotak
                     width: MediaQuery.of(context).size.width - 55,
-                    height: MediaQuery.of(context).size.height / 3,
+                    height: MediaQuery.of(context).size.height / 4,
                     padding: const EdgeInsets.only(bottom: 15, right: 15),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.0),
@@ -124,172 +125,150 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                           } else {
                             List<Pekerjaan> dataList = snapshot.data!;
                             return Container(
-                              child: Column(
-                                children: [
-                                  for (int i = 0;
-                                      i < dataList.length && i < 8;
-                                      i += 4)
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        // Menu dari Database
-                                        for (int j = i;
-                                            j < i + 4 &&
-                                                j < dataList.length &&
-                                                j < 8;
-                                            j++)
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 5,
-                                                vertical:
-                                                    15), // Tambahkan jarak kiri dan kanan
-                                            child: GestureDetector(
-                                              child: SizedBox.fromSize(
-                                                size: const Size(55, 55),
-                                                child: ClipOval(
-                                                  child: Material(
-                                                    color: Colors.amberAccent,
-                                                    child: InkWell(
-                                                      splashColor: Colors.green,
-                                                      onTap: () async {
-                                                        AuthService
-                                                            authService =
-                                                            AuthService();
-                                                        User? user =
-                                                            await authService
-                                                                .getCurrentUser();
-                                                        if (user != null) {
-                                                          Navigator.of(context,
-                                                                  rootNavigator:
-                                                                      true)
-                                                              .pushAndRemoveUntil(
-                                                            MaterialPageRoute(
-                                                              builder:
-                                                                  (BuildContext
-                                                                      context) {
-                                                                return module(
-                                                                    layanan: dataList[
-                                                                            j]
-                                                                        .title);
-                                                              },
-                                                            ),
-                                                            (_) => false,
-                                                          );
-                                                        } else {
-                                                          showDialog(
-                                                            context: context,
-                                                            barrierDismissible:
-                                                                false, // Mencegah pengguna menutup dialog dengan mengklik latar belakang
-                                                            builder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                    'Login Required'),
-                                                                content: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    ElevatedButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context,
-                                                                                rootNavigator: true)
-                                                                            .pushAndRemoveUntil(
-                                                                          MaterialPageRoute(
-                                                                            builder:
-                                                                                (BuildContext context) {
-                                                                              return LoginPage();
-                                                                            },
-                                                                          ),
-                                                                          (_) =>
-                                                                              false,
-                                                                        );
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  for (int i = 0; i < dataList.length; i++)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 15,
+                                      ),
+                                      child: GestureDetector(
+                                        child: SizedBox.fromSize(
+                                          size: const Size(55, 55),
+                                          child: ClipOval(
+                                            child: Material(
+                                              color: Colors.amberAccent,
+                                              child: InkWell(
+                                                splashColor: Colors.green,
+                                                onTap: () async {
+                                                  AuthService authService =
+                                                      AuthService();
+                                                  User? user = await authService
+                                                      .getCurrentUser();
+                                                  if (user != null) {
+                                                    Navigator.of(context,
+                                                            rootNavigator: true)
+                                                        .pushAndRemoveUntil(
+                                                      MaterialPageRoute(
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return option_menu(
+                                                              layanan:
+                                                                  dataList[i]
+                                                                      .title);
+                                                        },
+                                                      ),
+                                                      (_) => false,
+                                                    );
+                                                  } else {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierDismissible: false,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          title: Text(
+                                                              'Login Required'),
+                                                          content: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              ElevatedButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context,
+                                                                          rootNavigator:
+                                                                              true)
+                                                                      .pushAndRemoveUntil(
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (BuildContext
+                                                                              context) {
+                                                                        return LoginPage();
                                                                       },
-                                                                      child: Text(
-                                                                          'Login'),
                                                                     ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            16),
-                                                                    ElevatedButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context,
-                                                                                rootNavigator: true)
-                                                                            .pushAndRemoveUntil(
-                                                                          MaterialPageRoute(
-                                                                            builder:
-                                                                                (BuildContext context) {
-                                                                              return LoginPage();
-                                                                            },
-                                                                          ),
-                                                                          (_) =>
-                                                                              false,
-                                                                        );
+                                                                    (_) =>
+                                                                        false,
+                                                                  );
+                                                                },
+                                                                child: Text(
+                                                                    'Login'),
+                                                              ),
+                                                              SizedBox(
+                                                                  height: 16),
+                                                              ElevatedButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context,
+                                                                          rootNavigator:
+                                                                              true)
+                                                                      .pushAndRemoveUntil(
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (BuildContext
+                                                                              context) {
+                                                                        return LoginPage();
                                                                       },
-                                                                      child: Text(
-                                                                          'Sign Up'),
                                                                     ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            16),
-                                                                    TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context)
-                                                                            .pop();
-                                                                        // Tutup dialog jika tombol Cancel ditekan
-                                                                      },
-                                                                      child: Text(
-                                                                          'Cancel'),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              );
-                                                            },
-                                                          );
-                                                        }
+                                                                    (_) =>
+                                                                        false,
+                                                                  );
+                                                                },
+                                                                child: Text(
+                                                                    'Sign Up'),
+                                                              ),
+                                                              SizedBox(
+                                                                  height: 16),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                                child: Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
                                                       },
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: <Widget>[
-                                                          const Icon(
-                                                            Icons.anchor,
-                                                            size: 15,
-                                                          ), // <-- Icon
-                                                          AutoSizeText(
-                                                            dataList[j].title,
-                                                            maxLines: 3,
-                                                            wrapWords:
-                                                                true, // Jumlah maksimal baris teks
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            minFontSize:
-                                                                6, // Ukuran font minimum
-                                                            maxFontSize:
-                                                                7, // Ukuran font maksimum
-                                                            style: const TextStyle(
-                                                                fontFamily:
-                                                                    'OpenSans',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ), // <-- Text
-                                                        ],
+                                                    );
+                                                  }
+                                                },
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    const Icon(
+                                                      Icons.anchor,
+                                                      size: 15,
+                                                    ),
+                                                    AutoSizeText(
+                                                      dataList[i].title,
+                                                      maxLines: 3,
+                                                      wrapWords: true,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      minFontSize: 6,
+                                                      maxFontSize: 7,
+                                                      style: const TextStyle(
+                                                        fontFamily: 'OpenSans',
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
-                                                  ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
                                           ),
-                                      ],
+                                        ),
+                                      ),
                                     ),
                                 ],
                               ),

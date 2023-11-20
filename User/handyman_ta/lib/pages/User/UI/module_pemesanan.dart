@@ -54,6 +54,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
   TextEditingController addressController = TextEditingController();
   DateTime? selectedDateTime;
   String uid = "";
+
   String getToken = "";
   List<String> selectedOptions = [];
   TextEditingController descriptionController = TextEditingController();
@@ -99,13 +100,13 @@ class _ModulePemesananState extends State<ModulePemesanan> {
   Future<void> getOptionData() async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
-          .collection("option_layanan")
-          .where('nama_layanan', isEqualTo: widget.layanan)
+          .collection("input_option")
+          .where('option_layanan', isEqualTo: widget.layanan)
           .get();
 
       setState(() {
         optionLayanan = querySnapshot.docs
-            .map((doc) => List<String>.from(doc.get('option')))
+            .map((doc) => List<String>.from(doc.get('input')))
             .expand((options) => options)
             .toList();
       });
@@ -529,9 +530,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                     onChanged: (selected) {
                       setState(() {
                         selectedOptions = List<String>.from(selected!);
-                        showTextbox =
-                            selectedOptions.contains("Lain - Lainnya");
-
+                        showTextbox = selectedOptions.contains("Lain - Lain");
                         if (!showTextbox) {
                           otherOptionController.clear();
                         }
