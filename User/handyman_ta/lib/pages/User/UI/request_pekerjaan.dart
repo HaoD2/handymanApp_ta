@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/User/UI/custom_pemesanan/pemesanan_option.dart';
 import 'package:handyman_ta/pages/User/UI/option_menu.dart';
 import 'package:handyman_ta/pages/User/UI/showall_list.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
@@ -150,20 +151,40 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                                                   User? user = await authService
                                                       .getCurrentUser();
                                                   if (user != null) {
-                                                    Navigator.of(context,
-                                                            rootNavigator: true)
-                                                        .pushAndRemoveUntil(
-                                                      MaterialPageRoute(
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return option_menu(
-                                                              layanan:
-                                                                  dataList[i]
-                                                                      .title);
-                                                        },
-                                                      ),
-                                                      (_) => false,
-                                                    );
+                                                    if (dataList[i].title ==
+                                                        "Lain - Lainnya") {
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return PemesananOption(
+                                                                layanan:
+                                                                    dataList[i]
+                                                                        .title);
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
+                                                    } else {
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return option_menu(
+                                                                layanan:
+                                                                    dataList[i]
+                                                                        .title);
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
+                                                    }
                                                   } else {
                                                     showDialog(
                                                       context: context,
