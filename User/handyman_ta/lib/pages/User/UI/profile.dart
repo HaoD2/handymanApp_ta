@@ -93,7 +93,7 @@ class _profileState extends State<profile> {
                       constraints: BoxConstraints(
                         minWidth: 0,
                         maxWidth: MediaQuery.of(context).size.width,
-                        maxHeight: 175,
+                        maxHeight: 200,
                       ),
                       decoration: const BoxDecoration(
                         image: DecorationImage(
@@ -111,7 +111,7 @@ class _profileState extends State<profile> {
                             fit: BoxFit.cover,
                           ),
                           trailing: Container(
-                            margin: const EdgeInsets.all(2),
+                            margin: const EdgeInsets.only(bottom: 50),
                             child: const Icon(Icons.edit),
                           ),
                           title: Column(

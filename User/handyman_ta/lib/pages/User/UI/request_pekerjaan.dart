@@ -322,7 +322,7 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                         children: [
                           Container(
                             margin: EdgeInsets.only(
-                                left: MediaQuery.of(context).size.width / 4),
+                                left: MediaQuery.of(context).size.width / 5),
                             alignment: Alignment.topCenter,
                             child: Row(
                               children: [
@@ -417,7 +417,9 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                                         );
                                       }
                                     },
-                                    child: const Text('Lihat Semua'),
+                                    child: Container(
+                                        margin: EdgeInsets.all(2),
+                                        child: const Text('Lihat Semua')),
                                   ),
                                 ),
                               ],
@@ -441,26 +443,63 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                                       as Map<String, dynamic>;
                                   return Column(
                                     children: [
-                                      Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                              '${data['tipe_pekerjaan']}')),
-                                      Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                              'End Time: ${data['end_time']}')),
-                                      Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                              'Start Time: ${data['start_time']}')),
-                                      Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                              'Address: ${data['address']}')),
-                                      Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                              'Status: ${data['status']}')),
+                                      ListTile(
+                                        tileColor: Colors
+                                            .white, // Warna latar belakang tile
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              8.0), // Bentuk kotak dengan sudut melengkung
+                                        ),
+                                        onTap: () {
+                                          // Fungsi ketika tile ditekan
+                                        },
+                                        contentPadding: EdgeInsets.all(
+                                            12.0), // Padding untuk konten dalam tile
+                                        title: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors
+                                                .blue, // Warna latar belakang teks
+                                            borderRadius: BorderRadius.circular(
+                                                8), // Bentuk kotak dengan sudut melengkung
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(
+                                                    0.5), // Warna shadow
+                                                spreadRadius:
+                                                    3, // Radius penyebaran shadow
+                                                blurRadius:
+                                                    5, // Radius blur shadow
+                                                offset: Offset(
+                                                    0, 2), // Posisi shadow
+                                              ),
+                                            ],
+                                          ),
+                                          padding: EdgeInsets.all(
+                                              8.0), // Padding teks
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${data['tipe_pekerjaan']}',
+                                                style: TextStyle(
+                                                  color: Colors
+                                                      .white, // Warna teks
+                                                  // Gaya teks untuk tipe pekerjaan
+                                                ),
+                                              ),
+                                              Text(
+                                                'Status: ${data['status']}',
+                                                style: TextStyle(
+                                                  color: Colors
+                                                      .white, // Warna teks
+                                                  // Gaya teks untuk status
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
                                     ],
                                   );
                                 } else {
