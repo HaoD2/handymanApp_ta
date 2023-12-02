@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/src/datetime_picker_theme.dart'
+    as custom;
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:handyman_ta/pages/Model/pekerjaan.dart';
 import 'package:handyman_ta/pages/User/UI/custom_pemesanan/detail_custom.dart';
 import 'package:handyman_ta/pages/User/home.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/intl.dart';
 
 class PemesananOption extends StatefulWidget {
   final dynamic layanan;
@@ -24,16 +32,72 @@ class _PemesananOptionState extends State<PemesananOption>
       GlobalKey<FormBuilderState>();
   final GlobalKey<FormBuilderState> _formKeyPage4 =
       GlobalKey<FormBuilderState>();
+  Position? _currentPosition;
 
+  TimeOfDay selectedTimeEnd = TimeOfDay.now();
+  TimeOfDay selectedTimeStart = TimeOfDay.now();
   TextEditingController detailPemesananControlller = TextEditingController();
-  TextEditingController waktuController = TextEditingController();
+// Buat controller untuk komponen waktu mulai
+  final startTimeController = TextEditingController();
+// Buat controller untuk komponen waktu akhir
+  final endTimeController = TextEditingController();
   TextEditingController handymanController = TextEditingController();
   TextEditingController lokasiController = TextEditingController();
   int _currentPageIndex = 0;
 
   late AnimationController animationController;
+  Future<String> getAddressFromCoordinates(
+      double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks != null && placemarks.isNotEmpty) {
+        Placemark placemark = placemarks[0];
+        String address =
+            '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}';
+        return address;
+      }
+    } catch (e) {
+      print('Error getting address: $e');
+    }
+    return '';
+  }
+
+  Future<void> _getCurrentLocation() async {
+    PermissionStatus permissionStatus = await Permission.location.request();
+
+    if (permissionStatus.isGranted) {
+      try {
+        final Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+
+        final String address = await getAddressFromCoordinates(
+            position.latitude, position.longitude);
+
+        setState(() {
+          _currentPosition = position;
+          print(_currentPosition);
+          lokasiController.text = address;
+        });
+      } catch (e) {
+        print('Error getting location: $e');
+      }
+    } else if (permissionStatus.isDenied ||
+        permissionStatus.isPermanentlyDenied) {
+      bool isPermissionGranted = await openAppSettings();
+
+      if (isPermissionGranted) {
+        _getCurrentLocation();
+      }
+    }
+  }
+
   @override
   void initState() {
+    // if (_currentPageIndex == 3) {
+    //   _getCurrentLocation();
+    // }
     super.initState();
     animationController = AnimationController(
       vsync: this,
@@ -119,7 +183,8 @@ class _PemesananOptionState extends State<PemesananOption>
                                     deskripsi: detailPemesananControlller.text,
                                     alamat: lokasiController.text,
                                     require_handyman: handymanController.text,
-                                    waktu_pekerjaan: waktuController.text);
+                                    start_time: startTimeController.text,
+                                    end_time: endTimeController.text);
                               },
                             ),
                             (_) => false,
@@ -225,20 +290,45 @@ class _PemesananOptionState extends State<PemesananOption>
               key: _formKeyPage3,
               child: Column(
                 children: [
-                  FormBuilderTextField(
-                    name: 'waktu_pekerjaan_text',
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
-                    decoration: InputDecoration(
-                      labelText: 'Waktu Pekerjaan ?',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  Row(
+                    children: [
+                      Container(
+                        width: 75,
+                        margin: EdgeInsets.all(15),
+                        child: FormBuilderDateTimePicker(
+                          name: 'start_time',
+                          inputType: InputType.time,
+                          initialValue: DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                            selectedTimeStart.hour,
+                            selectedTimeStart.minute,
+                          ),
+                          format: DateFormat("HH:mm"),
+                          controller: startTimeController,
+                          decoration: InputDecoration(labelText: 'Start : '),
+                        ),
                       ),
-                    ),
-                    controller: waktuController,
-                    minLines: 3,
-                    maxLines: null,
+                      Container(
+                        width: 75,
+                        margin: EdgeInsets.all(15),
+                        child: FormBuilderDateTimePicker(
+                          name: 'end_time',
+                          inputType: InputType.time,
+                          initialValue: DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                            selectedTimeEnd.hour,
+                            selectedTimeEnd.minute,
+                          ),
+                          format: DateFormat("HH:mm"),
+                          controller: endTimeController,
+                          decoration: InputDecoration(labelText: 'End : '),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -257,20 +347,57 @@ class _PemesananOptionState extends State<PemesananOption>
               key: _formKeyPage4,
               child: Column(
                 children: [
-                  FormBuilderTextField(
-                    name: 'lokasi_text',
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
-                    decoration: InputDecoration(
-                      labelText: 'Tempat Lokasi  ?',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: FormBuilderTextField(
+                      name: 'address',
+                      controller: lokasiController,
+                      decoration: InputDecoration(labelText: 'Location'),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
                     ),
-                    controller: lokasiController,
-                    minLines: 3,
-                    maxLines: null,
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    height: 200,
+                    child: _currentPosition != null
+                        ? FlutterMap(
+                            options: MapOptions(
+                              center: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 13.0,
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                subdomains: ['a', 'b', 'c'],
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                      width: 40.0,
+                                      height: 40.0,
+                                      point: LatLng(
+                                        _currentPosition!.latitude,
+                                        _currentPosition!.longitude,
+                                      ),
+                                      builder: (ctx) => Container(
+                                              child: Icon(
+                                            Icons.location_on,
+                                            color: Colors.red,
+                                            size: 40.0,
+                                          )))
+                                ],
+                              )
+                            ],
+                          )
+                        : Center(
+                            child: CircularProgressIndicator(),
+                          ),
                   ),
                 ],
               ),

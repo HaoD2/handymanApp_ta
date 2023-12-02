@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 
 class detail_custom extends StatefulWidget {
-  final deskripsi, alamat, require_handyman, waktu_pekerjaan;
+  final deskripsi, alamat, require_handyman, start_time, end_time;
   const detail_custom({
     Key? key,
     required this.deskripsi,
     required this.alamat,
     required this.require_handyman,
-    required this.waktu_pekerjaan,
+    required this.start_time,
+    required this.end_time,
   }) : super(key: key);
 
   @override
@@ -69,7 +70,7 @@ class _detail_customState extends State<detail_custom> {
                 fontSize: 18,
               ),
             ),
-            Text(widget.waktu_pekerjaan),
+            Text(widget.start_time + " - " + widget.end_time),
           ],
         ),
       ),
