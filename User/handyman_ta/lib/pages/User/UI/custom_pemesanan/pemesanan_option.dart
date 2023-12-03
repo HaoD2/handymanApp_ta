@@ -10,30 +10,28 @@ import 'package:latlong2/latlong.dart';
 import 'package:handyman_ta/pages/Model/pekerjaan.dart';
 import 'package:handyman_ta/pages/User/UI/custom_pemesanan/detail_custom.dart';
 import 'package:handyman_ta/pages/User/home.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 
-class PemesananOption extends StatefulWidget {
+final uniqueKeyProvider = StateProvider.autoDispose<int>((ref) {
+  // Gunakan fungsi Random() atau UUID untuk membuat kunci yang unik
+  return UniqueKey().hashCode; // Contoh menggunakan hashCode dari UniqueKey
+});
+final currentPageProvider = StateProvider<int>((ref) => 0);
+
+class PemesananOption extends ConsumerStatefulWidget {
   final dynamic layanan;
 
   const PemesananOption({Key? key, this.layanan}) : super(key: key);
-
   @override
-  State<PemesananOption> createState() => _PemesananOptionState();
+  ConsumerState<PemesananOption> createState() => _PemesananOptionState();
 }
 
-class _PemesananOptionState extends State<PemesananOption>
+class _PemesananOptionState extends ConsumerState<PemesananOption>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<FormBuilderState> _formKeyPage1 =
-      GlobalKey<FormBuilderState>();
-  final GlobalKey<FormBuilderState> _formKeyPage2 =
-      GlobalKey<FormBuilderState>();
-  final GlobalKey<FormBuilderState> _formKeyPage3 =
-      GlobalKey<FormBuilderState>();
-  final GlobalKey<FormBuilderState> _formKeyPage4 =
-      GlobalKey<FormBuilderState>();
   Position? _currentPosition;
-
+  FocusNode _textFieldFocusNode = FocusNode();
   TimeOfDay selectedTimeEnd = TimeOfDay.now();
   TimeOfDay selectedTimeStart = TimeOfDay.now();
   TextEditingController detailPemesananControlller = TextEditingController();
@@ -44,6 +42,12 @@ class _PemesananOptionState extends State<PemesananOption>
   TextEditingController handymanController = TextEditingController();
   TextEditingController lokasiController = TextEditingController();
   int _currentPageIndex = 0;
+
+//form handler
+  GlobalKey<FormBuilderState> formKey1 = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> formKey2 = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> formKey3 = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> formKey4 = GlobalKey<FormBuilderState>();
 
   late AnimationController animationController;
   Future<String> getAddressFromCoordinates(
@@ -95,9 +99,7 @@ class _PemesananOptionState extends State<PemesananOption>
 
   @override
   void initState() {
-    // if (_currentPageIndex == 3) {
-    //   _getCurrentLocation();
-    // }
+    _getCurrentLocation();
     super.initState();
     animationController = AnimationController(
       vsync: this,
@@ -114,6 +116,7 @@ class _PemesananOptionState extends State<PemesananOption>
 
   @override
   Widget build(BuildContext context) {
+    final uniqueKey = ref.watch(uniqueKeyProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Custom Pemesanan'),
@@ -160,7 +163,7 @@ class _PemesananOptionState extends State<PemesananOption>
                 children: [
                   AnimatedSwitcher(
                     duration: Duration(milliseconds: 100),
-                    child: _getPage(_currentPageIndex),
+                    child: _getPage(_currentPageIndex, uniqueKey),
                   ),
                   SizedBox(height: 20), // Jarak antara text field dan button
                   Align(
@@ -171,6 +174,7 @@ class _PemesananOptionState extends State<PemesananOption>
                           setState(() {
                             _currentPageIndex++;
                           });
+                          print(animationController.isAnimating);
                           print(_currentPageIndex);
                         } else {
                           // Lakukan sesuatu ketika tombol Next di halaman terakhir ditekan
@@ -212,17 +216,17 @@ class _PemesananOptionState extends State<PemesananOption>
     );
   }
 
-  Widget _getPage(int index) {
+  Widget _getPage(int index, int uniqueKey) {
     switch (index) {
       case 0:
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(
               CurvedAnimation(parent: animationController, curve: Curves.ease)),
-          key: UniqueKey(),
+          key: ValueKey<int>(uniqueKey),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: FormBuilder(
-              key: _formKeyPage1,
+              key: formKey1,
               child: Column(
                 children: [
                   FormBuilderTextField(
@@ -251,11 +255,11 @@ class _PemesananOptionState extends State<PemesananOption>
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(
               CurvedAnimation(parent: animationController, curve: Curves.ease)),
-          key: UniqueKey(),
+          key: ValueKey<int>(uniqueKey),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: FormBuilder(
-              key: _formKeyPage2,
+              key: formKey2,
               child: Column(
                 children: [
                   FormBuilderTextField(
@@ -283,11 +287,11 @@ class _PemesananOptionState extends State<PemesananOption>
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(
               CurvedAnimation(parent: animationController, curve: Curves.ease)),
-          key: UniqueKey(),
+          key: ValueKey<int>(uniqueKey),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: FormBuilder(
-              key: _formKeyPage3,
+              key: formKey3,
               child: Column(
                 children: [
                   Row(
@@ -340,11 +344,11 @@ class _PemesananOptionState extends State<PemesananOption>
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(
               CurvedAnimation(parent: animationController, curve: Curves.ease)),
-          key: UniqueKey(),
+          key: ValueKey<int>(uniqueKey),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: FormBuilder(
-              key: _formKeyPage4,
+              key: formKey4,
               child: Column(
                 children: [
                   Container(
