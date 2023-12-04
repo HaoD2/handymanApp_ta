@@ -109,61 +109,57 @@ class _ChatPageState extends State<ChatPage> {
                       timeB); // Mengurutkan dari yang terbaru ke yang terlama
                 });
 
-                List<Widget> messageWidgets = [];
-                for (var message in messages) {
-                  var isiPesan = message['isiPesan'];
-                  if (isiPesan != null || isiPesan.isNotEmpty) {
-                    var isDone = message['isDone'];
-                    var sent = message['sent'];
-                    var pengirimUID = message['pengirimEmail'];
-                    var waktu = message['waktu'];
-                    bool isCurrentUser =
-                        sent == FirebaseAuth.instance.currentUser!.email;
-                    messageWidgets.add(Align(
-                      alignment: isCurrentUser
-                          ? Alignment.topRight
-                          : Alignment.topLeft,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isCurrentUser ? Colors.blue : Colors.grey,
-                          borderRadius: isCurrentUser
-                              ? const BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  bottomRight: Radius.circular(30),
-                                  topRight: Radius.circular(30))
-                              : const BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  bottomRight: Radius.circular(30),
-                                  topRight: Radius.circular(30)),
+                return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      var message = messages[index];
+                      var isiPesan = message['isiPesan'];
+                      var sent = message['sent'];
+                      var pengirimUID = message['pengirimEmail'];
+                      var waktu = message['waktu'];
+                      bool isCurrentUser =
+                          sent == FirebaseAuth.instance.currentUser!.email;
+
+                      var reversedIndex = (messages.length - 1) - index;
+                      return Align(
+                        alignment: isCurrentUser
+                            ? Alignment.topRight
+                            : Alignment.topLeft,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isCurrentUser ? Colors.blue : Colors.grey,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30),
+                              topRight: Radius.circular(30),
+                            ),
+                          ),
+                          margin: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: isCurrentUser
+                                ? CrossAxisAlignment.start
+                                : CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                isiPesan,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                formatTimeAgo(waktu),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              // Tambahkan bagian lain seperti informasi pengirim, status, dll. sesuai kebutuhan
+                            ],
+                          ),
                         ),
-                        margin: const EdgeInsets.all(10),
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: isCurrentUser
-                              ? CrossAxisAlignment.start
-                              : CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              isiPesan,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              formatTimeAgo(waktu),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ));
-                  }
-                }
-                return Column(
-                  children: messageWidgets,
-                );
+                      );
+                    });
               },
             ),
           ),

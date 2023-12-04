@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/User/UI/custom_pemesanan/pemesanan_option.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 
 class detail_custom extends StatefulWidget {
-  final deskripsi, alamat, require_handyman, start_time, end_time;
-  const detail_custom({
-    Key? key,
-    required this.deskripsi,
-    required this.alamat,
-    required this.require_handyman,
-    required this.start_time,
-    required this.end_time,
-  }) : super(key: key);
+  final deskripsi, alamat, require_handyman, start_time, end_time, min, max;
+  const detail_custom(
+      {Key? key,
+      required this.deskripsi,
+      required this.alamat,
+      required this.require_handyman,
+      required this.start_time,
+      required this.end_time,
+      required this.min,
+      required this.max})
+      : super(key: key);
 
   @override
   State<detail_custom> createState() => _detail_customState();
@@ -27,7 +30,7 @@ class _detail_customState extends State<detail_custom> {
           onPressed: () => Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const userHomepage(),
+                builder: (context) => const PemesananOption(),
               )),
         ),
       ),
@@ -71,6 +74,15 @@ class _detail_customState extends State<detail_custom> {
               ),
             ),
             Text(widget.start_time + " - " + widget.end_time),
+            SizedBox(height: 10),
+            Text(
+              'Budget Harga Pekerjaan:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            Text(widget.min + " - " + widget.max),
           ],
         ),
       ),

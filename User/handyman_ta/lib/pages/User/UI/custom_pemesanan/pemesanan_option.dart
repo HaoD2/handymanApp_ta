@@ -41,13 +41,24 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
   final endTimeController = TextEditingController();
   TextEditingController handymanController = TextEditingController();
   TextEditingController lokasiController = TextEditingController();
+  final TextEditingController _minController = TextEditingController();
+  final TextEditingController _maxController = TextEditingController();
   int _currentPageIndex = 0;
-
 //form handler
   GlobalKey<FormBuilderState> formKey1 = GlobalKey<FormBuilderState>();
   GlobalKey<FormBuilderState> formKey2 = GlobalKey<FormBuilderState>();
   GlobalKey<FormBuilderState> formKey3 = GlobalKey<FormBuilderState>();
   GlobalKey<FormBuilderState> formKey4 = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> formKey5 = GlobalKey<FormBuilderState>();
+  final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID', symbol: 'Rp'); // Formatter mata uang
+  //RangeValues
+  double _minValue = 0;
+  double _maxValue = 10000000; // Nilai maksimum 10 juta
+  final FocusNode _minFocus = FocusNode();
+  final FocusNode _maxFocus = FocusNode();
+
+  RangeValues _currentRange = const RangeValues(0, 100000000);
 
   late AnimationController animationController;
   Future<String> getAddressFromCoordinates(
@@ -101,6 +112,7 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
   void initState() {
     _getCurrentLocation();
     super.initState();
+
     animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 100), // Adjust duration as needed
@@ -110,6 +122,8 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
 
   @override
   void dispose() {
+    _minFocus.dispose();
+    _maxFocus.dispose();
     animationController.dispose();
     super.dispose();
   }
@@ -170,7 +184,7 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                     alignment: Alignment.bottomRight,
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (_currentPageIndex < 3) {
+                        if (_currentPageIndex < 4) {
                           setState(() {
                             _currentPageIndex++;
                           });
@@ -178,20 +192,21 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                           print(_currentPageIndex);
                         } else {
                           // Lakukan sesuatu ketika tombol Next di halaman terakhir ditekan
-
-                          Navigator.of(context, rootNavigator: true)
-                              .pushAndRemoveUntil(
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(
                               builder: (BuildContext context) {
                                 return detail_custom(
-                                    deskripsi: detailPemesananControlller.text,
-                                    alamat: lokasiController.text,
-                                    require_handyman: handymanController.text,
-                                    start_time: startTimeController.text,
-                                    end_time: endTimeController.text);
+                                  deskripsi: detailPemesananControlller.text,
+                                  alamat: lokasiController.text,
+                                  require_handyman: handymanController.text,
+                                  start_time: startTimeController.text,
+                                  end_time: endTimeController.text,
+                                  min: _minController.text,
+                                  max: _maxController.text,
+                                );
                               },
                             ),
-                            (_) => false,
                           );
                         }
                       },
@@ -204,7 +219,7 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text(_currentPageIndex < 3 ? "Next" : "Submit"),
+                      child: Text(_currentPageIndex < 4 ? "Next" : "Submit"),
                     ),
                   ),
                 ],
@@ -340,6 +355,101 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
           ),
         );
       case 3:
+        // Widget C
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0, end: 1).animate(
+            CurvedAnimation(parent: animationController, curve: Curves.ease),
+          ),
+          key: ValueKey<int>(uniqueKey),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: FormBuilder(
+              key: formKey4,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(labelText: 'Min Value'),
+                          controller: _minController,
+                          onChanged: (value) {
+                            int min = int.tryParse(value) ?? 0;
+                            int max = int.tryParse(_maxController.text) ?? 0;
+
+                            if (min > max) {
+                              min = max;
+                              _minController.text = min.toString();
+                            }
+
+                            if (min > 10000000) {
+                              min =
+                                  10000000; // Batasi nilai minimum menjadi 10 juta
+                              _minController.text = min.toString();
+                            }
+
+                            setState(() {
+                              _minValue = min.toDouble();
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(labelText: 'Max Value'),
+                          controller: _maxController,
+                          onChanged: (value) {
+                            int min = int.tryParse(_minController.text) ?? 0;
+                            int max = int.tryParse(value) ?? 0;
+
+                            if (max < min) {
+                              max = min;
+                              _maxController.text = max.toString();
+                            }
+
+                            if (max > 10000000) {
+                              max =
+                                  10000000; // Batasi nilai maksimum menjadi 10 juta
+                              _maxController.text = max.toString();
+                            }
+
+                            setState(() {
+                              _maxValue = max.toDouble();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  RangeSlider(
+                    values: RangeValues(_minValue, _maxValue),
+                    min: 0,
+                    max: 10000000, // Ubah nilai maksimum menjadi 10 juta
+                    divisions: 100,
+                    labels: RangeLabels(
+                      currencyFormatter.format(_minValue),
+                      currencyFormatter.format(_maxValue),
+                    ),
+                    onChanged: (RangeValues values) {
+                      setState(() {
+                        _minValue = values.start;
+                        _maxValue = values.end;
+                        _minController.text = _minValue.toInt().toString();
+                        _maxController.text = _maxValue.toInt().toString();
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      case 4:
         // Widget D
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(
@@ -348,7 +458,7 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: FormBuilder(
-              key: formKey4,
+              key: formKey5,
               child: Column(
                 children: [
                   Container(
