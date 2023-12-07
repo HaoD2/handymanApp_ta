@@ -6,6 +6,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+
 import 'package:latlong2/latlong.dart';
 import 'package:handyman_ta/pages/Model/pekerjaan.dart';
 import 'package:handyman_ta/pages/User/UI/custom_pemesanan/detail_custom.dart';
@@ -71,11 +72,13 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
         String address =
             '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}';
         return address;
+      } else {
+        return 'No address found';
       }
     } catch (e) {
       print('Error getting address: $e');
+      return 'Error: Unable to retrieve address';
     }
-    return '';
   }
 
   Future<void> _getCurrentLocation() async {

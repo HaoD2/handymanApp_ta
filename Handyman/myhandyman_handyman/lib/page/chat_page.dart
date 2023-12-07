@@ -71,6 +71,84 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Widget buildSubmitButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: _pesanController,
+              decoration: InputDecoration(labelText: 'Pesan'),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: () {
+              _kirimPesan();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+// Fungsi untuk menampilkan tombol "Rating" dan "Report"
+  Widget buildRatingAndReportButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(width: 10),
+        ElevatedButton(
+          child: Text('Report'),
+          onPressed: () {
+            // Lakukan aksi saat tombol Report ditekan
+            // Contohnya: Menampilkan dialog untuk melaporkan
+          },
+        ),
+      ],
+    );
+  }
+
+  void iSDone(String email) async {
+    final CollectionReference usersCollection =
+        FirebaseFirestore.instance.collection('users');
+
+    QuerySnapshot querySnapshot =
+        await usersCollection.where('email', isEqualTo: email).get();
+    final token_sent = querySnapshot.docs.first['token_messaging'];
+    final res =
+        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization':
+                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
+            },
+            body: jsonEncode(<String, dynamic>{
+              'priority': 'high',
+              'data': {
+                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                'status': 'done',
+                'body': 'MyHandyman',
+                'title': ' Pemesanan kamu Sudah Selesai !',
+              },
+              'notification': {
+                'body': 'MyHandyman',
+                'title': ' Pemesanan kamu Sudah Selesai !',
+                'android_channel_id': "dbFood"
+              },
+              "to": token_sent
+            }));
+    if (res.statusCode == 200) {
+      print('>>>>>>>>>>>>>>>>>>>>success');
+      final responseData = jsonDecode(res.body);
+    } else {
+      print(res.body);
+      print(res.statusCode.toString() + ">>>>>");
+      print('>>>>>>>>>>>>>>>>>>>>gagal');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,17 +185,38 @@ class _ChatPageState extends State<ChatPage> {
               if (value == 'done') {
                 await FirebaseFirestore.instance
                     .collection('kontak')
-                    .where('penerimaEmail', isEqualTo: widget.penerimaEmail)
-                    .where('pengirimEmail', isEqualTo: widget.pengirimEmail)
+                    .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
                     .get()
                     .then((querySnapshot) {
                   querySnapshot.docs.forEach((doc) {
-                    // Perbarui nilai isDone menjadi false
-                    doc.reference.update({'isDone': false});
+                    // Perbarui nilai isDone menjadi true
+                    doc.reference.update({'isDone': true}).then((value) {
+                      print('Nilai isDone telah diperbarui menjadi true');
+
+                      // Lakukan pengecekan isDone
+                      FirebaseFirestore.instance
+                          .collection('kontak')
+                          .where('uid_pemesanan',
+                              isEqualTo: this.widget.uid_pemesanan)
+                          .get()
+                          .then((updatedSnapshot) {
+                        var updatedDocs = updatedSnapshot.docs;
+                        if (updatedDocs.isNotEmpty) {
+                          var updatedIsDone = updatedDocs.first['isDone'];
+
+                          // Jika isDone sudah true, panggil fungsi isDone()
+                          if (updatedIsDone) {
+                            print("isdone alert masuk");
+                            iSDone(this.widget.penerimaEmail);
+                          }
+                        }
+                        // Jika isDone sudah true, panggil fungsi isDone()
+                      });
+                    }).catchError((error) {
+                      print('Gagal memperbarui nilai isDone: $error');
+                    });
                   });
                 });
-              } else if (value == 'cancel') {
-                // Logika ketika Cancel dipilih
               }
             },
           ),
@@ -202,16 +301,30 @@ class _ChatPageState extends State<ChatPage> {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: TextField(
-                    controller: _pesanController,
-                    decoration: InputDecoration(labelText: 'Pesan'),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('kontak')
+                        .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+                      var contacts = snapshot.data!.docs;
+                      bool isDone = false;
+
+                      if (contacts.isNotEmpty) {
+                        isDone = contacts.first['isDone'];
+                      }
+
+                      // Tampilkan tombol berdasarkan nilai isDone
+                      if (isDone) {
+                        return buildRatingAndReportButtons();
+                      } else {
+                        return buildSubmitButton();
+                      }
+                    },
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    _kirimPesan();
-                  },
                 ),
               ],
             ),
@@ -231,7 +344,7 @@ class _ChatPageState extends State<ChatPage> {
       penerimaEmail: this.widget.penerimaEmail,
       isiPesan: pesan,
       sent: FirebaseAuth.instance.currentUser!.email.toString(),
-      isDone: true,
+      isDone: false,
       waktu: DateTime.now(),
       uid_pemesanan: this.widget.uid_pemesanan,
     );

@@ -1,28 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class AuthServices {
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   Future<User?> getCurrentUser() async {
-    return _auth.currentUser;
+    return auth.currentUser;
   }
 
-  Future<String?> getCurrentUserEmail() async {
-    return _auth.currentUser?.email;
-  }
-
-  Future<String?> signInWithEmailAndPassword(
-      String email, String password) async {
+  Future<String?> Login(String email, String password) async {
+    signOut();
     try {
-      final UserCredential authResult = await _auth.signInWithEmailAndPassword(
+      final UserCredential authResult = await auth.signInWithEmailAndPassword(
           email: email, password: password);
       return null; // Login berhasil, kembalikan null
     } catch (e) {
       if (e is FirebaseAuthException) {
         print(
             "Firebase Auth Exception - Code: ${e.code}, Message: ${e.message}");
-
         // Handle specific Firebase Auth exceptions using e.code
         switch (e.code) {
           case "invalid-email":
@@ -41,6 +36,6 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    await auth.signOut();
   }
 }

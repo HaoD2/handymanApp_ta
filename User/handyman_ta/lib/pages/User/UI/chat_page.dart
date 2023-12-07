@@ -29,6 +29,12 @@ class _ChatPageState extends State<ChatPage> {
     return timeAgo.toString();
   }
 
+  double _rating = 0;
+  bool _notProfessional = false;
+  bool _badService = false;
+  bool _poorCommunication = false;
+  bool _unclearCost = false;
+  bool _fraudulent = false;
   void Retrieve(String email) async {
     final CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
@@ -68,6 +74,125 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Widget buildRatingAndReportButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          child: Text('Rating'),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Beri Rating'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text('Score: $_rating/5'),
+                      Slider(
+                        value: _rating,
+                        min: 0,
+                        max: 5,
+                        divisions: 5,
+                        onChanged: (value) {
+                          setState(() {
+                            _rating = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Tutup dialog
+                      },
+                      child: Text('Batal'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Lakukan sesuatu dengan nilai _rating
+                        Navigator.of(context).pop(); // Tutup dialog
+                      },
+                      child: Text('Submit'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+        SizedBox(width: 10),
+        ElevatedButton(
+          child: Text('Report'),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Report User'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      CheckboxListTile(
+                        title: Text('Tidak Professional'),
+                        value: _notProfessional,
+                        onChanged: (value) {
+                          setState(() {
+                            _notProfessional = value!;
+                          });
+                        },
+                      ),
+                      // CheckboxListTile lainnya disini
+                    ],
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Tutup dialog
+                      },
+                      child: Text('Batal'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Lakukan sesuatu dengan variabel boolean yang sudah diperbarui
+                        Navigator.of(context).pop(); // Tutup dialog
+                      },
+                      child: Text('Submit'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget buildSubmitButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: _pesanController,
+              decoration: InputDecoration(labelText: 'Pesan'),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: () {
+              _kirimPesan();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,7 +204,9 @@ class _ChatPageState extends State<ChatPage> {
             Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return userHomepage();
+                  return userHomepage(
+                    email: FirebaseAuth.instance.currentUser?.email,
+                  );
                 },
               ),
               (_) => false,
@@ -100,7 +227,6 @@ class _ChatPageState extends State<ChatPage> {
                 if (!snapshot.hasData) {
                   return CircularProgressIndicator();
                 }
-
                 var messages = snapshot.data!.docs;
                 messages.sort((a, b) {
                   Timestamp timeA = a['waktu'] as Timestamp;
@@ -108,7 +234,6 @@ class _ChatPageState extends State<ChatPage> {
                   return timeA.compareTo(
                       timeB); // Mengurutkan dari yang terbaru ke yang terlama
                 });
-
                 return ListView.builder(
                     reverse: true,
                     itemCount: messages.length,
@@ -168,16 +293,30 @@ class _ChatPageState extends State<ChatPage> {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: TextField(
-                    controller: _pesanController,
-                    decoration: InputDecoration(labelText: 'Pesan'),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('kontak')
+                        .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+                      var contacts = snapshot.data!.docs;
+                      bool isDone = false;
+
+                      if (contacts.isNotEmpty) {
+                        isDone = contacts.first['isDone'];
+                      }
+
+                      // Tampilkan tombol berdasarkan nilai isDone
+                      if (isDone) {
+                        return buildRatingAndReportButtons();
+                      } else {
+                        return buildSubmitButton();
+                      }
+                    },
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    _kirimPesan();
-                  },
                 ),
               ],
             ),

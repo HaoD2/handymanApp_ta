@@ -20,7 +20,7 @@ class _KontakPageState extends State<KontakPage> {
             .collection('kontak')
             .where('pengirimEmail',
                 isEqualTo: FirebaseAuth.instance.currentUser?.email)
-            .where('isDone', isEqualTo: true)
+            .where('isDone', isEqualTo: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -34,35 +34,81 @@ class _KontakPageState extends State<KontakPage> {
               var penerimaUID = contact['penerimaEmail'];
               var pengirimUID = contact['pengirimEmail'];
               var uid_pemesanan = contact['uid_pemesanan'];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage:
-                          AssetImage('assets/images/icon_profile.png'),
-                    )
-                  ],
-                ),
-                title: Text(
-                  penerimaUID,
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
-                ),
-                onTap: () {
-                  Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return ChatPage(
-                            penerimaUID, pengirimUID, uid_pemesanan);
-                      },
-                    ),
-                    (_) => false,
-                  );
+              return FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection(
+                        'request_handyman') // Ganti dengan nama koleksi yang sesuai
+                    .where('uid',
+                        isEqualTo:
+                            uid_pemesanan) // Ganti dengan nama dokumen atau UID yang sesuai
+                    .get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    // Ambil data dari snapshot yang diperoleh
+                    var data = snapshot.data!.docs.first.data();
+                    if (data is Map<String, dynamic>) {
+                      var tipe_pekerjaan = data['tipe_pekerjaan'];
+                      var pemesananUID = data['uid'];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage:
+                                  AssetImage('assets/images/icon_profile.png'),
+                            )
+                          ],
+                        ),
+                        title: Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment
+                                .start, // Untuk membuat teks menjadi rata di kiri
+                            crossAxisAlignment: CrossAxisAlignment
+                                .start, // Untuk mengatur teks ke kiri
+                            children: [
+                              Text(
+                                penerimaUID,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                tipe_pekerjaan + " - " + pemesananUID,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return ChatPage(
+                                    penerimaUID, pengirimUID, uid_pemesanan);
+                              },
+                            ),
+                            (_) => false,
+                          );
+                        },
+                      );
+                    }
+                  }
+
+                  return CircularProgressIndicator(); // Tampilkan loading jika data sedang diambil
                 },
               );
             },

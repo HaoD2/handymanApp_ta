@@ -8,10 +8,9 @@ import 'package:handyman_ta/pages/User/UI/custom_pemesanan/pemesanan_option.dart
 import 'package:handyman_ta/pages/User/UI/option_menu.dart';
 import 'package:handyman_ta/pages/User/UI/showall_list.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
-import 'package:handyman_ta/pages/service/authservice.dart';
+import 'package:handyman_ta/pages/service/authServices.dart';
 
 import '../../Model/pekerjaan.dart';
-import 'module_pemesanan.dart';
 
 class requestPekerjaan extends StatefulWidget {
   final email;
@@ -146,8 +145,8 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                                               child: InkWell(
                                                 splashColor: Colors.green,
                                                 onTap: () async {
-                                                  AuthService authService =
-                                                      AuthService();
+                                                  AuthServices authService =
+                                                      AuthServices();
                                                   User? user = await authService
                                                       .getCurrentUser();
                                                   if (user != null) {
@@ -340,7 +339,7 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
                                             fontSize: 10,
                                             fontFamily: 'OpenSans')),
                                     onPressed: () async {
-                                      AuthService authService = AuthService();
+                                      AuthServices authService = AuthServices();
                                       User? user =
                                           await authService.getCurrentUser();
                                       if (user != null) {

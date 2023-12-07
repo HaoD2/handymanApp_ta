@@ -14,8 +14,8 @@ class loginRoutePass extends StatefulWidget {
 }
 
 class _loginRoutePassState extends State<loginRoutePass> {
-  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final CollectionReference _users =
+      FirebaseFirestore.instance.collection('users');
 
   Future logout() async {
     const CircularProgressIndicator();

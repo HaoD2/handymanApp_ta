@@ -4,7 +4,8 @@ import 'package:handyman_ta/pages/User/UI/favourites.dart';
 import 'package:handyman_ta/pages/User/UI/request_handyman.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
-import 'package:handyman_ta/pages/service/authservice.dart';
+import 'package:handyman_ta/pages/service/authServices.dart';
+
 import 'package:handyman_ta/pages/service/changepassword.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,7 +22,7 @@ class profile extends StatefulWidget {
 }
 
 class _profileState extends State<profile> {
-  final AuthService _authService = AuthService();
+  final AuthServices _authService = AuthServices();
   final bool _isVerifying = false;
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');

@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 import 'package:handyman_ta/pages/register.dart';
-import 'package:handyman_ta/pages/service/authservice.dart';
+import 'package:handyman_ta/pages/service/authServices.dart';
 import 'package:handyman_ta/pages/service/fcmAPI.dart';
-import 'package:handyman_ta/pages/service/loginRoute.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,12 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
+  final AuthServices _authService = AuthServices();
+
   void loginUser() async {
     // Ganti dengan email dan password sesuai input pengguna
 
     if (_formKey.currentState!.validate()) {
-      final loginResult = await _authService.signInWithEmailAndPassword(
+      print(FirebaseAuth.instance.currentUser?.email);
+      final loginResult = await _authService.Login(
           usernameController.text.trim(), passwordController.text.trim());
 
       if (loginResult == null) {

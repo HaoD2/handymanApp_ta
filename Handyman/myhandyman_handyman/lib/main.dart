@@ -14,7 +14,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    name: 'handyman',
+    // Replace with actual values
+    options: FirebaseOptions(
+      apiKey: "AIzaSyDrT_0nzeqNQ1cxIWwA3Acet5yOLrivu2k",
+      appId: "1:25940658453:android:96352fa1ae7e9f9112011c",
+      messagingSenderId: "25940658453",
+      projectId: "database-ta-1aec7",
+    ),
+  );
   runApp(
     const ProviderScope(
       child: MyApp(),

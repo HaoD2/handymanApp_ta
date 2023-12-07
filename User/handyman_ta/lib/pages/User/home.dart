@@ -40,7 +40,7 @@ class _MainMenuState extends State<MainMenu> {
     return [
       home(email: widget.email),
       requestPekerjaan(email: widget.email),
-      messageUser(email: widget.email),
+      Kontak_User(email: widget.email),
       profile(email: widget.email)
     ];
   }
@@ -208,7 +208,7 @@ class _homeState extends State<home> {
             ),
           ),
         ),
-        const Column(
+        Column(
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(bottom: 20.0),

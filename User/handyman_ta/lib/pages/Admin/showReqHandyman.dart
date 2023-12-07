@@ -22,8 +22,8 @@ class _showRequestHandymanState extends State<showRequestHandyman> {
 
       for (final doc in querySnapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final imageUrl = data['image'] as String;
-        imageUrls.add(imageUrl);
+        final imageUrl = data['image'];
+        imageUrls.add(imageUrl.toString());
       }
 
       return imageUrls;
