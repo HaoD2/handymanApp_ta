@@ -60,7 +60,7 @@ class Pekerjaan {
             "", // Mengatasi nilai null dengan default string kosong
         status: data['status'] as String? ??
             "", // Mengatasi nilai null dengan default string kosong
-        tipe_Pekerjaan: data['tipe_Pekerjaan'] as String? ??
+        tipe_Pekerjaan: data['tipe_pekerjaan'] as String? ??
             "", // Mengatasi nilai null dengan default string kosong
         taken_by: data['taken_by'] as String? ??
             "", // Mengatasi nilai null dengan default string kosong
@@ -92,6 +92,72 @@ class FirebaseDataService {
     return requestData;
   }
 
+  Future<List<Pekerjaan>> filterDataSearchdanDistance(
+      double maxDistance, String keyword, Position _currentPosition) async {
+    List<Pekerjaan> allData = await getRequestData();
+
+    List<Pekerjaan> filteredData = [];
+
+    if (maxDistance > 0 && keyword.isNotEmpty) {
+      // Jika menggunakan keduanya: distance dan search
+      if (_currentPosition != null) {
+        allData.forEach((item) {
+          double calculatedDistance = Geolocator.distanceBetween(
+                _currentPosition.latitude,
+                _currentPosition.longitude,
+                item.location.latitude,
+                item.location.longitude,
+              ) /
+              1000;
+
+          String lowercaseDescription = item.description.toLowerCase();
+          String lowercaseTipePekerjaan = item.tipe_Pekerjaan.toLowerCase();
+          String lowercaseKeyword = keyword.toLowerCase();
+
+          if (calculatedDistance <= maxDistance &&
+              (lowercaseDescription.contains(lowercaseKeyword) ||
+                  lowercaseTipePekerjaan.contains(lowercaseKeyword))) {
+            filteredData.add(item);
+          }
+        });
+      }
+    } else if (maxDistance > 0) {
+      // Jika hanya menggunakan distance
+      if (_currentPosition != null) {
+        allData.forEach((item) {
+          double calculatedDistance = Geolocator.distanceBetween(
+                _currentPosition.latitude,
+                _currentPosition.longitude,
+                item.location.latitude,
+                item.location.longitude,
+              ) /
+              1000;
+
+          if (calculatedDistance <= maxDistance) {
+            filteredData.add(item);
+          }
+        });
+      }
+    } else if (keyword.isNotEmpty) {
+      // Jika hanya menggunakan search
+      allData.forEach((item) {
+        String lowercaseDescription = item.description.toLowerCase();
+        String lowercaseTipePekerjaan = item.tipe_Pekerjaan.toLowerCase();
+        String lowercaseKeyword = keyword.toLowerCase();
+
+        if (lowercaseDescription.contains(lowercaseKeyword) ||
+            lowercaseTipePekerjaan.contains(lowercaseKeyword)) {
+          filteredData.add(item);
+        }
+      });
+    } else {
+      // Jika tidak ada filter
+      filteredData = allData;
+    }
+
+    return filteredData;
+  }
+
   Future<List<Pekerjaan>> fetchAndFilterData(
       double maxDistance, Position _currentPosition) async {
     List<Pekerjaan> allData = await getRequestData();
@@ -108,6 +174,8 @@ class FirebaseDataService {
             1000;
 
         if (calculatedDistance <= maxDistance) {
+          print('filtered');
+          print(maxDistance);
           filteredData.add(item);
         }
       });

@@ -84,7 +84,52 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      home: LoginPage(),
+      home: Auth(),
+    );
+  }
+}
+
+class Auth extends StatelessWidget {
+  const Auth({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(child: Text('Something went wrong'));
+        } else if (snapshot.hasData) {
+          final user = snapshot.data!;
+          print(snapshot.hasData.toString());
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Center(child: Text('Something went wrong'));
+              } else {
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                if (data['status_handyman'] == 1) {
+                  // Email terverifikasi tetapi status_verif = 0 (belum diverifikasi di Firestore)
+                  return userHandyman();
+                } else {
+                  // Email terverifikasi dan status_verif = 1 (sudah diverifikasi di Firestore)
+                  return const LoginPage();
+                }
+              }
+            },
+          );
+        } else {
+          return const LoginPage();
+        }
+      },
     );
   }
 }

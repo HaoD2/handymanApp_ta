@@ -129,40 +129,6 @@ class _homeState extends State<home> {
   TextEditingController queryController = TextEditingController();
   bool filterByDistance = false;
   Future<void> fetchLocationData() async {
-    // Periksa izin lokasi
-    final locationPermission = await Geolocator.checkPermission();
-    if (locationPermission == LocationPermission.denied) {
-      // Jika izin ditolak, minta izin
-      final permissionStatus = await Geolocator.requestPermission();
-      if (permissionStatus != LocationPermission.always &&
-          permissionStatus != LocationPermission.whileInUse) {
-        // Izin tidak diberikan, tampilkan pesan kepada pengguna atau handle sesuai kebijakan aplikasi Anda.
-        return;
-      }
-    }
-
-    // Periksa status layanan lokasi
-    final isLocationServiceEnabled =
-        await Geolocator.isLocationServiceEnabled();
-    if (!isLocationServiceEnabled) {
-      // Layanan lokasi dimatikan, tampilkan pesan kepada pengguna atau handle sesuai kebijakan aplikasi Anda.
-      return;
-    }
-
-    // Dapatkan data lokasi
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.best);
-      // Setelah mendapatkan data lokasi, Anda dapat menghitung jarak atau melakukan tindakan lainnya.
-      setState(() {
-        _currentPosition = position;
-      });
-    } catch (e) {
-      // Tangani kesalahan yang mungkin terjadi saat mendapatkan lokasi.
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
     PermissionStatus permissionStatus = await Permission.location.request();
 
     if (permissionStatus.isGranted) {
@@ -172,8 +138,8 @@ class _homeState extends State<home> {
         );
 
         setState(() {
-          print(_currentPosition);
           _currentPosition = position;
+          print(_currentPosition);
         });
       } catch (e) {
         print('Error getting location: $e');
@@ -181,13 +147,15 @@ class _homeState extends State<home> {
     } else if (permissionStatus.isDenied ||
         permissionStatus.isPermanentlyDenied) {
       bool isPermissionGranted = await openAppSettings();
+
       if (isPermissionGranted) {
-        _getCurrentLocation();
+        fetchLocationData();
       }
     }
   }
 
   Future<void> fetchData() async {
+    data.clear();
     FirebaseDataService().getRequestData().then((dataList) {
       setState(() {
         data = dataList;
@@ -196,9 +164,11 @@ class _homeState extends State<home> {
   }
 
   void FilteredByDistance() async {
+    data.clear();
     // Panggil fetchAndFilterData
     List<Pekerjaan> filteredData = await FirebaseDataService()
-        .fetchAndFilterData(maxDistanceFilter, _currentPosition!);
+        .filterDataSearchdanDistance(
+            selectedDistance, queryController.text, _currentPosition!);
 
     // Setelah mendapatkan data yang telah difilter, perbarui state widget ini dengan data tersebut
     setState(() {
@@ -221,14 +191,8 @@ class _homeState extends State<home> {
   void initState() {
     super.initState();
     fetchLocationData();
-    _getCurrentLocation();
-    if (filterByDistance) {
-      print("masuk fecth data filter");
-      FilteredByDistance();
-    } else {
-      print("masuk fecth data filter");
-      fetchData();
-    }
+    fetchData();
+    print(data);
   }
 
   @override
@@ -254,15 +218,20 @@ class _homeState extends State<home> {
                       // Dapatkan nilai pencarian saat pengguna mengetik
                       String keyword = text;
                       // Panggil fungsi pencarian dengan kata kunci yang sedang diketik
-                      FirebaseDataService()
-                          .searchPekerjaan(keyword)
-                          .then((searchResults) {
-                        setState(() {
-                          data.clear();
-                          // Perbarui data yang ditampilkan dengan hasil pencarian
-                          data = searchResults;
+                      if (filterByDistance) {
+                        FilteredByDistance();
+                      } else {
+                        FirebaseDataService()
+                            .searchPekerjaan(keyword)
+                            .then((searchResults) {
+                          setState(() {
+                            data.clear();
+                            // Perbarui data yang ditampilkan dengan hasil pencarian
+                            data = searchResults;
+                          });
                         });
-                      });
+                      }
+
                       print(keyword);
                     },
                   ),
@@ -298,6 +267,7 @@ class _homeState extends State<home> {
                                       onChanged: (value) {
                                         setState(() {
                                           filterByDistance = value!;
+                                          print(filterByDistance);
                                         });
                                       },
                                     ),
