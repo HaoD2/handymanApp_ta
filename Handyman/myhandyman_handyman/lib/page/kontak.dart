@@ -20,7 +20,6 @@ class _KontakPageState extends State<KontakPage> {
             .collection('kontak')
             .where('pengirimEmail',
                 isEqualTo: FirebaseAuth.instance.currentUser?.email)
-            .where('isDone', isEqualTo: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
