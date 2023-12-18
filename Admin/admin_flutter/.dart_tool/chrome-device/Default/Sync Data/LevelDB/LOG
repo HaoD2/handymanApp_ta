@@ -1,0 +1,9 @@
+2023/12/19-00:34:50.791 e120 Reusing MANIFEST C:\Users\kevin\AppData\Local\Temp\flutter_tools.26dd90c4\flutter_tools_chrome_device.d158d8d\Default\Sync Data\LevelDB/MANIFEST-000001
+2023/12/19-00:34:50.791 e120 Recovering log #3
+2023/12/19-00:34:50.793 e120 Reusing old log C:\Users\kevin\AppData\Local\Temp\flutter_tools.26dd90c4\flutter_tools_chrome_device.d158d8d\Default\Sync Data\LevelDB/000003.log 
+2023/12/19-00:52:59.290 af48 Level-0 table #5: started
+2023/12/19-00:52:59.297 af48 Level-0 table #5: 119392 bytes OK
+2023/12/19-00:52:59.299 af48 Delete type=0 #3
+2023/12/19-02:18:34.612 af48 Level-0 table #7: started
+2023/12/19-02:18:34.645 af48 Level-0 table #7: 70737 bytes OK
+2023/12/19-02:18:34.648 af48 Delete type=0 #4
