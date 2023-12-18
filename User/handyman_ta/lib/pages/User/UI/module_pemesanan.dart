@@ -449,13 +449,13 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                     alignment: Alignment.centerLeft,
                     child: Text("Gambar (Optional)")),
 
-                // Tambahkan kode untuk mengunggah gambar sertifikat
+                // Tambahkan kode untuk mengunggah gambar
                 Container(
                   margin: EdgeInsets.all(15),
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
                     onPressed: _getImage,
-                    child: Text('Unggah Sertifikat'),
+                    child: Text('Unggah Foto'),
                   ),
                 ),
                 if (requestImage != null)
