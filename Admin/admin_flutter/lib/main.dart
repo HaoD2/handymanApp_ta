@@ -1,4 +1,5 @@
-import 'package:admin_flutter/views/home_view.dart';
+import 'package:admin_flutter/dashboard/main_dashboard.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.blue,
           textTheme: Theme.of(context).textTheme.apply(fontFamily: 'OpenSans')),
-      home: home_view(),
+      home: MainDashboardScreen(),
     );
   }
 }
