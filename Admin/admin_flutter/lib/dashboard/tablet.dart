@@ -1,4 +1,5 @@
 import 'package:admin_flutter/constants/app_colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class DashboardTablet extends StatefulWidget {
@@ -9,452 +10,250 @@ class DashboardTablet extends StatefulWidget {
 }
 
 class _DashboardTabletState extends State<DashboardTablet> {
+  late Stream<QuerySnapshot> _dataStream;
+  @override
+  void initState() {
+    super.initState();
+    _dataStream = FirebaseFirestore.instance
+        .collection('handyman_req_forms')
+        .snapshots(); // Mengambil stream dari koleksi 'handyman_req_forms'
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isExpanded = false;
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          //Let's start by adding the Navigation Rail
-          NavigationRail(
-              extended: isExpanded,
-              backgroundColor: Colors.deepPurple.shade400,
-              unselectedIconTheme:
-                  IconThemeData(color: Colors.white, opacity: 1),
-              unselectedLabelTextStyle: TextStyle(
-                color: Colors.white,
-              ),
-              selectedIconTheme:
-                  IconThemeData(color: Colors.deepPurple.shade900),
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text("Home"),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.bar_chart),
-                  label: Text("Rapports"),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.person),
-                  label: Text("Profile"),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text("Settings"),
-                ),
-              ],
-              selectedIndex: 0),
+          AppBar(
+            // Tambahkan AppBar sebagai judul
+            title: Text('Dashboard',
+                style: TextStyle(fontSize: sizeTabletTextTitle)),
+            backgroundColor: Colors.deepPurple.shade400,
+            automaticallyImplyLeading: false, centerTitle: true,
+            // Menonaktifkan tombol back
+          ),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(45.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //let's add the navigation menu for this project
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            //let's trigger the navigation expansion
-                            setState(() {
-                              isExpanded = !isExpanded;
-                            });
-                          },
-                          icon: Icon(Icons.menu),
-                        ),
-                        CircleAvatar(
+            child: Row(
+              children: [
+                Container(
+                  width: 250,
+                  color: Colors.deepPurple.shade400,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
                           backgroundImage: NetworkImage(
                               "https://faces-img.xcdn.link/image-lorem-face-3430.jpg"),
-                          radius: 26.0,
+                          radius: 15.0,
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    //Now let's start with the dashboard main rapports
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Flexible(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(18.0),
-                              child: Center(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.article,
-                                          size: 26.0,
-                                        ),
-                                        SizedBox(
-                                          width: 15.0,
-                                        ),
-                                        Text(
-                                          "Articles",
-                                          style: TextStyle(
-                                            fontSize: sizeTabletTextTitle,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 20.0,
-                                    ),
-                                    Text(
-                                      "6 Articles",
-                                      style: TextStyle(
-                                        fontSize: sizeTabletTextContent,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(18.0),
-                              child: Center(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.comment,
-                                          size: 26.0,
-                                          color: Colors.red,
-                                        ),
-                                        SizedBox(
-                                          width: 15.0,
-                                        ),
-                                        Text(
-                                          "Comments",
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: sizeTabletTextTitle,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 20.0,
-                                    ),
-                                    Text(
-                                      "+32 Comments",
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: sizeTabletTextContent,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(18.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.people,
-                                        size: 26.0,
-                                        color: Colors.amber,
-                                      ),
-                                      SizedBox(
-                                        width: 15.0,
-                                      ),
-                                      Text(
-                                        "Subscribers",
-                                        style: TextStyle(
-                                          fontSize: 26.0,
-                                          color: Colors.amber,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 20.0,
-                                  ),
-                                  Text(
-                                    "3.2M Subscribers",
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      color: Colors.amber,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(18.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.monetization_on_outlined,
-                                        size: 26.0,
-                                        color: Colors.green,
-                                      ),
-                                      SizedBox(
-                                        width: 15.0,
-                                      ),
-                                      Text(
-                                        "Revenue",
-                                        style: TextStyle(
-                                          fontSize: 26.0,
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 20.0,
-                                  ),
-                                  Text(
-                                    "2.300 \$",
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    //Now let's set the article section
-                    SizedBox(
-                      height: 30.0,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              "6 Articles",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 28.0,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            Text(
-                              "3 new Articles",
-                              style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          width: 300.0,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: "Type Article Title",
-                              prefixIcon: Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.black26,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 40.0,
-                    ),
-
-                    //let's set the filter section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: Colors.deepPurple.shade400,
-                          ),
-                          label: Text(
-                            "2022, July 14, July 15, July 16",
+                        title: Text('Welcome, Admin',
                             style: TextStyle(
-                              color: Colors.deepPurple.shade400,
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            DropdownButton(
-                                hint: Text("Filter by"),
-                                items: [
-                                  DropdownMenuItem(
-                                    value: "Date",
-                                    child: Text("Date"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Comments",
-                                    child: Text("Comments"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Views",
-                                    child: Text("Views"),
-                                  ),
-                                ],
-                                onChanged: (value) {}),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            DropdownButton(
-                                hint: Text("Order by"),
-                                items: [
-                                  DropdownMenuItem(
-                                    value: "Date",
-                                    child: Text("Date"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Comments",
-                                    child: Text("Comments"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Views",
-                                    child: Text("Views"),
-                                  ),
-                                ],
-                                onChanged: (value) {}),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 40.0,
-                    ),
-                    //Now let's add the Table
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        DataTable(
-                            headingRowColor: MaterialStateProperty.resolveWith(
-                                (states) => Colors.grey.shade200),
-                            columns: [
-                              DataColumn(label: Text("ID")),
-                              DataColumn(label: Text("Article Title")),
-                              DataColumn(label: Text("Creation Date")),
-                              DataColumn(label: Text("Views")),
-                              DataColumn(label: Text("Comments")),
-                            ],
-                            rows: [
-                              DataRow(cells: [
-                                DataCell(Text("0")),
-                                DataCell(
-                                    Text("How to build a Flutter Web App")),
-                                DataCell(Text("${DateTime.now()}")),
-                                DataCell(Text("2.3K Views")),
-                                DataCell(Text("102Comments")),
-                              ]),
-                              DataRow(cells: [
-                                DataCell(Text("1")),
-                                DataCell(
-                                    Text("How to build a Flutter Mobile App")),
-                                DataCell(Text("${DateTime.now()}")),
-                                DataCell(Text("21.3K Views")),
-                                DataCell(Text("1020Comments")),
-                              ]),
-                              DataRow(cells: [
-                                DataCell(Text("2")),
-                                DataCell(
-                                    Text("Flutter for your first project")),
-                                DataCell(Text("${DateTime.now()}")),
-                                DataCell(Text("2.3M Views")),
-                                DataCell(Text("10K Comments")),
-                              ]),
-                            ]),
-                        //Now let's set the pagination
-                        SizedBox(
-                          height: 40.0,
-                        ),
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                "1",
-                                style: TextStyle(color: Colors.deepPurple),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                "2",
-                                style: TextStyle(color: Colors.deepPurple),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                "3",
-                                style: TextStyle(color: Colors.deepPurple),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                "See All",
-                                style: TextStyle(color: Colors.deepPurple),
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    )
-                  ],
+                                color: Colors.black87,
+                                fontSize: sizeTabletTextTitle)),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.home, color: Colors.white),
+                        title: Text('Home',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: sizeTabletTextTitle)),
+                        onTap: () {
+                          // Action for Home
+                        },
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.bar_chart, color: Colors.white),
+                        title: Text('Laporan Insight',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: sizeTabletTextTitle)),
+                        onTap: () {
+                          // Action for Rapports
+                        },
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.settings, color: Colors.white),
+                        title: Text('Settings',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: sizeTabletTextTitle)),
+                        onTap: () {
+                          // Action for Settings
+                        },
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ListTile(
+                        leading:
+                            Icon(Icons.logout_outlined, color: Colors.white),
+                        title: Text('Logout',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: sizeTabletTextTitle)),
+                        onTap: () {
+                          // Action for Settings
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Request Handyman'),
+                          SizedBox(
+                            height: 24,
+                          ),
+                          //Now let's add the Table
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              StreamBuilder<QuerySnapshot>(
+                                stream: _dataStream,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Center(
+                                        child: Text(
+                                            'Error: ${snapshot.error.toString()}'));
+                                  }
+
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  }
+
+                                  List<DocumentSnapshot> documents =
+                                      snapshot.data!.docs;
+
+                                  List<DataRow> rows =
+                                      documents.asMap().entries.map((entry) {
+                                    Map<String, dynamic> data = entry.value
+                                        .data() as Map<String, dynamic>;
+                                    int index = entry.key + 1;
+
+                                    return DataRow(cells: [
+                                      DataCell(Text(index
+                                          .toString())), // Jika Anda ingin menambahkan nomor urutan, sesuaikan di sini
+                                      DataCell(Text(data['name'] ?? '',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize:
+                                                  sizeTabletTextContent))),
+                                      DataCell(Text(data['email'] ?? '',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize:
+                                                  sizeTabletTextContent))),
+                                      DataCell(Text(data['skill'] ?? '',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize:
+                                                  sizeTabletTextContent))),
+                                      DataCell(Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {
+                                              // Aksi untuk tombol Detail
+                                            },
+                                            icon: Icon(Icons
+                                                .details), // Ganti dengan ikon yang sesuai
+                                          ),
+                                          SizedBox(width: 8),
+                                          IconButton(
+                                            onPressed: () {
+                                              // Aksi untuk tombol Submit
+                                            },
+                                            icon: Icon(Icons
+                                                .send), // Ganti dengan ikon yang sesuai
+                                          ),
+                                          SizedBox(width: 8),
+                                          IconButton(
+                                            onPressed: () {
+                                              // Aksi untuk tombol Tolak
+                                            },
+                                            icon: Icon(Icons
+                                                .close), // Ganti dengan ikon yang sesuai
+                                          ),
+                                        ],
+                                      )),
+                                    ]);
+                                  }).toList();
+
+                                  return DataTable(
+                                    headingRowColor:
+                                        MaterialStateProperty.resolveWith(
+                                            (states) => Colors.grey.shade200),
+                                    columns: [
+                                      DataColumn(
+                                          label: Text("No",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize:
+                                                      sizeTabletTextTitle))),
+                                      DataColumn(
+                                          label: Text("Nama",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize:
+                                                      sizeTabletTextTitle))),
+                                      DataColumn(
+                                          label: Text("Email",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize:
+                                                      sizeTabletTextTitle))),
+                                      DataColumn(
+                                          label: Text("Skill",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize:
+                                                      sizeTabletTextContent))),
+                                      DataColumn(
+                                          label: Text("Action",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize:
+                                                      sizeTabletTextContent))),
+                                    ],
+                                    rows: rows,
+                                  );
+                                },
+                              ),
+
+                              //Now let's set the pagination
+                              SizedBox(
+                                height: 40.0,
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          Text(screenWidth.toString()),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
-        backgroundColor: Colors.deepPurple.shade400,
       ),
     );
   }

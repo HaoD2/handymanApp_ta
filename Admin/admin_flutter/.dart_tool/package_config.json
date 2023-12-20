@@ -8,6 +8,18 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "adaptivex",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/adaptivex-0.0.1+6",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "ansicolor",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/ansicolor-2.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "async",
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
       "packageUri": "lib/",
@@ -158,6 +170,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "printx",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/printx-0.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "provider",
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.1",
       "packageUri": "lib/",
@@ -168,6 +186,12 @@
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/responsive_builder-0.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
+    },
+    {
+      "name": "responsive_table",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/responsive_table-0.2.0+2",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
     },
     {
       "name": "sky_engine",
@@ -230,7 +254,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2023-12-18T19:32:11.766746Z",
+  "generated": "2023-12-20T01:30:50.863092Z",
   "generator": "pub",
   "generatorVersion": "3.2.0"
 }

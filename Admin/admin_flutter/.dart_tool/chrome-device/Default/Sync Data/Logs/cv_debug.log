@@ -400,3 +400,8 @@ Notified types: Typed URLs}
 {"logTime": "1219/103517", "correlationVector":"JSdLAgJ+TeW4sncVF+omyQ.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_SoutheastAsia_000j", "migrationStage":"NotStarted", "server":"GENERAL03000001"}}
 {"logTime": "1219/103517", "correlationVector":"JSdLAgJ+TeW4sncVF+omyQ.2","action":"GetUpdates Response", "result":"SYNCER_OK", "context":Received 1 update(s). cV=JSdLAgJ+TeW4sncVF+omyQ.0;server=GENERAL03000001;cloudType=Consumer;environment=Prod_SoutheastAsia_000j;migrationStage=NotStarted}
 {"logTime": "1219/114719", "correlationVector":"++bHycvHgSXKu0WRDB+fLc.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}
+{"logTime": "1220/010651", "correlationVector":"pm5Z0B21z3CRS3n6NHnVgs.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}
+{"logTime": "1220/014229", "correlationVector":"4iT3MoepjBT5wwLrOZNcos.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}
+{"logTime": "1220/014809", "correlationVector":"lD/XaeXRiHX4/iVYTuNViA.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}
+{"logTime": "1220/015054", "correlationVector":"9H5r0rAe7RQlk/DbgvX8bj.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}
+{"logTime": "1220/023043", "correlationVector":"fRAyEyLSyb8SsBTLCsw+kT.0","action":"FeedSettingFetch_homeCloud", "result":"0", "context":{}}

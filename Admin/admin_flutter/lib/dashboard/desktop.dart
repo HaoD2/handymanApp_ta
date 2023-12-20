@@ -21,6 +21,7 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
         children: [
@@ -149,32 +150,37 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                     int index = entry.key + 1;
 
                                     return DataRow(cells: [
-                                      DataCell(Text(index
-                                          .toString())), // Jika Anda ingin menambahkan nomor urutan, sesuaikan di sini
+                                      DataCell(Text(index.toString())),
                                       DataCell(Text(data['name'] ?? '')),
                                       DataCell(Text(data['email'] ?? '')),
                                       DataCell(Text(data['skill'] ?? '')),
                                       DataCell(Row(
                                         children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Aksi untuk tombol Detail
-                                            },
-                                            child: Text('Detail'),
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              child: Text("Detail"),
+                                            ),
                                           ),
                                           SizedBox(width: 8),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Aksi untuk tombol Submit
-                                            },
-                                            child: Text('Submit'),
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              child: Text("Submit"),
+                                            ),
                                           ),
                                           SizedBox(width: 8),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Aksi untuk tombol Tolak
-                                            },
-                                            child: Text('Tolak'),
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              child: Text("Tolak"),
+                                            ),
                                           ),
                                         ],
                                       )),
@@ -211,12 +217,8 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
               ],
             ),
           ),
+          Text(screenWidth.toString()),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
-        backgroundColor: Colors.deepPurple.shade400,
       ),
     );
   }
