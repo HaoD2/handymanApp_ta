@@ -1,3 +1,4 @@
+import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -72,10 +73,30 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                     int index = entry.key + 1;
 
                                     return DataRow(cells: [
-                                      DataCell(Text(index.toString())),
-                                      DataCell(Text(data['name'] ?? '')),
-                                      DataCell(Text(data['email'] ?? '')),
-                                      DataCell(Text(data['skill'] ?? '')),
+                                      DataCell(Text(
+                                        index.toString(),
+                                        style: TextStyle(
+                                            fontSize:
+                                                sizeTableDesktopTextContent),
+                                      )),
+                                      DataCell(Text(
+                                        data['name'] ?? '',
+                                        style: TextStyle(
+                                            fontSize:
+                                                sizeTableDesktopTextContent),
+                                      )),
+                                      DataCell(Text(
+                                        data['email'] ?? '',
+                                        style: TextStyle(
+                                            fontSize:
+                                                sizeTableDesktopTextContent),
+                                      )),
+                                      DataCell(Text(
+                                        data['skill'] ?? '',
+                                        style: TextStyle(
+                                            fontSize:
+                                                sizeTableDesktopTextContent),
+                                      )),
                                       DataCell(Row(
                                         children: [
                                           ButtonTheme(
@@ -83,7 +104,12 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                             height: 100.0,
                                             child: ElevatedButton(
                                               onPressed: () {},
-                                              child: Text("Detail"),
+                                              child: Text(
+                                                "Detail",
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        sizeTableDesktopTextContent),
+                                              ),
                                             ),
                                           ),
                                           SizedBox(width: 8),
@@ -92,7 +118,12 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                             height: 100.0,
                                             child: ElevatedButton(
                                               onPressed: () {},
-                                              child: Text("Submit"),
+                                              child: Text(
+                                                "Submit",
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        sizeTableDesktopTextContent),
+                                              ),
                                             ),
                                           ),
                                           SizedBox(width: 8),
@@ -101,7 +132,12 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                             height: 100.0,
                                             child: ElevatedButton(
                                               onPressed: () {},
-                                              child: Text("Tolak"),
+                                              child: Text(
+                                                "Tolak",
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        sizeTableDesktopTextContent),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -114,11 +150,33 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
                                         MaterialStateProperty.resolveWith(
                                             (states) => Colors.grey.shade200),
                                     columns: [
-                                      DataColumn(label: Text("No")),
-                                      DataColumn(label: Text("Nama")),
-                                      DataColumn(label: Text("Email")),
-                                      DataColumn(label: Text("Skill")),
-                                      DataColumn(label: Text("Action")),
+                                      DataColumn(
+                                          label: Text(
+                                        "No",
+                                        style: TextStyle(
+                                            fontSize:
+                                                sizeTableDesktopTextTitle),
+                                      )),
+                                      DataColumn(
+                                          label: Text("Nama",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      sizeTableDesktopTextTitle))),
+                                      DataColumn(
+                                          label: Text("Email",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      sizeTableDesktopTextTitle))),
+                                      DataColumn(
+                                          label: Text("Skill",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      sizeTableDesktopTextTitle))),
+                                      DataColumn(
+                                          label: Text("Action",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      sizeTableDesktopTextTitle))),
                                     ],
                                     rows: rows,
                                   );
@@ -139,7 +197,6 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
               ],
             ),
           ),
-          Text(screenWidth.toString()),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:admin_flutter/constants/app_colors.dart';
-import 'package:admin_flutter/route/laporan_pelanggaran.dart';
+import 'package:admin_flutter/route/laporan/laporan_pelanggaran/LP_Desktop.dart';
+import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
 import 'package:flutter/material.dart';
 
 class NavigationSideTablet extends StatelessWidget {

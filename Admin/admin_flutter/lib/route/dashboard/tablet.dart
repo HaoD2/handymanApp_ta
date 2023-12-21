@@ -80,17 +80,17 @@ class _DashboardTabletState extends State<DashboardTablet> {
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontSize:
-                                                  sizeTabletTextContent))),
+                                                  sizeTableTabletTextContent))),
                                       DataCell(Text(data['email'] ?? '',
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontSize:
-                                                  sizeTabletTextContent))),
+                                                  sizeTableTabletTextContent))),
                                       DataCell(Text(data['skill'] ?? '',
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontSize:
-                                                  sizeTabletTextContent))),
+                                                  sizeTableTabletTextContent))),
                                       DataCell(Row(
                                         children: [
                                           IconButton(
@@ -131,31 +131,31 @@ class _DashboardTabletState extends State<DashboardTablet> {
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize:
-                                                      sizeTabletTextTitle))),
+                                                      sizeTableTabletTextTitle))),
                                       DataColumn(
                                           label: Text("Nama",
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize:
-                                                      sizeTabletTextTitle))),
+                                                      sizeTableTabletTextTitle))),
                                       DataColumn(
                                           label: Text("Email",
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize:
-                                                      sizeTabletTextTitle))),
+                                                      sizeTableTabletTextTitle))),
                                       DataColumn(
                                           label: Text("Skill",
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize:
-                                                      sizeTabletTextContent))),
+                                                      sizeTableTabletTextTitle))),
                                       DataColumn(
                                           label: Text("Action",
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize:
-                                                      sizeTabletTextContent))),
+                                                      sizeTableTabletTextTitle))),
                                     ],
                                     rows: rows,
                                   );
