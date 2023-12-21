@@ -1,4 +1,7 @@
 import 'package:admin_flutter/constants/app_colors.dart';
+import 'package:admin_flutter/navigation/navigation_header/nav_header_dekstop.dart';
+import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
+import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -25,90 +28,11 @@ class _DashboardTabletState extends State<DashboardTablet> {
     return Scaffold(
       body: Column(
         children: [
-          AppBar(
-            // Tambahkan AppBar sebagai judul
-            title: Text('Dashboard',
-                style: TextStyle(fontSize: sizeTabletTextTitle)),
-            backgroundColor: Colors.deepPurple.shade400,
-            automaticallyImplyLeading: false, centerTitle: true,
-            // Menonaktifkan tombol back
-          ),
+          NavigationHeaderResponsive(),
           Expanded(
             child: Row(
               children: [
-                Container(
-                  width: 250,
-                  color: Colors.deepPurple.shade400,
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                              "https://faces-img.xcdn.link/image-lorem-face-3430.jpg"),
-                          radius: 15.0,
-                        ),
-                        title: Text('Welcome, Admin',
-                            style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: sizeTabletTextTitle)),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.home, color: Colors.white),
-                        title: Text('Home',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: sizeTabletTextTitle)),
-                        onTap: () {
-                          // Action for Home
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.bar_chart, color: Colors.white),
-                        title: Text('Laporan Insight',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: sizeTabletTextTitle)),
-                        onTap: () {
-                          // Action for Rapports
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.settings, color: Colors.white),
-                        title: Text('Settings',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: sizeTabletTextTitle)),
-                        onTap: () {
-                          // Action for Settings
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ListTile(
-                        leading:
-                            Icon(Icons.logout_outlined, color: Colors.white),
-                        title: Text('Logout',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: sizeTabletTextTitle)),
-                        onTap: () {
-                          // Action for Settings
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                NavigationSideResponsive(),
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(left: 20.0, right: 20.0),

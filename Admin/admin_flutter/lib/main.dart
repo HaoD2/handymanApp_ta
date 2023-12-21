@@ -1,4 +1,4 @@
-import 'package:admin_flutter/dashboard/main_dashboard.dart';
+import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';

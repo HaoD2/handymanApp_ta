@@ -1,6 +1,6 @@
-import 'package:admin_flutter/dashboard/desktop.dart';
-import 'package:admin_flutter/dashboard/mobile.dart';
-import 'package:admin_flutter/dashboard/tablet.dart';
+import 'package:admin_flutter/route/dashboard/desktop.dart';
+import 'package:admin_flutter/route/dashboard/mobile.dart';
+import 'package:admin_flutter/route/dashboard/tablet.dart';
 import 'package:admin_flutter/responsive.dart';
 import 'package:flutter/material.dart';
 
