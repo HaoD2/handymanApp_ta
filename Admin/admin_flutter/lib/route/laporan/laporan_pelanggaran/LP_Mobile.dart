@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class LaporangPelanggaranMobile extends StatefulWidget {
-  const LaporangPelanggaranMobile({super.key});
+class LaporanPelanggaranMobile extends StatefulWidget {
+  const LaporanPelanggaranMobile({super.key});
 
   @override
-  State<LaporangPelanggaranMobile> createState() =>
-      _LaporangPelanggaranMobileState();
+  State<LaporanPelanggaranMobile> createState() =>
+      _LaporanPelanggaranMobileState();
 }
 
-class _LaporangPelanggaranMobileState extends State<LaporangPelanggaranMobile> {
+class _LaporanPelanggaranMobileState extends State<LaporanPelanggaranMobile> {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();

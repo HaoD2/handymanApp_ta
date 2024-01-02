@@ -23,7 +23,6 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
         children: [

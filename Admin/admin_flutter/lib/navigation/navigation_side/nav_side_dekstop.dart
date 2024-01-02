@@ -1,6 +1,6 @@
 import 'package:admin_flutter/constants/app_colors.dart';
-import 'package:admin_flutter/route/laporan/laporan_pelanggaran/LP_Desktop.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
+import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
 import 'package:flutter/material.dart';
 
 class NavigationSideDekstop extends StatelessWidget {
@@ -25,7 +25,7 @@ class NavigationSideDekstop extends StatelessWidget {
                     color: Colors.black87, fontSize: sizeDesktopTextContent)),
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           ListTile(
             leading: Icon(Icons.home, color: Colors.white),
@@ -37,7 +37,7 @@ class NavigationSideDekstop extends StatelessWidget {
             },
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           ListTile(
             leading: Icon(Icons.bar_chart, color: Colors.white),
@@ -49,7 +49,7 @@ class NavigationSideDekstop extends StatelessWidget {
             },
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           ListTile(
             leading: Icon(Icons.warning, color: Colors.white),
@@ -64,7 +64,22 @@ class NavigationSideDekstop extends StatelessWidget {
             },
           ),
           SizedBox(
-            height: 20,
+            height: 10,
+          ),
+          ListTile(
+            leading: Icon(Icons.logout_outlined, color: Colors.white),
+            title: Text('Laporan Listing',
+                style: TextStyle(
+                    color: Colors.white, fontSize: sizeDesktopTextContent)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ListingView()),
+              );
+            },
+          ),
+          SizedBox(
+            height: 10,
           ),
           ListTile(
             leading: Icon(Icons.logout_outlined, color: Colors.white),

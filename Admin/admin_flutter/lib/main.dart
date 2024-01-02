@@ -1,19 +1,15 @@
+import 'package:admin_flutter/firebase_option.dart';
 import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
+import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyDrT_0nzeqNQ1cxIWwA3Acet5yOLrivu2k",
-          authDomain: "database-ta-1aec7.firebaseapp.com",
-          projectId: "database-ta-1aec7",
-          storageBucket: "database-ta-1aec7.appspot.com",
-          messagingSenderId: "25940658453",
-          appId: "1:25940658453:web:f915e513af44542212011c",
-          measurementId: "G-P3ZHMZ6BHF"));
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

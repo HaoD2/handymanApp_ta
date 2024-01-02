@@ -10,7 +10,7 @@ class LaporanPelanggaran extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Responsive(
-      mobile: LaporangPelanggaranMobile(),
+      mobile: LaporanPelanggaranMobile(),
       tablet: LaporanPelanggaranTablet(),
       desktop: LaporanPelanggaranDekstop(),
     );

@@ -1,5 +1,4 @@
 import 'package:admin_flutter/constants/app_colors.dart';
-import 'package:admin_flutter/navigation/navigation_header/nav_header_dekstop.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 
@@ -76,8 +75,6 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                                     int index = entry.key + 1;
                                     Timestamp t = data['tanggal_pelanggaran'];
                                     DateTime date = t.toDate();
-                                    Map<String, dynamic> options =
-                                        data['option_keterangan'];
                                     return DataRow(cells: [
                                       DataCell(Text(index.toString(),
                                           style: TextStyle(

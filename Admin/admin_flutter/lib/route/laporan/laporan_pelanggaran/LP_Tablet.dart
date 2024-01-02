@@ -74,8 +74,6 @@ class _LaporanPelanggaranTabletState extends State<LaporanPelanggaranTablet> {
                                     int index = entry.key + 1;
                                     Timestamp t = data['tanggal_pelanggaran'];
                                     DateTime date = t.toDate();
-                                    Map<String, dynamic> options =
-                                        data['option_keterangan'];
                                     return DataRow(cells: [
                                       DataCell(Text(index.toString(),
                                           style: TextStyle(
