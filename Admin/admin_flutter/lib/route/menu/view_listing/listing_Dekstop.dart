@@ -39,7 +39,7 @@ class _ListingDekstopState extends State<ListingDekstop> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Request Handyman'),
+                          Text('Listing Handyman'),
                           SizedBox(
                             height: 24,
                           ),

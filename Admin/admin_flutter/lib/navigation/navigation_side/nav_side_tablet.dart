@@ -1,5 +1,7 @@
 import 'package:admin_flutter/constants/app_colors.dart';
+import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
+import 'package:admin_flutter/route/menu/layanan_menu/main_layanan.dart';
 import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +36,10 @@ class NavigationSideTablet extends StatelessWidget {
                     color: Colors.white, fontSize: sizeTabletTextContent)),
             onTap: () {
               // Action for Home
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MainDashboardScreen()),
+              );
             },
           ),
           SizedBox(
@@ -70,11 +76,27 @@ class NavigationSideTablet extends StatelessWidget {
             leading: Icon(Icons.logout_outlined, color: Colors.white),
             title: Text('Laporan Listing',
                 style: TextStyle(
-                    color: Colors.white, fontSize: sizeDesktopTextContent)),
+                    color: Colors.white, fontSize: sizeTabletTextContent)),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ListingView()),
+              );
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          ListTile(
+            leading: Icon(Icons.logout_outlined, color: Colors.white),
+            title: Text('Laporan Pekerjaan',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: sizeTableDesktopTextContent)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LayananMenu()),
               );
             },
           ),

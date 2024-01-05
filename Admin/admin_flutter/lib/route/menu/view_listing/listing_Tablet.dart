@@ -39,7 +39,7 @@ class _ListingTabletState extends State<ListingTablet> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Request Handyman'),
+                          Text('Listing Handyman'),
                           SizedBox(
                             height: 24,
                           ),

@@ -42,7 +42,7 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Request Handyman'),
+                          Text('Laporan Pelanggaran'),
                           SizedBox(
                             height: 24,
                           ),

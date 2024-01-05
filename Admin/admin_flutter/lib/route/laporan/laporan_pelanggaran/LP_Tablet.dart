@@ -41,7 +41,7 @@ class _LaporanPelanggaranTabletState extends State<LaporanPelanggaranTablet> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Request Handyman'),
+                          Text('Laporan Pelanggaran'),
                           SizedBox(
                             height: 24,
                           ),

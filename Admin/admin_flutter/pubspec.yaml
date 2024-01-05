@@ -39,6 +39,8 @@ dependencies:
   cloud_firestore: ^4.13.6
   responsive_builder: ^0.7.0
   responsive_table: ^0.2.0+2
+  flutter_riverpod: ^2.4.9
+  dynamic_form: ^0.23.0
 
 dev_dependencies:
   flutter_test:
