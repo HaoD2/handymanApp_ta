@@ -1,4 +1,4 @@
-import 'package:admin_flutter/route/menu/layanan_menu/insert_layanan/insert_option_layanan.dart/main_insert_option.dart';
+import 'package:admin_flutter/route/menu/layanan_menu/insert_layanan/insert_option_layanan/main_insert_option.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -133,8 +133,11 @@ class _insertLayananDekstopState extends State<insertLayananDekstop> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          MainInsertOption(layanan: textList)));
+                      builder: (context) => MainInsertOption(
+                            layanan: textList.toList(),
+                            harga: price,
+                            nama_pekerjaan: Pekerjaan,
+                          )));
             },
             child: Text('Submit'),
           ),

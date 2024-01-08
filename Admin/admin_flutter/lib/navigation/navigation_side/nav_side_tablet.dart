@@ -1,7 +1,7 @@
 import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
-import 'package:admin_flutter/route/menu/layanan_menu/main_layanan.dart';
+import 'package:admin_flutter/route/menu/layanan_menu/main_LM.dart';
 import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
 import 'package:flutter/material.dart';
 

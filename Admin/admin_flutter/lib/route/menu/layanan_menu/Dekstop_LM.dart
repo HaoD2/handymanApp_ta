@@ -1,7 +1,9 @@
 import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
+import 'package:admin_flutter/route/menu/layanan_menu/delete_layanan/main_delete.dart';
 import 'package:admin_flutter/route/menu/layanan_menu/insert_layanan/main_insert.dart';
+import 'package:admin_flutter/route/menu/layanan_menu/update_layanan/update_main_LM.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -115,6 +117,55 @@ class CRUDMenuDekstopState extends State<CRUDMenuDekstop> {
                                             fontSize:
                                                 sizeTableDesktopTextContent),
                                       )),
+                                      DataCell(Row(
+                                        children: [
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LayananMenuDelete(
+                                                            nama_pekerjaan:
+                                                                data['title']
+                                                                    .toString(),
+                                                          )),
+                                                );
+                                              },
+                                              child: Text("Delete",
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          sizeTableDesktopTextContent)),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LayananMenuUpdate(
+                                                            nama_pekerjaan:
+                                                                data['title']
+                                                                    .toString(),
+                                                          )),
+                                                );
+                                              },
+                                              child: Text("Update",
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          sizeTableDesktopTextContent)),
+                                            ),
+                                          ),
+                                        ],
+                                      )),
                                     ]);
                                   }).toList();
 
@@ -137,6 +188,11 @@ class CRUDMenuDekstopState extends State<CRUDMenuDekstop> {
                                                       sizeTableDesktopTextTitle))),
                                       DataColumn(
                                           label: Text("Harga",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      sizeTableDesktopTextTitle))),
+                                      DataColumn(
+                                          label: Text("Detail",
                                               style: TextStyle(
                                                   fontSize:
                                                       sizeTableDesktopTextTitle))),
