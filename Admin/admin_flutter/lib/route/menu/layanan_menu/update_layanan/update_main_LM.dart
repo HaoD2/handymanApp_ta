@@ -11,7 +11,6 @@ class LayananMenuUpdate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(nama_pekerjaan);
     return Responsive(
       mobile: insertLayananMobile(),
       desktop: UpdateLayananDesktop(namaPekerjaan: nama_pekerjaan),

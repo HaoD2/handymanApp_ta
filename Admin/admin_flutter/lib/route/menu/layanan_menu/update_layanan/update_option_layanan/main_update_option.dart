@@ -10,6 +10,7 @@ class MainUpdateOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(nama_option);
     return Responsive(
       mobile: InsertOptionMobile(),
       desktop: UpdateOptionDekstop(

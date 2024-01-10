@@ -36,13 +36,54 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
   void _fetchOptions() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('input_option')
-        .where('option_layanan', isEqualTo: widget.nama_option)
+        .where('option_layanan', isEqualTo: this.widget.nama_option)
         .get();
-
     if (querySnapshot.docs.isNotEmpty) {
       setState(() {
         currentOptions = List<String>.from(querySnapshot.docs.first['input']);
       });
+    }
+  }
+
+  Future<void> addDataToFirestore() async {
+    // Fetch the document with the specified option_layanan
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('input_option')
+        .where('option_layanan', isEqualTo: this.widget.nama_option)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Document(s) with the specified option_layanan found
+      querySnapshot.docs.forEach((doc) {
+        List<dynamic> existingData = doc['input'];
+        Set<String> existingSet = Set.from(existingData);
+
+        // Check for duplicates in the existing data
+        bool hasDuplicates = false;
+        for (String element in textList) {
+          if (existingSet.contains(element)) {
+            hasDuplicates = true;
+            break;
+          }
+        }
+
+        if (!hasDuplicates) {
+          // No duplicates found, proceed to update Firestore document
+          List<String> updatedData = List.from(existingData)..addAll(textList);
+
+          // Update Firestore document with the updated 'input' array
+          FirebaseFirestore.instance
+              .collection('input_option')
+              .doc(doc.id)
+              .update({'input': updatedData})
+              .then((_) => print('Data added successfully!'))
+              .catchError((error) => print('Failed to add data: $error'));
+        } else {
+          print('Data insertion failed. Duplicates found in newData.');
+        }
+      });
+    } else {
+      print('Document with  not found.');
     }
   }
 
@@ -193,7 +234,9 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
               child: ButtonTheme(
                 minWidth: 150.0,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    addDataToFirestore();
+                  },
                   child: Text("Submit",
                       style: TextStyle(fontSize: sizeTableDesktopTextContent)),
                 ),
