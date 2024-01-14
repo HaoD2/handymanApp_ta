@@ -1,6 +1,7 @@
 import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
+import 'package:admin_flutter/route/laporan/laporan_pelanggaran/LP_Detail/LPD_main.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class LaporanPelanggaranDekstop extends StatefulWidget {
 
 class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
   late Stream<QuerySnapshot> _dataStream;
+  String selectedUID = "";
   @override
   void initState() {
     super.initState();
@@ -75,6 +77,8 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                                     int index = entry.key + 1;
                                     Timestamp t = data['tanggal_pelanggaran'];
                                     DateTime date = t.toDate();
+                                    String tempID =
+                                        entry.value.id; // Ambil ID dari dokumen
                                     return DataRow(cells: [
                                       DataCell(Text(index.toString(),
                                           style: TextStyle(
@@ -95,7 +99,19 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                                             minWidth: 150.0,
                                             height: 100.0,
                                             child: ElevatedButton(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                setState(() {
+                                                  selectedUID = tempID;
+                                                });
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LPDMain(
+                                                            uid: selectedUID,
+                                                          )),
+                                                );
+                                              },
                                               child: Text("Detail",
                                                   style: TextStyle(
                                                       fontSize:

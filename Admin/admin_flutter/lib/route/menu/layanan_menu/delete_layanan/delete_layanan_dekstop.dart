@@ -1,3 +1,4 @@
+import 'package:admin_flutter/route/menu/layanan_menu/delete_layanan/delete_option_layanan/main_option_delete.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -133,8 +134,13 @@ class _DeleteLayananDekstopState extends State<DeleteLayananDekstop> {
                           return ListTile(
                             title: Text(judul.toString()),
                             onTap: () {
-                              // Fungsi yang akan dijalankan ketika opsi yang ada dipilih
-                              // Tambahkan logika untuk opsi yang ada di sini
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => OptionMenuDelete(
+                                          nama_pekerjaan: judul.toString(),
+                                        )),
+                              );
                             },
                           );
                         }).toList(),

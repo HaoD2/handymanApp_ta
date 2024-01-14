@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express();
-const port = 8000
+const port = 3000
 const http = require('http');
 
 
@@ -23,7 +23,7 @@ app.use("/api/notification/", FCM);
 
 
 
-app.listen(port, '192.168.1.5', () => {
-    console.log('Server is running on http://192.168.1.5:8000');
+app.listen(port, () => {
+    console.log(`Server is running on http://192.168.1.5:${port}`);
 })
 
