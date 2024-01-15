@@ -117,6 +117,27 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.black, // Warna garis bawah
+                    width: 1.0, // Lebar garis bawah
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 4.0), // Atur jarak antara teks dan garis
+                child: Text(
+                  "Edit Menu yang Sudah Ada",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Container(
               child: Expanded(
                 child: ListView.builder(
                   itemCount: currentOptions.length,
@@ -141,7 +162,7 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
                 minWidth: 150.0,
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: Text("Submit",
+                  child: Text("Update Menu",
                       style: TextStyle(fontSize: sizeTableDesktopTextContent)),
                 ),
               ),
@@ -162,7 +183,7 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
                 padding: const EdgeInsets.only(
                     bottom: 4.0), // Atur jarak antara teks dan garis
                 child: Text(
-                  "Inputan Baru",
+                  "Tambahkan Menu Baru",
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
@@ -237,7 +258,7 @@ class _UpdateOptionDekstopState extends State<UpdateOptionDekstop> {
                   onPressed: () {
                     addDataToFirestore();
                   },
-                  child: Text("Submit",
+                  child: Text("Tambahkan Menu",
                       style: TextStyle(fontSize: sizeTableDesktopTextContent)),
                 ),
               ),

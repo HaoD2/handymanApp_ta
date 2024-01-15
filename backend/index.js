@@ -24,6 +24,6 @@ app.use("/api/notification/", FCM);
 
 
 app.listen(port, () => {
-    console.log(`Server is running on http://192.168.1.5:${port}`);
+    console.log(`Server is running on ${port}`);
 })
 

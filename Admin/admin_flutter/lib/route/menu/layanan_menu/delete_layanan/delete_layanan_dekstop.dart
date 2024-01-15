@@ -117,11 +117,14 @@ class _DeleteLayananDekstopState extends State<DeleteLayananDekstop> {
                   itemBuilder: (context, index) {
                     if (index == snapshot.data!.docs.length) {
                       // Mengecek jika ini adalah indeks terakhir
-                      return ListTile(
-                        title: Text("Hapus layanan ini"),
-                        onTap: () {
-                          DeleteToFirestore();
-                        },
+                      return Container(
+                        color: Colors.red,
+                        child: ListTile(
+                          title: Text("Hapus layanan ini"),
+                          onTap: () {
+                            DeleteToFirestore();
+                          },
+                        ),
                       );
                     } else {
                       var document = snapshot.data!.docs[index];

@@ -43,10 +43,20 @@ router.post('/purchase', async (req, res) => {
             clientKey: CLIENT_KEY
         });
         const param = {
+            item_details: {
+                id: data.item_details.id,
+                name: data.item_details.tipe_pekerjaan,
+                price: data.item_details.price,
+                quantity: 1
+            },
             transaction_details: {
                 order_id: data.transaction_detail.order_id,
                 gross_amount: data.transaction_detail.gross_amount,
             },
+            customer_details: {
+                email: data.customer_detail.user,
+            }
+
         };
         console.log(param);
         const transaction = await snap.createTransaction(param);

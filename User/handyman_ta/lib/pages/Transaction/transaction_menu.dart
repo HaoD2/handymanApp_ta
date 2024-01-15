@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/User/home.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 // Import for iOS features.
@@ -7,14 +8,15 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class SnapScreen extends StatefulWidget {
   final redirect_url;
-
-  const SnapScreen({super.key, this.redirect_url});
+  final order_id;
+  const SnapScreen({super.key, this.redirect_url, this.order_id});
 
   @override
   _SnapScreenState createState() => _SnapScreenState();
 }
 
 class _SnapScreenState extends State<SnapScreen> {
+  late bool _isSuccess = false;
   late WebViewController webViewController;
   bool _isLoading = false;
   late final WebViewController _controller;
@@ -49,8 +51,14 @@ class _SnapScreenState extends State<SnapScreen> {
             debugPrint('Page started loading: $url');
           },
           onPageFinished: (String url) {
+            print(url);
             _isLoading = false;
-            debugPrint('Page finished loading: $url');
+            if (url.contains(
+                'https://famous-mastiff-sunny.ngrok-free.app/api/transaction/finish_trans?status_code=200&transaction_status=settlement&merchant_id=G494846640&order_id=${this.widget.order_id.toString()}')) {
+              setState(() {
+                _isSuccess = true;
+              });
+            }
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('''
@@ -109,11 +117,29 @@ Page resource error:
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'PAYMENT',
-          style: TextStyle(
-            color: Colors.black,
-          ),
+        title: Row(
+          children: [
+            if (_isSuccess)
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return userHomepage();
+                      },
+                    ),
+                    (_) => false,
+                  );
+                },
+              ),
+            Text(
+              'PAYMENT',
+              style: TextStyle(
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
         elevation: 2,
       ),
@@ -122,7 +148,32 @@ Page resource error:
         child: Stack(
           children: <Widget>[
             Container(
-              child: WebViewWidget(controller: _controller),
+              child: _isSuccess
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 80,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Terima kasih telah memesan jasa handyman',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ) // Tampilkan widget Success jika _isSuccess true
+                  : Visibility(
+                      visible: !_isSuccess, // Tambahkan kondisi ini
+                      child: WebViewWidget(controller: _controller),
+                    ),
             )
           ],
         ),

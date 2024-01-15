@@ -279,18 +279,17 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       Map<String, dynamic> requestAPI = {
         'transaction_detail': {"order_id": uniqueCode, "gross_amount": 90000},
         'credit_card': {"secure": true},
-        'item_details': [
-          {
-            'id': uniqueCode,
-            'price': 90000,
-            'Option_Name': selectedOptions.toList(),
-            'dateTime': dateTime.toString(),
-            'start_time': start_time.toString(),
-            'end_time': end_time.toString(),
-            'otherOption': other.toString(),
-            'description': description,
-          }
-        ],
+        'item_details': {
+          'id': uniqueCode,
+          'price': 90000,
+          'Option_Name': selectedOptions.toList(),
+          'dateTime': dateTime.toString(),
+          'start_time': start_time.toString(),
+          'end_time': end_time.toString(),
+          'otherOption': other.toString(),
+          'description': description,
+          'tipe_pekerjaan': this.widget.layanan,
+        },
         'customer_detail': {
           'user': user,
           'address': address,
@@ -308,7 +307,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         'Authorization': basicAuth, // Ganti basicAuth dengan nilai yang sesuai
       };
       final res = await http.post(
-          Uri.parse("http://192.168.1.5:8000/api/transaction/purchase"),
+          Uri.parse(
+              "https://famous-mastiff-sunny.ngrok-free.app/api/transaction/purchase"),
           headers: headers,
           body: jsonEncode(requestAPI));
       if (res.statusCode == 200) {
@@ -332,7 +332,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return SnapScreen(redirect_url: responseData['redirect']);
+              return SnapScreen(
+                  redirect_url: responseData['redirect'], order_id: uniqueCode);
             },
           ),
           (_) => false,
