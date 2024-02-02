@@ -237,6 +237,25 @@
       "instanceId": "3e7a9c4b1f8d6e5c2a9b7e4d1c8f3e7a",
       "type": "builtin",
       "version": "1002"
+   }, {
+      "appId": "8f6c546d0514482c9898cd8f963453cc",
+      "appName": "operation_platform",
+      "data": {
+         "operation_upsell_config": {
+            "max_version": 125,
+            "min_version": 122,
+            "target_user_profile": {
+               "copilot_eligiable": true,
+               "language_code": "en"
+            },
+            "upsell_id": 1,
+            "upsell_url": "https://edgeoptest.azurewebsites.net"
+         }
+      },
+      "effectStrategy": "launch",
+      "instanceId": "35cafee49b9741a5ae5b2f7799ecc815",
+      "type": "normal",
+      "version": "1002"
    } ],
    "version": "202309010001"
 }

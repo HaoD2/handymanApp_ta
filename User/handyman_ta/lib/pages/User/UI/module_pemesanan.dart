@@ -60,6 +60,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
   TextEditingController otherOptionController = TextEditingController();
+  TextEditingController PriceController = TextEditingController();
   final dateController = TextEditingController();
   XFile? requestImage;
 // Buat controller untuk komponen waktu mulai
@@ -222,6 +223,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       String start_time = startTimeController.text;
       String end_time = endTimeController.text;
       Timestamp timestamp = Timestamp.fromDate(dateTime);
+      String price = PriceController.text;
       // Dapatkan referensi ke collection "request_handyman" di Firebase
       final CollectionReference requestCollection =
           FirebaseFirestore.instance.collection('request_handyman');
@@ -264,7 +266,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         'address': address,
         'dateTime': dateTime,
         'start_time': start_time,
-        'price': 120000,
+        'price': price,
         'end_time': end_time,
         'otherOption': other ?? null,
         'description': description,
@@ -277,11 +279,11 @@ class _ModulePemesananState extends State<ModulePemesanan> {
             : null,
       };
       Map<String, dynamic> requestAPI = {
-        'transaction_detail': {"order_id": uniqueCode, "gross_amount": 90000},
+        'transaction_detail': {"order_id": uniqueCode, "gross_amount": price},
         'credit_card': {"secure": true},
         'item_details': {
           'id': uniqueCode,
-          'price': 90000,
+          'price': price,
           'Option_Name': selectedOptions.toList(),
           'dateTime': dateTime.toString(),
           'start_time': start_time.toString(),
@@ -520,6 +522,20 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                     ]),
                   ),
                 ),
+                Container(
+                  margin: EdgeInsets.all(15),
+                  child: FormBuilderTextField(
+                    name: 'Price',
+                    controller: PriceController,
+                    decoration: InputDecoration(
+                        labelText: 'Price', hintText: 'Minimal 50.000'),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.numeric(),
+                      FormBuilderValidators.min(50000)
+                    ]),
+                  ),
+                ),
                 const SizedBox(height: 16.0),
                 Container(
                   margin: EdgeInsets.all(15),
@@ -531,7 +547,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                     onChanged: (selected) {
                       setState(() {
                         selectedOptions = List<String>.from(selected!);
-                        showTextbox = selectedOptions.contains("Lain - Lain");
+                        showTextbox =
+                            selectedOptions.contains("Lain - Lainnya");
                         if (!showTextbox) {
                           otherOptionController.clear();
                         }

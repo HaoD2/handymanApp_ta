@@ -35,8 +35,6 @@ class _LoginPageState extends State<LoginPage> {
         String? fcmToken = await firebaseAPI().initNotification();
         if (FirebaseAuth.instance.currentUser != null) {
           String? email = FirebaseAuth.instance.currentUser!.email;
-          print("ini + $email");
-          print("ini + $fcmToken");
           if (email != null) {
             final usersCollection =
                 FirebaseFirestore.instance.collection('users');

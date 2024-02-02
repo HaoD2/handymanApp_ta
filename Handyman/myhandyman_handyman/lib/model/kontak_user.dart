@@ -5,19 +5,28 @@ class kontak_user {
   final String penerimaEmail;
   final String uid_pemesanan;
   final bool isDone;
+  final bool isDoneUser;
+  final bool isRatingDone;
+  final bool isReportDone;
 
   kontak_user(
       {required this.pengirimEmail,
       required this.penerimaEmail,
       required this.uid_pemesanan,
-      required this.isDone});
+      required this.isDone,
+      required this.isDoneUser,
+      required this.isRatingDone,
+      required this.isReportDone});
 
   Map<String, dynamic> toMap() {
     return {
       'pengirimEmail': pengirimEmail,
       'penerimaEmail': penerimaEmail,
       'uid_pemesanan': uid_pemesanan,
-      'isDone': true,
+      'isDone': isDone,
+      'isDoneUser': isDoneUser,
+      'isRatingDone': isRatingDone,
+      'isReportDone': isReportDone
     };
   }
 }

@@ -140,11 +140,14 @@ class _homeState extends State<home> {
   Future<void> fetchData() async {
     PekerjaanService pekerjaanService = PekerjaanService();
     List<Pekerjaan> fetchedData = await pekerjaanService.getPekerjaanListRand();
-    fetchedData.shuffle();
 
     setState(() {
       dataList = fetchedData;
     });
+
+    for (var i = 0; i < dataList.length; i++) {
+      print(dataList[i].imageName);
+    }
   }
 
   @override
@@ -275,7 +278,7 @@ class _homeState extends State<home> {
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
-                              color: Colors.white70,
+                              color: Colors.black87,
                               fontFamily: 'OpenSans',
                             ),
                           ),

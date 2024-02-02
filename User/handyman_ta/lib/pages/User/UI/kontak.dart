@@ -14,28 +14,39 @@ class Kontak_User extends StatefulWidget {
 class _Kontak_UserState extends State<Kontak_User> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('kontak')
-          .where('penerimaEmail',
-              isEqualTo: FirebaseAuth.instance.currentUser?.email)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          var contacts = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: contacts.length,
-            itemBuilder: (context, index) {
-              var contact = contacts[index];
-              var penerimaUID = contact['penerimaEmail'];
-              var pengirimUID = contact['pengirimEmail'];
+    return Container(
+      constraints: BoxConstraints(
+        minWidth: 0,
+        maxWidth: MediaQuery.of(context).size.width,
+        maxHeight: 175,
+      ),
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/images/home_decoration.png',
+          ),
+          fit: BoxFit.fill,
+          alignment: Alignment.topCenter,
+        ),
+      ),
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('kontak')
+            .where('penerimaEmail',
+                isEqualTo: FirebaseAuth.instance.currentUser?.email)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            var contacts = snapshot.data!.docs;
+            // List to store the futures
+            List<FutureBuilder> futureBuilders = [];
+            for (var contact in contacts) {
               var uid_pemesanan = contact['uid_pemesanan'];
-
-              return FutureBuilder<QuerySnapshot>(
+              futureBuilders.add(FutureBuilder<QuerySnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('request_handyman')
                     .where('uid', isEqualTo: uid_pemesanan)
@@ -47,69 +58,82 @@ class _Kontak_UserState extends State<Kontak_User> {
                   }
 
                   if (snapshot.connectionState == ConnectionState.done) {
-                    var data = snapshot.data!.docs.first.data();
-                    if (data is Map<String, dynamic>) {
-                      var tipe_pekerjaan = data['tipe_pekerjaan'];
-                      var pemesananUID = data['uid'];
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundImage:
-                                  AssetImage('assets/images/icon_profile.png'),
-                            )
-                          ],
-                        ),
-                        title: Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                      var data = snapshot.data!.docs.first.data();
+                      if (data is Map<String, dynamic>) {
+                        var tipe_pekerjaan = data['tipe_pekerjaan'];
+                        var pemesananUID = data['uid'];
+                        var penerimaUID = data['penerimaEmail'];
+                        var pengirimUID = data['pengirimEmail'];
+                        var uid_pemesanan = data['uid_pemesanan'];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Stack(
+                            alignment: Alignment.bottomRight,
                             children: [
-                              Text(
-                                pengirimUID,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                tipe_pekerjaan + " - " + pemesananUID,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: AssetImage(
+                                    'assets/images/icon_profile.png'),
+                              )
                             ],
                           ),
-                        ),
-                        onTap: () {
-                          Navigator.of(context, rootNavigator: true)
-                              .pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return ChatPage(
-                                    penerimaUID, pengirimUID, uid_pemesanan);
-                              },
+                          title: Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  pengirimUID,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  tipe_pekerjaan + " - " + pemesananUID,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                            (_) => false,
-                          );
-                        },
-                      );
+                          ),
+                          onTap: () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  return ChatPage(
+                                      penerimaUID, pengirimUID, uid_pemesanan);
+                                },
+                              ),
+                              (_) => false,
+                            );
+                          },
+                        );
+                      }
+                    } else {
+                      // Handle case when no documents are found
+                      return Text("No documents found.");
                     }
                   }
 
+                  // Handle other states
                   return CircularProgressIndicator();
                 },
-              );
-            },
-          );
-        }
-      },
+              ));
+            }
+            // Return ListView with future builders
+            return ListView(
+              children: futureBuilders,
+            );
+          }
+        },
+      ),
     );
   }
 }

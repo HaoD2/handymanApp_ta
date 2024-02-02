@@ -14,7 +14,6 @@ class option_menu extends StatefulWidget {
 
 class _option_menuState extends State<option_menu> {
   bool isFavourite = false;
-  bool isLoaded = false;
   List<String> optionLayanan = [];
   Future<void> getOptionData() async {
     try {
@@ -35,35 +34,64 @@ class _option_menuState extends State<option_menu> {
     }
   }
 
+  Future<void> updateFavouriteStatus(bool newStatus) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('favourites_users')
+          .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Dokumen ditemukan, ambil dokumen pertama
+        DocumentSnapshot doc = querySnapshot.docs[0];
+
+        // Update status favourites berdasarkan email
+        await doc.reference.update({
+          'like.${widget.layanan}': newStatus,
+        });
+        print("Favourite status updated!");
+      } else {
+        // Dokumen tidak ditemukan, buat dokumen baru
+        await FirebaseFirestore.instance.collection('favourites_users').add({
+          'email': FirebaseAuth.instance.currentUser?.email,
+          'like': {
+            '${widget.layanan}': newStatus,
+          },
+        });
+        print("New document created!");
+      }
+    } catch (error) {
+      print("Failed to update or create document: $error");
+    }
+  }
+
   @override
   void initState() {
+    print(this.widget.layanan);
     super.initState();
-
     getOptionData();
+
+    // Pengecekan data dari Firestore
+    FirebaseFirestore.instance
+        .collection('favourites_users')
+        .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        if (doc.exists) {
+          // Set nilai isFavourite sesuai dengan data di Firestore
+          setState(() {
+            isFavourite = doc['like'][widget.layanan] ?? false;
+          });
+        }
+      });
+    }).catchError((error) {
+      print("Error fetching document: $error");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isLoaded) {
-      // Pengecekan data dari Firestore
-      FirebaseFirestore.instance
-          .collection('favourites_users')
-          .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
-          .get()
-          .then((QuerySnapshot querySnapshot) {
-        querySnapshot.docs.forEach((doc) {
-          if (doc.exists) {
-            // Set nilai isFavourite sesuai dengan data di Firestore
-            setState(() {
-              isFavourite = doc['like'][widget.layanan] ?? false;
-              isLoaded = true; // Tandai bahwa data sudah diload
-            });
-          }
-        });
-      }).catchError((error) {
-        print("Error fetching document: $error");
-      });
-    }
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -83,30 +111,7 @@ class _option_menuState extends State<option_menu> {
               setState(() {
                 isFavourite = !isFavourite;
               });
-
-              // Update status layanan di Firebase berdasarkan email pengguna
-              FirebaseFirestore.instance
-                  .collection('favourites_users')
-                  .where('email',
-                      isEqualTo: FirebaseAuth.instance.currentUser?.email)
-                  .get()
-                  .then((QuerySnapshot querySnapshot) {
-                querySnapshot.docs.forEach((doc) {
-                  // Periksa jika dokumen ditemukan
-                  if (doc.exists) {
-                    // Update status favourites berdasarkan email
-                    doc.reference.update({
-                      'like.${widget.layanan}': isFavourite,
-                    }).then((value) {
-                      print("Favourite status updated!");
-                    }).catchError((error) {
-                      print("Failed to update favourite status: $error");
-                    });
-                  }
-                });
-              }).catchError((error) {
-                print("Error fetching document: $error");
-              });
+              updateFavouriteStatus(isFavourite);
             },
             icon: Icon(
               isFavourite ? Icons.favorite : Icons.favorite_border,

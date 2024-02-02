@@ -59,6 +59,11 @@ class _SnapScreenState extends State<SnapScreen> {
                 _isSuccess = true;
               });
             }
+            if (url.endsWith('https://simulator.sandbox.midtrans.com/')) {
+              setState(() {
+                _isSuccess = true;
+              });
+            }
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('''

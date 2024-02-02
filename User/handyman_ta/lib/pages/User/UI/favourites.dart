@@ -14,27 +14,32 @@ class favourite_page extends StatefulWidget {
 
 class _favourite_pageState extends State<favourite_page> {
   FavouriteUserService? favouriteUser;
-  Future<void> fetchFavouriteUser() async {
-    // Ambil data FavouriteUser dari Firestore berdasarkan email
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('favourites_users')
-        .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      // Jika ditemukan, ambil dokumen pertama
-      DocumentSnapshot doc = querySnapshot.docs[0];
-
-      setState(() {
-        favouriteUser = FavouriteUserService.fromFirestore(doc);
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     fetchFavouriteUser();
+  }
+
+  Future<void> fetchFavouriteUser() async {
+    try {
+      // Ambil data FavouriteUser dari Firestore berdasarkan email
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('favourites_users')
+          .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Jika ditemukan, ambil dokumen pertama
+        DocumentSnapshot doc = querySnapshot.docs[0];
+
+        setState(() {
+          favouriteUser = FavouriteUserService.fromFirestore(doc);
+        });
+      }
+    } catch (error) {
+      print("Error fetching favourite user data: $error");
+    }
   }
 
   @override
@@ -56,61 +61,34 @@ class _favourite_pageState extends State<favourite_page> {
           },
         ),
       ),
-      body: favouriteUser != null
+      body: favouriteUser != null &&
+              favouriteUser!.like.keys
+                  .where((key) => favouriteUser!.like[key] == true)
+                  .isNotEmpty
           ? Column(
-              children: [
-                if (favouriteUser?.like['Layanan Jasa Titip'] == true)
-                  ListTile(
-                    title: Text('Menu Layanan Jasa Titip'),
+              children: favouriteUser!.like.keys.map((key) {
+                if (favouriteUser!.like[key] == true) {
+                  return ListTile(
+                    title: Text('Menu  $key'),
                     onTap: () {
                       Navigator.of(context, rootNavigator: true)
                           .pushAndRemoveUntil(
                         MaterialPageRoute(
                           builder: (BuildContext context) {
-                            return option_menu(layanan: "Layanan Jasa Titip");
+                            return option_menu(layanan: key);
                           },
                         ),
                         (_) => false,
                       );
                     },
-                    // Tambahkan aksi yang diperlukan ketika menu ini diklik
-                  ),
-                if (favouriteUser?.like['Layanan Pembersihan'] == true)
-                  ListTile(
-                    title: Text('Menu Layanan Pembersihan'),
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return option_menu(layanan: "Layanan Pembersihan");
-                          },
-                        ),
-                        (_) => false,
-                      );
-                    },
-                    // Tambahkan aksi yang diperlukan ketika menu ini diklik
-                  ),
-                if (favouriteUser?.like['Layanan Perbaikan'] == true)
-                  ListTile(
-                    title: Text('Menu Layanan Perbaikan'),
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return option_menu(layanan: "Layanan Perbaikan");
-                          },
-                        ),
-                        (_) => false,
-                      );
-                    },
-                    // Tambahkan aksi yang diperlukan ketika menu ini diklik
-                  ),
-              ],
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              }).toList(),
             )
           : Center(
-              child: CircularProgressIndicator(),
+              child: Text('Belum ada layanan yang kamu suka'),
             ),
     );
   }

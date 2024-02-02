@@ -273,7 +273,6 @@ class _ChatPageState extends State<ChatPage> {
                                       .where('uid',
                                           isEqualTo: this.widget.uid_pemesanan)
                                       .get();
-
                               if (querySnapshot.docs.isNotEmpty) {
                                 // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
                                 String tipePekerjaan =

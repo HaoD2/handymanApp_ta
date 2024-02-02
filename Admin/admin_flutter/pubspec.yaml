@@ -41,6 +41,7 @@ dependencies:
   responsive_table: ^0.2.0+2
   flutter_riverpod: ^2.4.9
   dynamic_form: ^0.23.0
+  firebase_analytics: ^10.8.0
 
 dev_dependencies:
   flutter_test:

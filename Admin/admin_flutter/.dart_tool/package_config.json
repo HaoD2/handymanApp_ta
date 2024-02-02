@@ -134,6 +134,24 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "firebase_analytics",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics-10.8.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "firebase_analytics_platform_interface",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_platform_interface-3.9.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "firebase_analytics_web",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_web-0.5.5+12",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "firebase_core",
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core-2.24.2",
       "packageUri": "lib/",
@@ -452,7 +470,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-01-15T06:16:42.517174Z",
+  "generated": "2024-01-25T12:54:46.724777Z",
   "generator": "pub",
   "generatorVersion": "3.2.0"
 }

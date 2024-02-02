@@ -151,7 +151,9 @@ class _profileState extends State<profile> {
                                       final status = data['status'];
                                       final statusHandyman =
                                           data['status_handyman'];
-
+                                      if (data == null) {
+                                        logout();
+                                      }
                                       // Menampilkan berdasarkan status
                                       if (status == 1 && statusHandyman == 1) {
                                         return Container(
@@ -380,31 +382,56 @@ class _profileState extends State<profile> {
                           Container(
                             margin: const EdgeInsets.all(5),
                             child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.exit_to_app),
-                              ),
-                              title: const Text(
-                                'Keluar',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
+                                trailing: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  child: const Icon(Icons.exit_to_app),
                                 ),
-                              ),
-                              onTap: () async {
-                                await logout();
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return const userHomepage();
-                                    },
+                                title: const Text(
+                                  'Keluar',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 15,
                                   ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
+                                ),
+                                onTap: () async {
+                                  return showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Konfirmasi Logout"),
+                                        content:
+                                            Text("Anda yakin ingin logout?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () async {
+                                              await logout();
+                                              Navigator.of(context,
+                                                      rootNavigator: true)
+                                                  .pushAndRemoveUntil(
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return const userHomepage();
+                                                  },
+                                                ),
+                                                (_) => false,
+                                              );
+                                            },
+                                            child: Text("Ya"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              // Jika user memilih "Tidak", maka tutup dialog box
+                                              Navigator.of(context).pop(false);
+                                            },
+                                            child: Text("Tidak"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }),
                           ),
                           Container(
                             margin: const EdgeInsets.all(5),

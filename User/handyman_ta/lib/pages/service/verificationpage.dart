@@ -1,28 +1,100 @@
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:handyman_ta/pages/User/home.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
+import 'package:handyman_ta/pages/service/authServices.dart';
+import 'package:handyman_ta/pages/service/fcmAPI.dart';
 
-class verificationPage extends StatefulWidget {
-  const verificationPage({super.key, this.email});
+class VerificationPage extends StatefulWidget {
+  const VerificationPage({Key? key, this.email}) : super(key: key);
   final email;
+
   @override
-  State<verificationPage> createState() => _verificationPageState();
+  State<VerificationPage> createState() => _VerificationPageState();
 }
 
-class _verificationPageState extends State<verificationPage> {
+class _VerificationPageState extends State<VerificationPage> {
   bool isEmailVerified = false;
+  bool canResentEmail = false;
+  int timeResend = 60;
   Timer? time;
   final _auth = FirebaseAuth.instance;
+  final AuthServices authServices = AuthServices();
+
   @override
   void initState() {
-    FirebaseAuth.instance.currentUser?.sendEmailVerification();
-    time =
-        Timer.periodic(const Duration(seconds: 3), (_) => checkEmailVerified());
+    isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
 
+    if (!isEmailVerified) {
+      sendVerificationEmail();
+      time = Timer.periodic(
+          const Duration(seconds: 3), (_) => checkEmailVerified());
+    }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    time?.cancel();
+    super.dispose();
+  }
+
+  Future<bool> _showExitConfirmationDialog() async {
+    Completer<bool> completer = Completer<bool>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Konfirmasi'),
+        content: Text('Apakah Anda ingin keluar dari verifikasi email?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              completer.complete(
+                  false); // Memberi nilai false saat tombol "Tidak" ditekan
+              Navigator.of(context).pop();
+            },
+            child: Text('Tidak'),
+          ),
+          TextButton(
+            onPressed: () {
+              completer.complete(
+                  true); // Memberi nilai true saat tombol "Ya" ditekan
+
+              FirebaseAuth.instance.currentUser?.delete();
+              FirebaseAuth.instance.signOut();
+              Navigator.of(context).pop();
+            },
+            child: Text('Ya'),
+          ),
+        ],
+      ),
+    );
+
+    return completer.future;
+  }
+
+  sendVerificationEmail() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser!;
+      await user.sendEmailVerification();
+
+      setState(() => canResentEmail = false);
+      await Future.delayed(Duration(seconds: timeResend));
+      setState(() {
+        if (timeResend > 0) {
+          timeResend--;
+        }
+      });
+      setState(() => canResentEmail = true);
+      setState(() {
+        timeResend = 60;
+      });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   checkEmailVerified() async {
@@ -34,42 +106,34 @@ class _verificationPageState extends State<verificationPage> {
 
     if (isEmailVerified) {
       var user = _auth.currentUser;
-      CollectionReference ref = FirebaseFirestore.instance.collection('users');
-      ref.doc(user!.uid).update({"status_verif": 1});
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Email Successfully Verified")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email Successfully Verified")));
       time?.cancel();
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginPage(),
-          ));
-    }
-  }
+      String? fcmToken = await firebaseAPI().initNotification();
+      CollectionReference ref = FirebaseFirestore.instance.collection('users');
+      await ref.doc(user!.uid).set({
+        'uid': _auth.currentUser?.uid,
+        'email': FirebaseAuth.instance.currentUser!.email,
+        'status': 1,
+        'status_verif': 1,
+        'status_handyman': 0,
+        'status_akun': 1,
+        'token_messaging': ""
+      });
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    time?.cancel();
-    // Periksa apakah email sudah terverifikasi atau tidak
-    if (!isEmailVerified) {
-      // Ubah status verifikasi email menjadi "belum diverifikasi" atau hapus data verifikasi email
-      var user = _auth.currentUser;
-      if (user != null) {
-        CollectionReference ref =
-            FirebaseFirestore.instance.collection('users');
-        ref.doc(user.uid).update({"status_verif": 0});
-        _auth.signOut();
-      }
+      Navigator.pushReplacementNamed(context, userHomepage.routeName);
     }
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // Hapus tombol kembali otomatis
+      ),
+      body: WillPopScope(
+        onWillPop: _showExitConfirmationDialog,
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -86,7 +150,7 @@ class _verificationPageState extends State<verificationPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Center(
                   child: Text(
-                    'We have sent you a Email on  ${_auth.currentUser?.email}',
+                    'We have sent you an email to ${_auth.currentUser?.email}',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -104,19 +168,14 @@ class _verificationPageState extends State<verificationPage> {
                 ),
               ),
               const SizedBox(height: 57),
+              Text(
+                'Resend Time: $timeResend seconds',
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: ElevatedButton(
-                  child: const Text('Resend'),
-                  onPressed: () {
-                    try {
-                      FirebaseAuth.instance.currentUser
-                          ?.sendEmailVerification();
-                    } catch (e) {
-                      debugPrint('$e');
-                    }
-                  },
-                ),
+                    child: const Text('Resend'),
+                    onPressed: canResentEmail ? sendVerificationEmail : null),
               ),
             ],
           ),

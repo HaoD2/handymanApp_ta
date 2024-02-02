@@ -24,10 +24,8 @@ class _showAll_listState extends State<showAll_list> {
     }
 
     // Mengambil semua dokumen dengan kondisi status adalah "pending" atau "acquired"
-    QuerySnapshot querySnapshot = await _request_handyman
-        .where('status', whereIn: ['pending', 'acquired'])
-        .where('user', isEqualTo: user.email)
-        .get();
+    QuerySnapshot querySnapshot =
+        await _request_handyman.where('user', isEqualTo: user.email).get();
 
     if (querySnapshot.docs.isNotEmpty) {
       return querySnapshot.docs;
@@ -68,29 +66,68 @@ class _showAll_listState extends State<showAll_list> {
                   itemCount: documents.length,
                   itemBuilder: (context, index) {
                     var data = documents[index].data() as Map<String, dynamic>;
+
+                    // Set color based on the status
+                    Color statusColor;
+                    switch (data['status']) {
+                      case 'pending':
+                        statusColor = const Color.fromARGB(212, 255, 235,
+                            59); // Set your desired color for pending status
+                        break;
+                      case 'on-progress':
+                        statusColor = Colors
+                            .blue; // Set your desired color for on-progress status
+                        break;
+                      case 'success':
+                        statusColor = const Color.fromARGB(255, 64, 255,
+                            71); // Set your desired color for success status
+                        break;
+                      default:
+                        statusColor = Colors
+                            .black; // Set default color or any other color
+                    }
+
                     return Card(
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(15),
                       child: Column(
                         children: [
                           Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text('${data['tipe_Pekerjaan']}')),
-                          Container(
+                            margin: EdgeInsets.all(10),
                             alignment: Alignment.centerLeft,
-                            child: Text('Option: ${data['Option'].join(', ')}'),
-                          ), // Join the array elements
+                            child: Text(
+                              '${data['uid']}',
+                            ),
+                          ),
                           Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text('End Time: ${data['end_time']}')),
+                            margin: EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '${data['tipe_pekerjaan']}',
+                            ),
+                          ),
                           Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text('Start Time: ${data['start_time']}')),
+                            margin: EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Option: ${data['Option'].join(', ')}',
+                            ),
+                          ),
                           Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text('Address: ${data['address']}')),
+                            margin: EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Harga: ${data['price']}',
+                            ),
+                          ),
+                          // ... (Repeat the process for other Text widgets)
                           Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text('Status: ${data['status']}')),
+                            margin: EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Status: ${data['status']}',
+                              style: TextStyle(color: statusColor),
+                            ),
+                          ),
                         ],
                       ),
                     );

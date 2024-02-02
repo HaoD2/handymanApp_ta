@@ -50,15 +50,31 @@ class PekerjaanService {
 
   Future<List<Pekerjaan>> getPekerjaanListRand() async {
     try {
-      QuerySnapshot querySnapshot = await pekerjaanCollection
-          .orderBy(
-              'title') // Randomize data based on title (you can adjust this)
-          .limit(3) // Limit the result to 3 items
-          .get();
+      List<Pekerjaan> pekerjaanList = [];
 
-      List<Pekerjaan> pekerjaanList = querySnapshot.docs
+      // Query and add data from first query
+      QuerySnapshot querySnapshot1 = await pekerjaanCollection
+          .where('title', isEqualTo: 'Layanan Pembersihan')
+          .get();
+      pekerjaanList.addAll(querySnapshot1.docs
           .map((doc) => Pekerjaan.fromFirestore(doc))
-          .toList();
+          .toList());
+
+      // Query and add data from second query
+      QuerySnapshot querySnapshot2 = await pekerjaanCollection
+          .where('title', isEqualTo: 'Layanan Jasa Titip')
+          .get();
+      pekerjaanList.addAll(querySnapshot2.docs
+          .map((doc) => Pekerjaan.fromFirestore(doc))
+          .toList());
+
+      // Query and add data from third query
+      QuerySnapshot querySnapshot3 = await pekerjaanCollection
+          .where('title', isEqualTo: 'Layanan Perbaikan')
+          .get();
+      pekerjaanList.addAll(querySnapshot3.docs
+          .map((doc) => Pekerjaan.fromFirestore(doc))
+          .toList());
 
       return pekerjaanList;
     } catch (e) {
@@ -66,12 +82,12 @@ class PekerjaanService {
       return [];
     }
   }
-}
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
 
-  PekerjaanService pekerjaanService = PekerjaanService();
-  List<Pekerjaan> dataList = await pekerjaanService.getPekerjaanList();
+    PekerjaanService pekerjaanService = PekerjaanService();
+    List<Pekerjaan> dataList = await pekerjaanService.getPekerjaanList();
+  }
 }

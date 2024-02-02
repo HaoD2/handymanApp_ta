@@ -156,32 +156,15 @@ class _RegisterPageState extends State<RegisterPage> {
         password: password,
       );
 
-      postDetailsToFirestore(email);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerificationPage(email: email),
+        ),
+      );
       Fluttertoast.showToast(msg: "Registration successful!");
     } on FirebaseAuthException catch (e) {
       Fluttertoast.showToast(msg: e.toString());
     }
-  }
-
-  void postDetailsToFirestore(String email) async {
-    String? fcmToken = await firebaseAPI().initNotification();
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-    var user = _auth.currentUser;
-    CollectionReference ref = FirebaseFirestore.instance.collection('users');
-    await ref.doc(user!.uid).set({
-      'uid': _auth.currentUser?.uid,
-      'email': email,
-      'status': 1,
-      'status_verif': 0,
-      'status_handyman': 0,
-      'status_akun': 1,
-      'token_messaging': ""
-    });
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => verificationPage(email: email),
-      ),
-    );
   }
 }

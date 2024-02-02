@@ -1,8 +1,52 @@
 {
    "current_locale": "en-US",
    "hub_apps": [ {
+      "auto_open_v2": [ {
+         "approved_channels": [ "canary", "dev" ],
+         "enabled": false,
+         "enabled|flight:msHubAppsAutoOpenV2|flight:msEdgeChatPersistentChatAutoShow|flight:msEdgeChatAutoOpenUseV2Framework": true,
+         "footer": {
+            "open_count": 3,
+            "text": "__MSG_auto_show_footer_notification_text__"
+         },
+         "force_auto_open": false,
+         "id": "8d3a928d-e911-40f0-9852-f63f6434dc7e",
+         "lifetime": "tab",
+         "non_visible_user_friendly_name": "Underside Persistent Chat Link",
+         "remember_context": {
+            "time_to_live_sec": 86400
+         },
+         "settings_toggle": {
+            "description": "__MSG_auto_show_settings_description__",
+            "title": "__MSG_auto_show_settings_title__"
+         },
+         "triggering_config": {
+            "signal_name": "IsUndersidePersistentChatLink",
+            "signal_threshold": 0.5
+         }
+      }, {
+         "approved_channels": [ "canary", "dev" ],
+         "enabled": false,
+         "enabled|flight:msHubAppsAutoOpenV2|flight:msEdgeChatPDFAutoShow|flight:msEdgeChatAutoOpenUseV2Framework": true,
+         "footer": {
+            "open_count": 3,
+            "text": "__MSG_auto_show_footer_notification_text__"
+         },
+         "force_auto_open": false,
+         "id": "e06e75c1-a59a-4ab6-8361-e8b038e00a8c",
+         "lifetime": "tab",
+         "non_visible_user_friendly_name": "Underside PDF Chat Link",
+         "remember_context": {
+            "time_to_live_sec": 86400
+         },
+         "settings_toggle": {
+            "description": "__MSG_auto_show_settings_description__",
+            "title": "__MSG_auto_show_settings_title__"
+         }
+      } ],
       "auto_show": {
          "enabled": true,
+         "enabled|flight:msHubAppsAutoOpenV2|flight:msEdgeChatPDFAutoShow|flight:msEdgeChatAutoOpenUseV2Framework": false,
          "fre_notification": {
             "enabled": true,
             "header": "Was opening this pane helpful to you?",
@@ -14,6 +58,10 @@
          "triggering_configs|flight:msHubAppsMsnArticleAutoShowTriggering": [ {
             "show_count_basis": "signal",
             "signal_name": "IsMsnArticleAutoOpenFromP1P2",
+            "signal_threshold": 0.5
+         } ],
+         "triggering_configs|flight:msUndersidePersistentChat": [ {
+            "signal_name": "IsUndersidePersistentChatLink",
             "signal_threshold": 0.5
          } ]
       },
@@ -35,9 +83,9 @@
       "description": "Contextually relevant info for any page",
       "icon": {
          "raster_icon": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_blue.png/1.2.1/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_hc.png/1.2.1/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_blue.png/1.2.1/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_blue.png/1.2.2/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_hc.png/1.2.2/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_copilot_blue.png/1.2.2/asset"
          }
       },
       "id": "cd4688a9-e888-48ea-ad81-76193d56b1be",
@@ -87,7 +135,7 @@
       "target": {
          "command": "discover_chat"
       },
-      "version": "1.2.1"
+      "version": "1.2.2"
    }, {
       "auto_show": {
          "enabled": true,
@@ -162,9 +210,9 @@
       "description": "Search without losing your place",
       "icon": {
          "raster_icon": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_maximal_dark.png/1.3.9/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_hc.png/1.3.9/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_maximal_light.png/1.3.9/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_maximal_dark.png/1.3.10/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_hc.png/1.3.10/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_search_maximal_light.png/1.3.10/asset"
          }
       },
       "id": "8ac719c5-140b-4bf2-a0b7-c71617f1f377",
@@ -172,11 +220,14 @@
       "locales": [ "af", "am", "ar", "as", "az", "bg", "bn_IN", "bs", "ca", "ca_Es_VALENCIA", "cs", "cy", "da", "de", "el", "en", "en_GB", "es", "es_MX", "et", "eu", "fa", "fi", "fil", "fil", "fr", "fr_CA", "ga", "gd", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "ka", "kk", "km", "kn", "ko", "kok", "kok", "lb", "lo", "lt", "lv", "mi", "mk", "ml", "mr", "ms", "mt", "nb", "ne", "nl", "nn", "or", "pa", "pl", "pt_BR", "pt_PT", "quz", "ro", "ru", "sk", "sl", "sq", "sr_Cyrl_BA", "sr_Cyrl_RS", "sr_Latn_RS", "sv", "ta", "te", "th", "tr", "tt", "ug", "uk", "ur", "uz", "vi", "zh_CN", "zh_TW" ],
       "manifest_version": 3,
       "name": "Search",
+      "notifications": {
+         "enabled": true
+      },
       "on_by_default": true,
       "target": {
          "command": "search"
       },
-      "version": "1.3.9"
+      "version": "1.3.10"
    }, {
       "capabilities": {
          "deprecated_hide_header": true
@@ -474,19 +525,19 @@
       "description": "Play popular games for free",
       "icon": {
          "raster_icon": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark.png/1.7.7/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc.png/1.7.7/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light.png/1.7.7/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark.png/1.7.8/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc.png/1.7.8/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light.png/1.7.8/asset"
          },
          "raster_icon|flight:msEdgeHubAppGamesNewIconController": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark_controller.png/1.7.7/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc_controller.png/1.7.7/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light_controller.png/1.7.7/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark_controller.png/1.7.8/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc_controller.png/1.7.8/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light_controller.png/1.7.8/asset"
          },
          "raster_icon|flight:msEdgeHubAppGamesNewIconJoystick": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark_joystick.png/1.7.7/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc_joystick.png/1.7.7/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light_joystick.png/1.7.7/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_dark_joystick.png/1.7.8/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_hc_joystick.png/1.7.8/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_games_maximal_light_joystick.png/1.7.8/asset"
          }
       },
       "id": "96defd79-4015-4a32-bd09-794ff72183ef",
@@ -495,12 +546,6 @@
       "manifest_version": 3,
       "name": "Games",
       "notifications": {
-         "awareness_prompts": {
-            "bubble_notifications": {
-               "domains": [ "chess.com", "gamedistribution.com", "gsn.com", "shockwave.com", "mahjong.com", "solitr.com", "worldofsolitaire.com", "solitaired.com", "freeonlinegames.com", "247solitaire.com", "springsolitaire.com", "solitairesummer.com", "fallsolitaire.com", "wintersolitaire.com", "christmas-solitaire.com", "solitaireeaster.com", "4thofjulysolitaire.com", "solitairehalloween.com", "thanksgivingsolitaire.com", "newyearssolitaire.com", "valentinesdaysolitaire.com", "stpatricksdaysolitaire.com", "cincodemayosolitaire.com", "cardgamespidersolitaire.com", "yukonsolitaire.net", "scorpionsolitaire.net", "247spidersolitaire.com", "cardgamesolitaire.com", "solitairetime.com", "247klondike.com", "247patience.com", "cardgameklondike.com", "cardgamepatience.com", "spiderettesolitaire.net", "247mahjong.com", "247sudoku.com", "247freecell.com", "123freecell.com", "cardgamefreecell.com", "247backgammon.org", "247blackjack.com", "247bridge.com", "247checkers.com", "247chess.com", "247hearts.com", "247freepoker.com", "247roulette.org", "247slots.org", "247spades.com", "247videopoker.org", "247wordsearch.com", "247crossword.com", "247minesweeper.com", "247spacerocks.com", "a10.com", "y8.com", "newgrounds.com", "agame.com", "armorgames.com", "kizi.com", "poki.com", "addictinggames.com", "bigfishgames.com", "arkadium.com", "nano.ubisoft.com", "cardgames.io", "pogo.com", "miniclip.com", "kongregate.com", "games.aarp.org", "games.usatoday.com", "games.washingtonpost.com" ],
-               "text": "Explore more games to play!"
-            }
-         },
          "enabled": true,
          "triggers|flight:msHubAppsGamesCNPop|market:CN": [ {
             "config": {
@@ -544,7 +589,7 @@
          "url|locale:zh_CN": "https://www.msn.cn/widgets/fullpage/gaming/widget?experiences=CasualGamesHub&sharedHeader=1",
          "url|locale:zh_CN|flight:msEdgeHubAppUseCGSideBar": "https://www.msn.cn/widgets/fullpage/cgSideBar/widget?experiences=CasualGamesHub&sharedHeader=1"
       },
-      "version": "1.7.7"
+      "version": "1.7.8"
    }, {
       "auto_show": {
          "enabled": true,
@@ -2134,9 +2179,9 @@
       "flights": [ "msEdgeHubAppGameView" ],
       "icon": {
          "raster_icon": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller_maximal_dark.png/1.0.1/asset",
-            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller-hc.png/1.0.1/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller_maximal_light.png/1.0.1/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller_maximal_dark.png/1.0.2/asset",
+            "high_contrast": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller-hc.png/1.0.2/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_controller_maximal_light.png/1.0.2/asset"
          }
       },
       "id": "c8ebd871-9f47-4a0d-abd3-c1c02b4f8f53",
@@ -2152,10 +2197,13 @@
          "type": "disable"
       },
       "name": "Game view",
+      "notifications": {
+         "enabled": true
+      },
       "target": {
          "url": "https://www.msn.com/widgets/fullpage/gaming/widget?experiences=GamingChannel"
       },
-      "version": "1.0.1"
+      "version": "1.0.2"
    }, {
       "auto_show": {
          "enabled": true,
@@ -2181,8 +2229,8 @@
       "flights": [ "msEdgeHubAppStart", "msEdgeTransientAppAutoOpen" ],
       "icon": {
          "raster_icon": {
-            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_msstart_logo_dark.png/1.2.2/asset",
-            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_msstart_logo_light.png/1.2.2/asset"
+            "dark_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_msstart_logo_dark.png/1.2.3/asset",
+            "light_mode": "https://edgeassetservice.azureedge.net/assets/edge_hub_apps_msstart_logo_light.png/1.2.3/asset"
          }
       },
       "id": "b7a8e9f2-6b0d-4c5b-ae7d-8a6e1f2c7a6f",
@@ -2190,12 +2238,15 @@
       "locales": [ "af", "am", "ar", "as", "az", "bg", "bn_IN", "bs", "ca", "ca_Es_VALENCIA", "cs", "cy", "da", "de", "el", "en", "en_GB", "es", "es_MX", "et", "eu", "fa", "fi", "fil", "fr", "fr_CA", "ga", "gd", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "ka", "kk", "km", "kn", "ko", "kok", "lb", "lo", "lt", "lv", "mi", "mk", "ml", "mr", "ms", "mt", "nb", "ne", "nl", "nn", "or", "pa", "pl", "pt_BR", "pt_PT", "quz", "ro", "ru", "sk", "sl", "sq", "sr_Cyrl_BA", "sr_Cyrl_RS", "sr_Latn_RS", "sv", "ta", "te", "th", "tr", "tt", "ug", "uk", "ur", "uz", "vi", "zh_CN", "zh_TW" ],
       "manifest_version": 3,
       "name": "Microsoft Start",
+      "notifications": {
+         "enabled": true
+      },
       "pin_by_default": true,
       "target": {
          "url": "https://www.msn.com/widgets/fullpage/winWidgets/sidebar?experiences=WindowsWidgetsHub",
          "url|locale:zh_CN": "https://www.msn.cn/widgets/fullpage/winWidgets/sidebar?experiences=WindowsWidgetsHub"
       },
-      "version": "1.2.2"
+      "version": "1.2.3"
    } ],
    "manifest_version": "4.0.0"
 }

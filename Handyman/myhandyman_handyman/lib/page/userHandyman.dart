@@ -316,6 +316,7 @@ class _homeState extends State<home> {
                       Text('Start Time: ${item.startTime}'),
                       Text('End Time: ${item.endTime}'),
                       Text('Description: ${item.description}'),
+                      Text('Price: ${item.price}'),
                       Row(
                         children: <Widget>[
                           Icon(Icons.access_time),

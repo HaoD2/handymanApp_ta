@@ -16,32 +16,29 @@ class FavouriteUserService {
       // Jika data kosong, mengembalikan nilai default atau kosong
       return FavouriteUserService(
         email: '',
-        like: {
-          'Layanan Jasa Titip': false,
-          'Layanan Pembersihan': false,
-          'Layanan Perbaikan': false,
-        },
+        like: {},
       );
+    }
+
+    Map<String, bool> likeData = {};
+
+    if (data['like'] != null) {
+      // Jika ada data di dalam field 'like', membangun likeData secara dinamis
+      for (String key in data['like'].keys) {
+        likeData[key] = data['like'][key] ?? false;
+      }
     }
 
     return FavouriteUserService(
       email: data['email'] ?? '',
-      like: {
-        'Layanan Jasa Titip': data['like']['Layanan Jasa Titip'] ?? false,
-        'Layanan Pembersihan': data['like']['Layanan Pembersihan'] ?? false,
-        'Layanan Perbaikan': data['like']['Layanan Perbaikan'] ?? false,
-      },
+      like: likeData,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'email': email,
-      'like': {
-        'Layanan Jasa Titip': like['Layanan Jasa Titip'],
-        'Layanan Pembersihan': like['Layanan Pembersihan'],
-        'Layanan Perbaikan': like['Layanan Perbaikan'],
-      },
+      'like': like,
     };
   }
 }

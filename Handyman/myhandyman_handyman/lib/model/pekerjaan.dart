@@ -16,6 +16,7 @@ class Pekerjaan {
   final String tipe_Pekerjaan;
   final String taken_by;
   final String user;
+  final String price;
   final uid;
 
   Pekerjaan(
@@ -33,6 +34,7 @@ class Pekerjaan {
       required this.tipe_Pekerjaan,
       required this.user,
       required this.taken_by,
+      required this.price,
       required this.uid});
 
   factory Pekerjaan.fromMap(String id, Map<String, dynamic> data) {
@@ -66,6 +68,7 @@ class Pekerjaan {
             "", // Mengatasi nilai null dengan default string kosong
         user: data['user'] as String? ??
             "", // Mengatasi nilai null dengan default string kosong
+        price: data['price'].toString(),
         uid: data['uid'] as String);
   }
 }
@@ -77,7 +80,9 @@ class FirebaseDataService {
 
   Future<List<Pekerjaan>> getRequestData() async {
     try {
-      QuerySnapshot querySnapshot = await requestHandymanCollection.get();
+      QuerySnapshot querySnapshot = await requestHandymanCollection
+          .where('status', isEqualTo: 'pending')
+          .get();
       requestData.clear();
       querySnapshot.docs.forEach((doc) {
         final pekerjaanData = doc.data() as Map<String, dynamic>;

@@ -163,7 +163,10 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
           pengirimEmail: uid_pengirim,
           penerimaEmail: uid_penerima,
           uid_pemesanan: uid_pemesanan,
-          isDone: true);
+          isDone: true,
+          isDoneUser: false,
+          isRatingDone: false,
+          isReportDone: false);
       FirebaseFirestore.instance
           .collection('kontak')
           .add(kontak.toMap())
