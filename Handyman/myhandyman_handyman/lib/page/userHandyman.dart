@@ -293,61 +293,77 @@ class _homeState extends State<home> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                final item = data[index];
-                double calculatedDistance = Geolocator.distanceBetween(
-                      _currentPosition?.latitude ?? 0.0,
-                      _currentPosition?.longitude ?? 0.0,
-                      item.location.latitude,
-                      item.location.longitude,
-                    ) /
-                    1000;
-                return ListTile(
-                  title: Text(
-                    'Option Menu: ${item.optionMenu.join(', ')}',
-                  ), // Menggabungkan multiple values dengan koma
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Start Time: ${item.startTime}'),
-                      Text('End Time: ${item.endTime}'),
-                      Text('Description: ${item.description}'),
-                      Text('Price: ${item.price}'),
-                      Row(
-                        children: <Widget>[
-                          Icon(Icons.access_time),
-                          Text(
-                              'Date Time: ${item.datetime.toDate()}'), // Konversi Timestamp ke DateTime
-                        ],
-                      ),
-                      Text(
-                          'Jarak ke Lokasi: ${calculatedDistance.toStringAsFixed(2)} kilometer'),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.of(context, rootNavigator: true)
-                        .pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return pemesanan_details(
-                              data: item.id, email: item.user, uid: item.uid);
-                        },
-                      ),
-                      (_) => false,
-                    );
-                  },
-                  // Tambahkan logika untuk menangani item yang diklik di sini
-                );
-              },
-              childCount: data.length,
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
             ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
           ),
-          // Tambahkan lebih banyak Sliver sesuai kebutuhan di sini
-        ],
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  final item = data[index];
+                  double calculatedDistance = Geolocator.distanceBetween(
+                        _currentPosition?.latitude ?? 0.0,
+                        _currentPosition?.longitude ?? 0.0,
+                        item.location.latitude,
+                        item.location.longitude,
+                      ) /
+                      1000;
+                  return ListTile(
+                    title: Text(
+                      'Option Menu: ${item.optionMenu.join(', ')}',
+                    ), // Menggabungkan multiple values dengan koma
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text('Start Time: ${item.startTime}'),
+                        Text('End Time: ${item.endTime}'),
+                        Text('Description: ${item.description}'),
+                        Text('Price: ${item.price}'),
+                        Row(
+                          children: <Widget>[
+                            Icon(Icons.access_time),
+                            Text(
+                                'Date Time: ${item.datetime.toDate()}'), // Konversi Timestamp ke DateTime
+                          ],
+                        ),
+                        Text(
+                            'Jarak ke Lokasi: ${calculatedDistance.toStringAsFixed(2)} kilometer'),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return pemesanan_details(
+                                data: item.id, email: item.user, uid: item.uid);
+                          },
+                        ),
+                        (_) => false,
+                      );
+                    },
+                    // Tambahkan logika untuk menangani item yang diklik di sini
+                  );
+                },
+                childCount: data.length,
+              ),
+            ),
+            // Tambahkan lebih banyak Sliver sesuai kebutuhan di sini
+          ],
+        ),
       ),
     );
   }

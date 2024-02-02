@@ -206,139 +206,155 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
       appBar: AppBar(
         title: Text('Detail Pemesanan'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Peta dan kontennya di sini
-            Container(
-              margin: EdgeInsets.all(15),
-              height: 200,
-              child: FlutterMap(
-                options: MapOptions(
-                  center: LatLng(
-                    pekerjaan?.location.latitude ?? 0,
-                    pekerjaan?.location.longitude ?? 0,
-                  ),
-                  zoom: 13.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    subdomains: ['a', 'b', 'c'],
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        width: 40.0,
-                        height: 40.0,
-                        point: LatLng(
-                          pekerjaan?.location.latitude ?? 0,
-                          pekerjaan?.location.longitude ?? 0,
-                        ),
-                        builder: (ctx) => Container(
-                          child: Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                            size: 40.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
             ),
-            // Tampilan judul dan detail di bawah peta
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Tipe Pekerjaan: ${pekerjaan?.tipe_Pekerjaan ?? 'Tidak Ada'}',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            // Tambahkan bagian lainnya di sini sesuai kebutuhan Anda seperti Alamat, Gambar, Deskripsi, Jam, Tanggal, dll.
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Alamat: ${pekerjaan?.address ?? 'Tidak Ada'}',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Gambar: ',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            // Padding(
-            //     padding: const EdgeInsets.all(16.0),
-            //     child: Image.network('${pekerjaan?.image.toString() ?? ""} ')),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Deskripsi: ${pekerjaan?.description ?? 'Tidak Ada'}',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Jam: ${pekerjaan?.startTime ?? 'Tidak Ada'} - ${pekerjaan?.endTime ?? 'Tidak Ada'}',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Tanggal: ${pekerjaan?.datetime?.toDate().toString().substring(0, 10) ?? 'Tidak Ada'}',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            // Tambahkan komponen lainnya sesuai kebutuhan Anda seperti Text Alamat, dll.
-            Container(
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      child: Text('Back'),
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true)
-                            .pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return userHandyman();
-                            },
-                          ),
-                          (_) => false,
-                        );
-                      },
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Peta dan kontennya di sini
+              Container(
+                margin: EdgeInsets.all(15),
+                height: 200,
+                child: FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(
+                      pekerjaan?.location.latitude ?? 0,
+                      pekerjaan?.location.longitude ?? 0,
                     ),
+                    zoom: 13.0,
                   ),
-                  Container(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          width: 40.0,
+                          height: 40.0,
+                          point: LatLng(
+                            pekerjaan?.location.latitude ?? 0,
+                            pekerjaan?.location.longitude ?? 0,
+                          ),
+                          builder: (ctx) => Container(
+                            child: Icon(
+                              Icons.location_on,
+                              color: Colors.red,
+                              size: 40.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Tampilan judul dan detail di bawah peta
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Tipe Pekerjaan: ${pekerjaan?.tipe_Pekerjaan ?? 'Tidak Ada'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              // Tambahkan bagian lainnya di sini sesuai kebutuhan Anda seperti Alamat, Gambar, Deskripsi, Jam, Tanggal, dll.
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Alamat: ${pekerjaan?.address ?? 'Tidak Ada'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Gambar: ',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              // Padding(
+              //     padding: const EdgeInsets.all(16.0),
+              //     child: Image.network('${pekerjaan?.image.toString() ?? ""} ')),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Deskripsi: ${pekerjaan?.description ?? 'Tidak Ada'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Jam: ${pekerjaan?.startTime ?? 'Tidak Ada'} - ${pekerjaan?.endTime ?? 'Tidak Ada'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Tanggal: ${pekerjaan?.datetime?.toDate().toString().substring(0, 10) ?? 'Tidak Ada'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              // Tambahkan komponen lainnya sesuai kebutuhan Anda seperti Text Alamat, dll.
+              Container(
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
-                        child: Text('Submit'),
+                        child: Text('Back'),
                         onPressed: () {
-                          Retrieve();
+                          Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return userHandyman();
+                              },
+                            ),
+                            (_) => false,
+                          );
                         },
                       ),
                     ),
-                  ),
-                  if (isLoading)
-                    Center(
-                      child:
-                          CircularProgressIndicator(), // Tampilkan indikator loading.
+                    Container(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ElevatedButton(
+                          child: Text('Submit'),
+                          onPressed: () {
+                            Retrieve();
+                          },
+                        ),
+                      ),
                     ),
-                ],
-              ),
-            )
-          ],
+                    if (isLoading)
+                      Center(
+                        child:
+                            CircularProgressIndicator(), // Tampilkan indikator loading.
+                      ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

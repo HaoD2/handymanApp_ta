@@ -56,7 +56,6 @@ class _Kontak_UserState extends State<Kontak_User> {
                   if (snapshot.hasError) {
                     return Text("Error: ${snapshot.error}");
                   }
-
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                       var data = snapshot.data!.docs.first.data();

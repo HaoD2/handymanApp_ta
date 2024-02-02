@@ -50,6 +50,20 @@ class _showAll_listState extends State<showAll_list> {
           centerTitle: true,
         ),
         body: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 600,
+          ),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
+            ),
+          ),
           child: FutureBuilder<List<DocumentSnapshot>?>(
             future: getDataReqList(),
             builder:
@@ -134,7 +148,16 @@ class _showAll_listState extends State<showAll_list> {
                   },
                 );
               } else {
-                return Text('No data available');
+                return Center(
+                    child: Text(
+                  'Belum ada Pesanan',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: Colors.black87,
+                    fontFamily: 'OpenSans',
+                  ),
+                ));
               }
             },
           ),

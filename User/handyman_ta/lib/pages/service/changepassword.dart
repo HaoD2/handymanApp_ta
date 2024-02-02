@@ -54,7 +54,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Password Changed'),
-              content: const Text('Your password has been changed successfully.'),
+              content:
+                  const Text('Your password has been changed successfully.'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -103,48 +104,65 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
               )),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Current Password'),
-                onChanged: (value) {
-                  setState(() {
-                    _currentPassword = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your current password.';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'New Password'),
-                onChanged: (value) {
-                  setState(() {
-                    _newPassword = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a new password.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _changePassword,
-                child: const Text('Change Password'),
-              ),
-            ],
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 300,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
+            ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  obscureText: true,
+                  decoration:
+                      const InputDecoration(labelText: 'Current Password'),
+                  onChanged: (value) {
+                    setState(() {
+                      _currentPassword = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your current password.';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'New Password'),
+                  onChanged: (value) {
+                    setState(() {
+                      _newPassword = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a new password.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _changePassword,
+                  child: const Text('Change Password'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

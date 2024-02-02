@@ -128,44 +128,60 @@ class _formRequestHandymanState extends State<formRequestHandyman> {
               ))),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FormBuilder(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FormBuilderTextField(
-                name: 'name',
-                decoration: InputDecoration(labelText: 'Nama'),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                ]),
-              ),
-              FormBuilderTextField(
-                name: 'skill',
-                decoration: InputDecoration(labelText: 'Skill'),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                ]),
-              ),
-              // Tambahkan kode untuk mengunggah gambar sertifikat
-              ElevatedButton(
-                onPressed: _getImage,
-                child: Text('Unggah Sertifikat'),
-              ),
-              // Tambahkan widget untuk menampilkan gambar yang diunggah
-              if (certificateImage != null)
-                Image.file(
-                  File(certificateImage!.path),
-                  height: 100.0,
-                  width: 100.0,
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
+            ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FormBuilder(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FormBuilderTextField(
+                  name: 'name',
+                  decoration: InputDecoration(labelText: 'Nama'),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.required(),
+                  ]),
                 ),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text('Kirim Permintaan'),
-              ),
-            ],
+                FormBuilderTextField(
+                  name: 'skill',
+                  decoration: InputDecoration(labelText: 'Skill'),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.required(),
+                  ]),
+                ),
+                // Tambahkan kode untuk mengunggah gambar sertifikat
+                ElevatedButton(
+                  onPressed: _getImage,
+                  child: Text('Unggah Sertifikat'),
+                ),
+                // Tambahkan widget untuk menampilkan gambar yang diunggah
+                if (certificateImage != null)
+                  Image.file(
+                    File(certificateImage!.path),
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  child: Text('Kirim Permintaan'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

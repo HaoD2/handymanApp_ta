@@ -377,215 +377,232 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Chat dengan ${widget.penerimaEmail}'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return userHandyman();
-                },
-              ),
-              (_) => false,
-            ); // Kembali ke halaman sebelumnya
-          },
+    return Container(
+      constraints: BoxConstraints(
+        minWidth: 0,
+        maxWidth: MediaQuery.of(context).size.width,
+        maxHeight: 600,
+      ),
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/images/home_decoration.png',
+          ),
+          fit: BoxFit.fill,
+          alignment: Alignment.topCenter,
         ),
-        actions: [
-          PopupMenuButton(
-            icon: Icon(Icons.more_vert),
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                child: Text('Done'),
-                value: 'done',
-              ),
-              PopupMenuItem(
-                child: Text('Cancel'),
-                value: 'cancel',
-              ),
-            ],
-            onSelected: (value) async {
-              // Tambahkan logika sesuai dengan item yang dipilih
-              if (value == 'done') {
-                await FirebaseFirestore.instance
-                    .collection('kontak')
-                    .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
-                    .get()
-                    .then((querySnapshot) {
-                  querySnapshot.docs.forEach((doc) {
-                    // Perbarui nilai isDone menjadi true
-                    doc.reference.update({'isDone': true}).then((value) {
-                      print('Nilai isDone telah diperbarui menjadi true');
-
-                      // Lakukan pengecekan isDone
-                      FirebaseFirestore.instance
-                          .collection('kontak')
-                          .where('uid_pemesanan',
-                              isEqualTo: this.widget.uid_pemesanan)
-                          .get()
-                          .then((updatedSnapshot) {
-                        var updatedDocs = updatedSnapshot.docs;
-                        if (updatedDocs.isNotEmpty) {
-                          var updatedIsDone = updatedDocs.first['isDone'];
-
-                          // Jika isDone sudah true, panggil fungsi isDone()
-                          if (updatedIsDone) {
-                            print("isdone alert masuk");
-                            iSDone(this.widget.penerimaEmail);
-                          }
-                        }
-                        // Jika isDone sudah true, panggil fungsi isDone()
-                      });
-                    }).catchError((error) {
-                      print('Gagal memperbarui nilai isDone: $error');
-                    });
-                  });
-                });
-              }
+      ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Chat dengan ${widget.penerimaEmail}'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return userHandyman();
+                  },
+                ),
+                (_) => false,
+              ); // Kembali ke halaman sebelumnya
             },
           ),
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('kontak')
-              .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              // Jika tidak ada data atau dokumen kosong
-              return Center(
-                child: Text('Tidak ada data'),
-              );
-            } else {
-              var isReportdone =
-                  snapshot.data!.docs.first['isReportDone'] ?? false;
-              return isReportdone
-                  ? buildMessageOnly()
-                  : Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('log_pesan')
-                                .where('penerimaEmail',
-                                    isEqualTo: this.widget.penerimaEmail)
-                                .where('pengirimEmail',
-                                    isEqualTo: this.widget.pengirimEmail)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return CircularProgressIndicator();
-                              }
-                              var messages = snapshot.data!.docs;
-                              messages.sort((a, b) {
-                                Timestamp timeA = a['waktu'] as Timestamp;
-                                Timestamp timeB = b['waktu'] as Timestamp;
-                                return timeA.compareTo(
-                                    timeB); // Mengurutkan dari yang terbaru ke yang terlama
-                              });
-                              return ListView.builder(
-                                  reverse: true,
-                                  itemCount: messages.length,
-                                  itemBuilder: (context, index) {
-                                    var message = messages[index];
-                                    var isiPesan = message['isiPesan'];
-                                    var sent = message['sent'];
-                                    var pengirimUID = message['pengirimEmail'];
-                                    var waktu = message['waktu'];
-                                    bool isCurrentUser = sent ==
-                                        FirebaseAuth
-                                            .instance.currentUser!.email;
+          actions: [
+            PopupMenuButton(
+              icon: Icon(Icons.more_vert),
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem(
+                  child: Text('Done'),
+                  value: 'done',
+                ),
+                PopupMenuItem(
+                  child: Text('Cancel'),
+                  value: 'cancel',
+                ),
+              ],
+              onSelected: (value) async {
+                // Tambahkan logika sesuai dengan item yang dipilih
+                if (value == 'done') {
+                  await FirebaseFirestore.instance
+                      .collection('kontak')
+                      .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                      .get()
+                      .then((querySnapshot) {
+                    querySnapshot.docs.forEach((doc) {
+                      // Perbarui nilai isDone menjadi true
+                      doc.reference.update({'isDone': true}).then((value) {
+                        print('Nilai isDone telah diperbarui menjadi true');
 
-                                    var reversedIndex =
-                                        (messages.length - 1) - index;
-                                    return Align(
-                                      alignment: isCurrentUser
-                                          ? Alignment.topRight
-                                          : Alignment.topLeft,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: isCurrentUser
-                                              ? Colors.blue
-                                              : Colors.grey,
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(30),
-                                            bottomRight: Radius.circular(30),
-                                            topRight: Radius.circular(30),
+                        // Lakukan pengecekan isDone
+                        FirebaseFirestore.instance
+                            .collection('kontak')
+                            .where('uid_pemesanan',
+                                isEqualTo: this.widget.uid_pemesanan)
+                            .get()
+                            .then((updatedSnapshot) {
+                          var updatedDocs = updatedSnapshot.docs;
+                          if (updatedDocs.isNotEmpty) {
+                            var updatedIsDone = updatedDocs.first['isDone'];
+
+                            // Jika isDone sudah true, panggil fungsi isDone()
+                            if (updatedIsDone) {
+                              print("isdone alert masuk");
+                              iSDone(this.widget.penerimaEmail);
+                            }
+                          }
+                          // Jika isDone sudah true, panggil fungsi isDone()
+                        });
+                      }).catchError((error) {
+                        print('Gagal memperbarui nilai isDone: $error');
+                      });
+                    });
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('kontak')
+                .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                // Jika tidak ada data atau dokumen kosong
+                return Center(
+                  child: Text('Tidak ada data'),
+                );
+              } else {
+                var isReportdone =
+                    snapshot.data!.docs.first['isReportDone'] ?? false;
+                return isReportdone
+                    ? buildMessageOnly()
+                    : Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('log_pesan')
+                                  .where('penerimaEmail',
+                                      isEqualTo: this.widget.penerimaEmail)
+                                  .where('pengirimEmail',
+                                      isEqualTo: this.widget.pengirimEmail)
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return CircularProgressIndicator();
+                                }
+                                var messages = snapshot.data!.docs;
+                                messages.sort((a, b) {
+                                  Timestamp timeA = a['waktu'] as Timestamp;
+                                  Timestamp timeB = b['waktu'] as Timestamp;
+                                  return timeA.compareTo(
+                                      timeB); // Mengurutkan dari yang terbaru ke yang terlama
+                                });
+                                return ListView.builder(
+                                    reverse: true,
+                                    itemCount: messages.length,
+                                    itemBuilder: (context, index) {
+                                      var message = messages[index];
+                                      var isiPesan = message['isiPesan'];
+                                      var sent = message['sent'];
+                                      var pengirimUID =
+                                          message['pengirimEmail'];
+                                      var waktu = message['waktu'];
+                                      bool isCurrentUser = sent ==
+                                          FirebaseAuth
+                                              .instance.currentUser!.email;
+
+                                      var reversedIndex =
+                                          (messages.length - 1) - index;
+                                      return Align(
+                                        alignment: isCurrentUser
+                                            ? Alignment.topRight
+                                            : Alignment.topLeft,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: isCurrentUser
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(30),
+                                              bottomRight: Radius.circular(30),
+                                              topRight: Radius.circular(30),
+                                            ),
+                                          ),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment: isCurrentUser
+                                                ? CrossAxisAlignment.start
+                                                : CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                isiPesan,
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                formatTimeAgo(waktu),
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              // Tambahkan bagian lain seperti informasi pengirim, status, dll. sesuai kebutuhan
+                                            ],
                                           ),
                                         ),
-                                        margin: const EdgeInsets.all(10),
-                                        padding: const EdgeInsets.all(10),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: isCurrentUser
-                                              ? CrossAxisAlignment.start
-                                              : CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              isiPesan,
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text(
-                                              formatTimeAgo(waktu),
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            // Tambahkan bagian lain seperti informasi pengirim, status, dll. sesuai kebutuhan
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  });
-                            },
+                                      );
+                                    });
+                              },
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('kontak')
-                                      .where('uid_pemesanan',
-                                          isEqualTo: widget.uid_pemesanan)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData) {
-                                      return CircularProgressIndicator();
-                                    }
-                                    var contacts = snapshot.data!.docs;
-                                    bool isDone = false;
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('kontak')
+                                        .where('uid_pemesanan',
+                                            isEqualTo: widget.uid_pemesanan)
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return CircularProgressIndicator();
+                                      }
+                                      var contacts = snapshot.data!.docs;
+                                      bool isDone = false;
 
-                                    if (contacts.isNotEmpty) {
-                                      isDone = contacts.first['isDone'];
-                                    }
+                                      if (contacts.isNotEmpty) {
+                                        isDone = contacts.first['isDone'];
+                                      }
 
-                                    // Tampilkan tombol berdasarkan nilai isDone
-                                    if (isDone) {
-                                      return buildRatingAndReportButtons();
-                                    } else {
-                                      return buildSubmitButton();
-                                    }
-                                  },
+                                      // Tampilkan tombol berdasarkan nilai isDone
+                                      if (isDone) {
+                                        return buildRatingAndReportButtons();
+                                      } else {
+                                        return buildSubmitButton();
+                                      }
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-            }
-          }),
+                        ],
+                      );
+              }
+            }),
+      ),
     );
   }
 

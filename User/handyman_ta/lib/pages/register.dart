@@ -20,7 +20,8 @@ final _auth = FirebaseAuth.instance;
 
 class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
-
+  DateTime? selectedDateTime;
+  TextEditingController dateController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController namaController = TextEditingController();
   TextEditingController notelpController = TextEditingController();
@@ -32,6 +33,20 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       body: SafeArea(
         child: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 600,
+          ),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
+            ),
+          ),
           padding: const EdgeInsets.only(top: 180, left: 16, right: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,6 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     FormBuilderTextField(
                       name: 'email',
+                      controller: emailController,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                         FormBuilderValidators.email(),
@@ -56,12 +72,51 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 10),
                     FormBuilderTextField(
+                      name: 'Nama Lengkap',
+                      controller: namaController,
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.minLength(8),
+                      ]),
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Nama Lengkap',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.all(15),
+                      child: FormBuilderDateTimePicker(
+                        name: 'date',
+                        decoration: InputDecoration(
+                          labelText: 'Select Date',
+                          prefixIcon: Icon(Icons.calendar_today),
+                        ),
+                        initialValue: selectedDateTime,
+                        inputType: InputType.date,
+                        controller: dateController,
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                        ]),
+                        valueTransformer: (DateTime? value) {
+                          if (value != null) {
+                            return value.toString();
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    FormBuilderTextField(
                       name: 'password',
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                         FormBuilderValidators.minLength(8),
                       ]),
                       obscureText: true,
+                      controller: passwordController,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         border: OutlineInputBorder(
@@ -72,6 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 10),
                     FormBuilderTextField(
                       name: 'confirmPassword',
+                      controller: confirmpasswordController,
                       validator: (value) {
                         final confirmPassword =
                             _formKey.currentState!.fields['password']?.value;
@@ -92,53 +148,58 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              // Register Button
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    await signUp();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
+              Row(
+                children: <Widget>[
+                  // Register Button
+
+                  TextButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        await signUp();
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Register",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 2.6,
                   ),
-                ),
-                child: const Text(
-                  "Register",
-                  style: TextStyle(
-                    color: Colors.white,
+                  // Login Button
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        LoginPage.routeName,
+                        (route) => false,
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Back to Login",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              // Login Button
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    LoginPage.routeName,
-                    (route) => false,
-                  );
-                },
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  "Login",
-                  style: TextStyle(
-                    color: Colors.lightBlueAccent,
-                  ),
-                ),
-              ),
+                ],
+              )
             ],
           ),
         ),

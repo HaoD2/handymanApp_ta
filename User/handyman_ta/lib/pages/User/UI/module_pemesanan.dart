@@ -299,6 +299,33 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       };
       //post API
 
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: user)
+          .where('status_pesan', isEqualTo: true)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Tidak bisa memesan'),
+              content: Text(
+                  'Anda tidak dapat memesan karena terdapat pesanan yang belum selesai.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+        return;
+      }
       String password = '';
       String basicAuth = 'Basic ' +
           base64.encode(
@@ -322,6 +349,18 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           await FirebaseFirestore.instance
               .collection('request_handyman')
               .add(requestData);
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('email', isEqualTo: user)
+              .get()
+              .then((QuerySnapshot querySnapshot) {
+            querySnapshot.docs.forEach((doc) {
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(doc.id)
+                  .update({'status_pesan': true});
+            });
+          });
 
           _formKey.currentState!.reset();
           setState(() {
@@ -366,217 +405,235 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         title: Text("${this.widget.layanan}"),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: FormBuilder(
-            key: _formKey,
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: FormBuilderTextField(
-                    name: 'address',
-                    controller: locationController,
-                    decoration: InputDecoration(labelText: 'Location'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  height: 200,
-                  child: _currentPosition != null
-                      ? FlutterMap(
-                          options: MapOptions(
-                            center: LatLng(
-                              _currentPosition!.latitude,
-                              _currentPosition!.longitude,
-                            ),
-                            zoom: 13.0,
-                          ),
-                          children: [
-                            TileLayer(
-                              urlTemplate:
-                                  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                              subdomains: ['a', 'b', 'c'],
-                            ),
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                    width: 40.0,
-                                    height: 40.0,
-                                    point: LatLng(
-                                      _currentPosition!.latitude,
-                                      _currentPosition!.longitude,
-                                    ),
-                                    builder: (ctx) => Container(
-                                            child: Icon(
-                                          Icons.location_on,
-                                          color: Colors.red,
-                                          size: 40.0,
-                                        )))
-                              ],
-                            )
-                          ],
-                        )
-                      : Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: FormBuilderDateTimePicker(
-                    name: 'date',
-                    decoration: InputDecoration(
-                      labelText: 'Select Date',
-                      prefixIcon: Icon(Icons.calendar_today),
-                    ),
-                    initialValue: selectedDateTime,
-                    inputType: InputType.date,
-                    controller: dateController,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
-                    valueTransformer: (DateTime? value) {
-                      if (value != null) {
-                        return value.toString();
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                    margin: EdgeInsets.all(15),
-                    alignment: Alignment.centerLeft,
-                    child: Text("Gambar (Optional)")),
-
-                // Tambahkan kode untuk mengunggah gambar
-                Container(
-                  margin: EdgeInsets.all(15),
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton(
-                    onPressed: _getImage,
-                    child: Text('Unggah Foto'),
-                  ),
-                ),
-                if (requestImage != null)
-                  Container(
-                    margin: EdgeInsets.all(15),
-                    child: Image.file(
-                      File(requestImage!.path),
-                      height: 100.0,
-                      width: 100.0,
-                    ),
-                  ),
-                Row(
-                  children: [
-                    Container(
-                      width: 150,
-                      margin: EdgeInsets.all(15),
-                      child: FormBuilderDateTimePicker(
-                        name: 'start_time',
-                        inputType: InputType.time,
-                        initialValue: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                          selectedTimeStart.hour,
-                          selectedTimeStart.minute,
-                        ),
-                        format: DateFormat("HH:mm"),
-                        controller: startTimeController,
-                        decoration: InputDecoration(labelText: 'Start : '),
-                      ),
-                    ),
-                    Container(
-                      width: 150,
-                      margin: EdgeInsets.all(15),
-                      child: FormBuilderDateTimePicker(
-                        name: 'end_time',
-                        inputType: InputType.time,
-                        initialValue: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                          selectedTimeEnd.hour,
-                          selectedTimeEnd.minute,
-                        ),
-                        format: DateFormat("HH:mm"),
-                        controller: endTimeController,
-                        decoration: InputDecoration(labelText: 'End : '),
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: FormBuilderTextField(
-                    name: 'Description',
-                    controller: descriptionController,
-                    maxLines: 10,
-                    decoration: InputDecoration(labelText: 'Description'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: FormBuilderTextField(
-                    name: 'Price',
-                    controller: PriceController,
-                    decoration: InputDecoration(
-                        labelText: 'Price', hintText: 'Minimal 50.000'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.numeric(),
-                      FormBuilderValidators.min(50000)
-                    ]),
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: FormBuilderCheckboxGroup(
-                    name: 'options',
-                    options: optionLayanan
-                        .map((option) => FormBuilderFieldOption(value: option))
-                        .toList(),
-                    onChanged: (selected) {
-                      setState(() {
-                        selectedOptions = List<String>.from(selected!);
-                        showTextbox =
-                            selectedOptions.contains("Lain - Lainnya");
-                        if (!showTextbox) {
-                          otherOptionController.clear();
-                        }
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                if (showTextbox)
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
+            ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
                   Container(
                     margin: EdgeInsets.all(15),
                     child: FormBuilderTextField(
-                      name: 'otherOption',
-                      controller: otherOptionController,
-                      decoration: InputDecoration(labelText: 'lain - lain nya'),
+                      name: 'address',
+                      controller: locationController,
+                      decoration: InputDecoration(labelText: 'Location'),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
                     ),
                   ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () async {
-                    _submitForm();
-                  },
-                  child: const Text('Submit'),
-                ),
-                const SizedBox(height: 16.0),
-                SizedBox(height: 16.0),
-              ],
-            )),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    height: 200,
+                    child: _currentPosition != null
+                        ? FlutterMap(
+                            options: MapOptions(
+                              center: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 13.0,
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                subdomains: ['a', 'b', 'c'],
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                      width: 40.0,
+                                      height: 40.0,
+                                      point: LatLng(
+                                        _currentPosition!.latitude,
+                                        _currentPosition!.longitude,
+                                      ),
+                                      builder: (ctx) => Container(
+                                              child: Icon(
+                                            Icons.location_on,
+                                            color: Colors.red,
+                                            size: 40.0,
+                                          )))
+                                ],
+                              )
+                            ],
+                          )
+                        : Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: FormBuilderDateTimePicker(
+                      name: 'date',
+                      decoration: InputDecoration(
+                        labelText: 'Select Date',
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      initialValue: selectedDateTime,
+                      inputType: InputType.date,
+                      controller: dateController,
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
+                      valueTransformer: (DateTime? value) {
+                        if (value != null) {
+                          return value.toString();
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Container(
+                      margin: EdgeInsets.all(15),
+                      alignment: Alignment.centerLeft,
+                      child: Text("Gambar (Optional)")),
+
+                  // Tambahkan kode untuk mengunggah gambar
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    alignment: Alignment.centerLeft,
+                    child: ElevatedButton(
+                      onPressed: _getImage,
+                      child: Text('Unggah Foto'),
+                    ),
+                  ),
+                  if (requestImage != null)
+                    Container(
+                      margin: EdgeInsets.all(15),
+                      child: Image.file(
+                        File(requestImage!.path),
+                        height: 100.0,
+                        width: 100.0,
+                      ),
+                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 150,
+                        margin: EdgeInsets.all(15),
+                        child: FormBuilderDateTimePicker(
+                          name: 'start_time',
+                          inputType: InputType.time,
+                          initialValue: DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                            selectedTimeStart.hour,
+                            selectedTimeStart.minute,
+                          ),
+                          format: DateFormat("HH:mm"),
+                          controller: startTimeController,
+                          decoration: InputDecoration(labelText: 'Start : '),
+                        ),
+                      ),
+                      Container(
+                        width: 150,
+                        margin: EdgeInsets.all(15),
+                        child: FormBuilderDateTimePicker(
+                          name: 'end_time',
+                          inputType: InputType.time,
+                          initialValue: DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                            selectedTimeEnd.hour,
+                            selectedTimeEnd.minute,
+                          ),
+                          format: DateFormat("HH:mm"),
+                          controller: endTimeController,
+                          decoration: InputDecoration(labelText: 'End : '),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: FormBuilderTextField(
+                      name: 'Description',
+                      controller: descriptionController,
+                      maxLines: 10,
+                      decoration: InputDecoration(labelText: 'Description'),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: FormBuilderTextField(
+                      name: 'Price',
+                      controller: PriceController,
+                      decoration: InputDecoration(
+                          labelText: 'Price', hintText: 'Minimal 50.000'),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.numeric(),
+                        FormBuilderValidators.min(50000)
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: FormBuilderCheckboxGroup(
+                      name: 'options',
+                      options: optionLayanan
+                          .map(
+                              (option) => FormBuilderFieldOption(value: option))
+                          .toList(),
+                      onChanged: (selected) {
+                        setState(() {
+                          selectedOptions = List<String>.from(selected!);
+                          showTextbox =
+                              selectedOptions.contains("Lain - Lainnya");
+                          if (!showTextbox) {
+                            otherOptionController.clear();
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  if (showTextbox)
+                    Container(
+                      margin: EdgeInsets.all(15),
+                      child: FormBuilderTextField(
+                        name: 'otherOption',
+                        controller: otherOptionController,
+                        decoration:
+                            InputDecoration(labelText: 'lain - lain nya'),
+                      ),
+                    ),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () async {
+                      _submitForm();
+                    },
+                    child: const Text('Submit'),
+                  ),
+                  const SizedBox(height: 16.0),
+                  SizedBox(height: 16.0),
+                ],
+              )),
+        ),
       ),
     );
   }

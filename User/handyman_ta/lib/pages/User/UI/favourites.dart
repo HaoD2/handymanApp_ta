@@ -45,51 +45,66 @@ class _favourite_pageState extends State<favourite_page> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Favourites'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return userHomepage();
-                },
-              ),
-              (_) => false,
-            );
-          },
+        appBar: AppBar(
+          title: Text('Favourites'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return userHomepage();
+                  },
+                ),
+                (_) => false,
+              );
+            },
+          ),
         ),
-      ),
-      body: favouriteUser != null &&
-              favouriteUser!.like.keys
-                  .where((key) => favouriteUser!.like[key] == true)
-                  .isNotEmpty
-          ? Column(
-              children: favouriteUser!.like.keys.map((key) {
-                if (favouriteUser!.like[key] == true) {
-                  return ListTile(
-                    title: Text('Menu  $key'),
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return option_menu(layanan: key);
-                          },
-                        ),
-                        (_) => false,
-                      );
-                    },
-                  );
-                } else {
-                  return SizedBox.shrink();
-                }
-              }).toList(),
-            )
-          : Center(
-              child: Text('Belum ada layanan yang kamu suka'),
+        body: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 175,
+          ),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
             ),
-    );
+          ),
+          child: favouriteUser != null &&
+                  favouriteUser!.like.keys
+                      .where((key) => favouriteUser!.like[key] == true)
+                      .isNotEmpty
+              ? Column(
+                  children: favouriteUser!.like.keys.map((key) {
+                    if (favouriteUser!.like[key] == true) {
+                      return ListTile(
+                        title: Text('Menu  $key'),
+                        onTap: () {
+                          Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return option_menu(layanan: key);
+                              },
+                            ),
+                            (_) => false,
+                          );
+                        },
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  }).toList(),
+                )
+              : Center(
+                  child: Text('Belum ada layanan yang kamu suka'),
+                ),
+        ));
   }
 }
