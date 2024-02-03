@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/Model/kontak.dart';
 import 'package:handyman_ta/pages/User/UI/chat_page.dart';
 
 class Kontak_User extends StatefulWidget {
@@ -12,127 +13,135 @@ class Kontak_User extends StatefulWidget {
 }
 
 class _Kontak_UserState extends State<Kontak_User> {
+  Future<List<kontak_user>> getDatas() async {
+    kontakService kontak_userService = kontakService();
+    List<kontak_user> dataList = await kontak_userService
+        .getkontakListRand(FirebaseAuth.instance.currentUser!.email.toString());
+
+    print(dataList.length);
+    return dataList;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-        minWidth: 0,
-        maxWidth: MediaQuery.of(context).size.width,
-        maxHeight: 175,
-      ),
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-            'assets/images/home_decoration.png',
-          ),
-          fit: BoxFit.fill,
-          alignment: Alignment.topCenter,
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Kontak'),
         ),
-      ),
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('kontak')
-            .where('penerimaEmail',
-                isEqualTo: FirebaseAuth.instance.currentUser?.email)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            var contacts = snapshot.data!.docs;
-            // List to store the futures
-            List<FutureBuilder> futureBuilders = [];
-            for (var contact in contacts) {
-              var uid_pemesanan = contact['uid_pemesanan'];
-              futureBuilders.add(FutureBuilder<QuerySnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('request_handyman')
-                    .where('uid', isEqualTo: uid_pemesanan)
-                    .get(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text("Error: ${snapshot.error}");
-                  }
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                      var data = snapshot.data!.docs.first.data();
-                      if (data is Map<String, dynamic>) {
-                        var tipe_pekerjaan = data['tipe_pekerjaan'];
-                        var pemesananUID = data['uid'];
-                        var penerimaUID = data['penerimaEmail'];
-                        var pengirimUID = data['pengirimEmail'];
-                        var uid_pemesanan = data['uid_pemesanan'];
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: AssetImage(
-                                    'assets/images/icon_profile.png'),
-                              )
-                            ],
-                          ),
-                          title: Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  pengirimUID,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  tipe_pekerjaan + " - " + pemesananUID,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.of(context, rootNavigator: true)
-                                .pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return ChatPage(
-                                      penerimaUID, pengirimUID, uid_pemesanan);
-                                },
-                              ),
-                              (_) => false,
-                            );
-                          },
-                        );
-                      }
-                    } else {
-                      // Handle case when no documents are found
-                      return Text("No documents found.");
-                    }
-                  }
+        body: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 600,
+          ),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          child: FutureBuilder<List<kontak_user>>(
+            future: getDatas(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else {
+                List<kontak_user>? dataList = snapshot.data;
+                if (dataList != null && dataList.isNotEmpty) {
+                  return ListView.builder(
+                    itemCount: dataList.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () async {
+                          String uidPemesanan = dataList[index].uid_pemesanan;
+                          // Periksa apakah ada permintaan dengan UID pemesanan yang sesuai
+                          QuerySnapshot requestSnapshot =
+                              await FirebaseFirestore.instance
+                                  .collection('request_handyman')
+                                  .where('uid', isEqualTo: uidPemesanan)
+                                  .get();
 
-                  // Handle other states
-                  return CircularProgressIndicator();
-                },
-              ));
-            }
-            // Return ListView with future builders
-            return ListView(
-              children: futureBuilders,
-            );
-          }
-        },
-      ),
-    );
+                          if (requestSnapshot.docs.isNotEmpty) {
+                            ListView.builder(
+                              itemCount: requestSnapshot.docs.length,
+                              itemBuilder: (context, index) {
+                                var document = requestSnapshot.docs[index];
+                                String pengirimHandyman =
+                                    document['pengirimHandyman'];
+                                String tipe_pekerjaan =
+                                    document['tipe_pekerjaan'];
+                                String uid_pemesanan =
+                                    document['uid_pemesanan'];
+
+                                return ListTile(
+                                  title: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        pengirimHandyman,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '$tipe_pekerjaan - $uid_pemesanan',
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // You can add onTap or any other properties you want for the ListTile
+                                );
+                              },
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Tidak ada permintaan untuk $uidPemesanan',
+                                ),
+                              ),
+                            );
+                            // You might want to return something here or handle the case when there are no requests
+                          }
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  return Center(
+                    child: Text('Tidak ada data kontak'),
+                  );
+                }
+              }
+            },
+          ),
+        ));
   }
 }
+                            // Navigator.of(context, rootNavigator: true)
+                            //     .pushAndRemoveUntil(
+                            //   MaterialPageRoute(
+                            //     builder: (BuildContext context) {
+                            //       return ChatPage(pengirimUser,
+                            //           pengirimHandyman, uidPemesanan);
+                            //     },
+                            //   ),
+                            //   (_) => false,
+                            // );

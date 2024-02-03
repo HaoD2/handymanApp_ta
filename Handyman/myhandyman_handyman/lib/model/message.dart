@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message_Log {
-  final String pengirimEmail;
-  final String penerimaEmail;
+  final String pengirimUser;
+  final String pengirimHandyman;
   final String sent;
   final String isiPesan;
   final bool isDone;
@@ -10,8 +10,8 @@ class Message_Log {
   final String uid_pemesanan;
 
   Message_Log(
-      {required this.pengirimEmail,
-      required this.penerimaEmail,
+      {required this.pengirimUser,
+      required this.pengirimHandyman,
       required this.sent,
       required this.isiPesan,
       required this.isDone,
@@ -20,8 +20,8 @@ class Message_Log {
 
   Map<String, dynamic> toMap() {
     return {
-      'pengirimEmail': pengirimEmail,
-      'penerimaEmail': penerimaEmail,
+      'pengirimUser': pengirimUser,
+      'pengirimHandyman': pengirimHandyman,
       'sent': sent,
       'isiPesan': isiPesan,
       'isDone': true,

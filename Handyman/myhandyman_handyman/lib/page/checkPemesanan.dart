@@ -117,11 +117,11 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
       documentReference.get().then((documentSnapshot) {
         if (documentSnapshot.exists) {
           // Mendapatkan nilai dari field "user" dalam dokumen "request_handyman"
-          String userField = documentSnapshot.data()?['user'];
-          String taken_by = documentSnapshot.data()?['taken_by'];
+          String pengirimUser = documentSnapshot.data()?['user'];
+          String pengirimHandyman = documentSnapshot.data()?['taken_by'];
           String uid_pemesanan = documentSnapshot.data()?['uid'];
           // Mencari dokumen pengguna yang cocok dalam koleksi "users"
-          createMessage(taken_by, userField, uid_pemesanan);
+          createMessage(pengirimUser, pengirimHandyman, uid_pemesanan);
         } else {
           print('Dokumen "request_handyman" tidak ditemukan.');
         }
@@ -140,14 +140,14 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
     }
   }
 
-  Future<void> createMessage(
-      String uid_pengirim, String uid_penerima, String uid_pemesanan) async {
+  Future<void> createMessage(String pengirimUser, String pengirimHandyman,
+      String uid_pemesanan) async {
     try {
       Message_Log pesanBaru = Message_Log(
-          penerimaEmail: uid_penerima,
-          pengirimEmail: uid_pengirim,
+          pengirimUser: pengirimUser,
+          pengirimHandyman: pengirimHandyman,
           sent: "",
-          isDone: true,
+          isDone: false,
           isiPesan: "",
           waktu: DateTime.now(),
           uid_pemesanan: this.widget.uid);
@@ -160,16 +160,19 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
         print('Terjadi kesalahan: $error');
       });
       kontak_user kontak = kontak_user(
-          pengirimEmail: uid_pengirim,
-          penerimaEmail: uid_penerima,
+          pengirimUser: pengirimUser,
+          pengirimHandyman: pengirimHandyman,
           uid_pemesanan: uid_pemesanan,
-          isDone: true,
+          isDoneHandyman: false,
           isDoneUser: false,
-          isRatingDone: false,
-          isReportDone: false);
+          isRatingDoneUser: false,
+          isRatingDoneHandyman: false,
+          isReportDoneHandyman: false,
+          isReportDoneUser: false);
+      Map<String, dynamic> kontakMap = kontak.toMap();
       FirebaseFirestore.instance
           .collection('kontak')
-          .add(kontak.toMap())
+          .add(kontakMap)
           .then((value) {
         // Menghapus teks dari input pesan.
       }).catchError((error) {

@@ -10,11 +10,11 @@ import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatPage extends StatefulWidget {
-  final String penerimaEmail;
-  final String pengirimEmail;
+  final String pengirimUser;
+  final String pengirimHandyman;
   final String uid_pemesanan;
 
-  const ChatPage(this.penerimaEmail, this.pengirimEmail, this.uid_pemesanan);
+  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan);
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -123,8 +123,8 @@ class _ChatPageState extends State<ChatPage> {
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('log_pesan')
-            .where('penerimaEmail', isEqualTo: widget.penerimaEmail)
-            .where('pengirimEmail', isEqualTo: widget.pengirimEmail)
+            .where('pengirimUser', isEqualTo: widget.pengirimUser)
+            .where('pengirimHandyman', isEqualTo: widget.pengirimHandyman)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -280,7 +280,7 @@ class _ChatPageState extends State<ChatPage> {
                                 tambahReport(
                                     FirebaseAuth.instance.currentUser!.email
                                         .toString(),
-                                    this.widget.penerimaEmail,
+                                    this.widget.pengirimUser,
                                     DateTime.now(),
                                     _reportComment,
                                     _notProfessional,
@@ -394,7 +394,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Chat dengan ${widget.penerimaEmail}'),
+          title: Text('Chat dengan ${widget.pengirimUser}'),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -448,7 +448,7 @@ class _ChatPageState extends State<ChatPage> {
                             // Jika isDone sudah true, panggil fungsi isDone()
                             if (updatedIsDone) {
                               print("isdone alert masuk");
-                              iSDone(this.widget.penerimaEmail);
+                              iSDone(this.widget.pengirimUser);
                             }
                           }
                           // Jika isDone sudah true, panggil fungsi isDone()
@@ -487,10 +487,10 @@ class _ChatPageState extends State<ChatPage> {
                             child: StreamBuilder<QuerySnapshot>(
                               stream: FirebaseFirestore.instance
                                   .collection('log_pesan')
-                                  .where('penerimaEmail',
-                                      isEqualTo: this.widget.penerimaEmail)
-                                  .where('pengirimEmail',
-                                      isEqualTo: this.widget.pengirimEmail)
+                                  .where('pengirimUser',
+                                      isEqualTo: this.widget.pengirimUser)
+                                  .where('pengirimHandyman',
+                                      isEqualTo: this.widget.pengirimHandyman)
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
@@ -611,9 +611,9 @@ class _ChatPageState extends State<ChatPage> {
     _pesanController.clear();
 
     var message = Message_Log(
-      pengirimEmail:
-          this.widget.pengirimEmail, // Gantilah dengan ID pengirim yang sesuai
-      penerimaEmail: this.widget.penerimaEmail,
+      pengirimUser:
+          this.widget.pengirimUser, // Gantilah dengan ID pengirim yang sesuai
+      pengirimHandyman: this.widget.pengirimHandyman,
       isiPesan: pesan,
       sent: FirebaseAuth.instance.currentUser!.email.toString(),
       isDone: false,
@@ -622,7 +622,7 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     FirebaseFirestore.instance.collection('log_pesan').add(message.toMap());
-    Retrieve(this.widget.penerimaEmail);
-    print(this.widget.penerimaEmail);
+    Retrieve(this.widget.pengirimUser);
+    print(this.widget.pengirimUser);
   }
 }
