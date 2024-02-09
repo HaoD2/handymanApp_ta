@@ -163,6 +163,12 @@ class _homeState extends State<home> {
     });
   }
 
+  @override
+  void dispose() {
+    // Membersihkan semua sumber daya dan referensi di sini
+    super.dispose();
+  }
+
   void FilteredByDistance() async {
     data.clear();
     // Panggil fetchAndFilterData

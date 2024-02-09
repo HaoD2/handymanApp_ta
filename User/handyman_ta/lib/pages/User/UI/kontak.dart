@@ -25,114 +25,125 @@ class _Kontak_UserState extends State<Kontak_User> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Kontak'),
+      appBar: AppBar(
+        title: Text('Kontak'),
+      ),
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
         ),
-        body: Container(
-          constraints: BoxConstraints(
-            minWidth: 0,
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: 600,
-          ),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/images/home_decoration.png',
-              ),
-              fit: BoxFit.fill,
-              alignment: Alignment.topCenter,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
             ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
           ),
-          child: FutureBuilder<List<kontak_user>>(
-            future: getDatas(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else {
-                List<kontak_user>? dataList = snapshot.data;
-                if (dataList != null && dataList.isNotEmpty) {
-                  return ListView.builder(
-                    itemCount: dataList.length,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () async {
-                          String uidPemesanan = dataList[index].uid_pemesanan;
-                          // Periksa apakah ada permintaan dengan UID pemesanan yang sesuai
-                          QuerySnapshot requestSnapshot =
-                              await FirebaseFirestore.instance
-                                  .collection('request_handyman')
-                                  .where('uid', isEqualTo: uidPemesanan)
-                                  .get();
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('kontak')
+              .where('pengirimUser',
+                  isEqualTo: FirebaseAuth.instance.currentUser?.email)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return CircularProgressIndicator();
+            }
+            var contacts = snapshot.data!.docs;
+            return ListView.builder(
+              itemCount: contacts.length,
+              itemBuilder: (context, index) {
+                var contact = contacts[index];
+                var pengirimHandyman = contact['pengirimHandyman'];
+                var pengirimUser = contact['pengirimUser'];
+                var uid_pemesanan = contact['uid_pemesanan'];
+                return FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection(
+                          'request_handyman') // Ganti dengan nama koleksi yang sesuai
+                      .where('uid',
+                          isEqualTo:
+                              uid_pemesanan) // Ganti dengan nama dokumen atau UID yang sesuai
+                      .get(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    }
 
-                          if (requestSnapshot.docs.isNotEmpty) {
-                            ListView.builder(
-                              itemCount: requestSnapshot.docs.length,
-                              itemBuilder: (context, index) {
-                                var document = requestSnapshot.docs[index];
-                                String pengirimHandyman =
-                                    document['pengirimHandyman'];
-                                String tipe_pekerjaan =
-                                    document['tipe_pekerjaan'];
-                                String uid_pemesanan =
-                                    document['uid_pemesanan'];
-
-                                return ListTile(
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        pengirimHandyman,
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        '$tipe_pekerjaan - $uid_pemesanan',
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      // Ambil data dari snapshot yang diperoleh
+                      var data = snapshot.data!.docs.first.data();
+                      if (data is Map<String, dynamic>) {
+                        var tipe_pekerjaan = data['tipe_pekerjaan'];
+                        var pemesananUID = data['uid'];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: AssetImage(
+                                    'assets/images/icon_profile.png'),
+                              )
+                            ],
+                          ),
+                          title: Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .start, // Untuk membuat teks menjadi rata di kiri
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Untuk mengatur teks ke kiri
+                              children: [
+                                Text(
+                                  pengirimHandyman,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  // You can add onTap or any other properties you want for the ListTile
-                                );
-                              },
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Tidak ada permintaan untuk $uidPemesanan',
                                 ),
+                                Text(
+                                  tipe_pekerjaan + " - " + pemesananUID,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  return ChatPage(pengirimHandyman,
+                                      pengirimUser, uid_pemesanan);
+                                },
                               ),
+                              (_) => false,
                             );
-                            // You might want to return something here or handle the case when there are no requests
-                          }
-                        },
-                      );
-                    },
-                  );
-                } else {
-                  return Center(
-                    child: Text('Tidak ada data kontak'),
-                  );
-                }
-              }
-            },
-          ),
-        ));
+                          },
+                        );
+                      }
+                    }
+
+                    return CircularProgressIndicator(); // Tampilkan loading jika data sedang diambil
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }
                             // Navigator.of(context, rootNavigator: true)

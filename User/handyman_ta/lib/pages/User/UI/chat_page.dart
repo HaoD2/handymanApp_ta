@@ -9,11 +9,11 @@ import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatPage extends StatefulWidget {
-  final String penerimaEmail;
-  final String pengirimEmail;
+  final String pengirimHandyman; //penerimaEmail
+  final String pengirimUser; //pengirimEmail
   final String uid_pemesanan;
 
-  const ChatPage(this.penerimaEmail, this.pengirimEmail, this.uid_pemesanan);
+  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan);
   @override
   _ChatPageState createState() => _ChatPageState();
 }
@@ -29,12 +29,40 @@ class _ChatPageState extends State<ChatPage> {
     return timeAgo.toString();
   }
 
+  bool confirmation = false;
   int _rating = 0;
   bool isChatDone = false;
   bool _notProfessional = false;
   bool _badService = false;
   bool _poorCommunication = false;
   bool _unclearCost = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Panggil ConfirmationCheck() dan tangani hasilnya menggunakan then
+    ConfirmationCheck();
+  }
+
+  Future<void> ConfirmationCheck() async {
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('kontak')
+          .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+          .get();
+
+      bool isConfirmed = false;
+
+      querySnapshot.docs.forEach((doc) {
+        isConfirmed = doc['isDoneUser'];
+      });
+    } catch (e) {
+      print('Error: $e');
+      // Handle error here
+    }
+  }
+
+  //kirim pesan
   void Retrieve(String email) async {
     final CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
@@ -74,6 +102,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  //ketika sudah konfirmasi pemesanan
   Widget buildRatingAndReportButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -240,7 +269,7 @@ class _ChatPageState extends State<ChatPage> {
                             tambahReport(
                                 FirebaseAuth.instance.currentUser!.email
                                     .toString(),
-                                this.widget.pengirimEmail,
+                                this.widget.pengirimUser,
                                 DateTime.now(),
                                 _reportComment,
                                 _notProfessional,
@@ -263,13 +292,14 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+//ketika dia sudah accept pemesanan
   Widget buildMessageOnly() {
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('log_pesan')
-            .where('penerimaEmail', isEqualTo: widget.penerimaEmail)
-            .where('pengirimEmail', isEqualTo: widget.pengirimEmail)
+            .where('pengirimHandyman', isEqualTo: widget.pengirimHandyman)
+            .where('pengirimUser', isEqualTo: widget.pengirimUser)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -335,6 +365,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  //submit button
   Widget buildSubmitButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -357,6 +388,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+//rating layanan
   Future<DocumentReference> tambahRatingLayanan(
     String namaLayanan,
     int nilaiRating,
@@ -419,11 +451,172 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+// Membuat fungsi untuk mengupdate status request_handyman menjadi success
+  Future<void> updateRequestAndUserBalance(BuildContext context) async {
+    // Ambil nilai price dari request_handyman
+    int price = 0;
+    await FirebaseFirestore.instance
+        .collection('request_handyman')
+        .where('uid', isEqualTo: widget.uid_pemesanan)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        price = int.parse(doc['price']);
+        // Update status request_handyman menjadi success
+        FirebaseFirestore.instance
+            .collection('request_handyman')
+            .doc(doc.id)
+            .update({'status': 'success'});
+      });
+    });
+    await FirebaseFirestore.instance
+        .collection('request_handyman')
+        .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        price = doc['price'];
+        // Update status request_handyman menjadi success
+        FirebaseFirestore.instance
+            .collection('request_handyman')
+            .doc(doc.id)
+            .update({'status': 'success'});
+      });
+    });
+// Ambil saldo pengguna
+    int saldo = 0;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: widget.pengirimHandyman)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // Mengecek apakah dokumen adalah dokumen yang valid dan memiliki field saldo
+        if (doc.exists &&
+            doc.data() is Map<String, dynamic> &&
+            (doc.data() as Map<String, dynamic>).containsKey('saldo')) {
+          saldo = doc['saldo'] + price;
+          // Update saldo pengguna
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(doc.id)
+              .update({'saldo': saldo, 'status_pesan': false}).then((_) {
+            // Berhasil mengupdate saldo
+          }).catchError((error) {
+            // Gagal mengupdate saldo
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Gagal mengupdate saldo: $error'),
+            ));
+          });
+        } else {
+          // Jika dokumen tidak memiliki field saldo, tambahkan field saldo beserta nilainya
+          saldo = price;
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(doc.id)
+              .set({'saldo': saldo}, SetOptions(merge: true)).then((_) {
+            // Berhasil menambahkan field saldo
+          }).catchError((error) {
+            // Gagal menambahkan field saldo
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Gagal menambahkan field saldo: $error'),
+            ));
+          });
+        }
+      });
+    });
+  }
+
+//UI Konfirmasi Button
+  Widget konfirmasiButton() {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Konfirmasi'),
+              content: Text(
+                  'Apakah Pekerjaan yang dilakukan Handyman Telah Selesai ?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(true); // Kembali dengan nilai true (ya)
+                  },
+                  child: Text('Ya'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(false); // Kembali dengan nilai false (tidak)
+                  },
+                  child: Text('Tidak'),
+                ),
+              ],
+            );
+          },
+        ).then((isConfirmed) async {
+          if (isConfirmed != null && isConfirmed) {
+            // Jika "Ya" ditekan, lakukan pembaruan ke Firestore
+            await FirebaseFirestore.instance
+                .collection('kontak')
+                .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                .get()
+                .then((QuerySnapshot querySnapshot) {
+              querySnapshot.docs.forEach((doc) {
+                FirebaseFirestore.instance
+                    .collection('kontak')
+                    .doc(doc.id)
+                    .update({'isDoneUser': true});
+              });
+            });
+            await updateRequestAndUserBalance(context);
+          } else {
+            // Jika "Tidak" ditekan, lakukan pembaruan ke Firestore
+            await FirebaseFirestore.instance
+                .collection('kontak')
+                .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                .get()
+                .then((QuerySnapshot querySnapshot) {
+              querySnapshot.docs.forEach((doc) {
+                FirebaseFirestore.instance
+                    .collection('kontak')
+                    .doc(doc.id)
+                    .update({'isDoneHandyman': false});
+              });
+            });
+          }
+          await FirebaseFirestore.instance
+              .collection('kontak')
+              .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+              .get()
+              .then((QuerySnapshot querySnapshot) {
+            querySnapshot.docs.forEach((doc) {
+              // Dapatkan nilai isDoneUser
+              bool isUserDone = doc['isDoneUser'] ?? false;
+              // Masukkan ke dalam variabel confirmation
+              setState(() {
+                confirmation = isUserDone;
+              });
+            });
+          });
+        });
+      },
+      child: Text('Konfirmasi'),
+    );
+  }
+
+//UI MEssagenya
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Chat dengan ${widget.penerimaEmail}'),
+          title: Column(
+            children: [
+              Text('Chat dengan ${widget.pengirimHandyman}'),
+            ],
+          ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -439,6 +632,7 @@ class _ChatPageState extends State<ChatPage> {
               ); // Kembali ke halaman sebelumnya
             },
           ),
+          backgroundColor: Colors.yellow,
         ),
         body: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -455,7 +649,7 @@ class _ChatPageState extends State<ChatPage> {
                 );
               } else {
                 var isRatingDone =
-                    snapshot.data!.docs.first['isRatingDone'] ?? false;
+                    snapshot.data!.docs.first['isRatingDoneUser'] ?? false;
 
                 return isRatingDone
                     ? buildMessageOnly()
@@ -465,10 +659,10 @@ class _ChatPageState extends State<ChatPage> {
                             child: StreamBuilder<QuerySnapshot>(
                               stream: FirebaseFirestore.instance
                                   .collection('log_pesan')
-                                  .where('penerimaEmail',
-                                      isEqualTo: this.widget.penerimaEmail)
-                                  .where('pengirimEmail',
-                                      isEqualTo: this.widget.pengirimEmail)
+                                  .where('pengirimHandyman',
+                                      isEqualTo: this.widget.pengirimHandyman)
+                                  .where('pengirimUser',
+                                      isEqualTo: this.widget.pengirimUser)
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
@@ -489,7 +683,7 @@ class _ChatPageState extends State<ChatPage> {
                                       var isiPesan = message['isiPesan'];
                                       var sent = message['sent'];
                                       var pengirimUID =
-                                          message['pengirimEmail'];
+                                          message['pengirimHandyman'];
                                       var waktu = message['waktu'];
                                       bool isCurrentUser = sent ==
                                           FirebaseAuth
@@ -558,15 +752,22 @@ class _ChatPageState extends State<ChatPage> {
                                         return CircularProgressIndicator();
                                       }
                                       var contacts = snapshot.data!.docs;
-                                      bool isDone = false;
+                                      bool isDoneHandyman = false;
 
                                       if (contacts.isNotEmpty) {
-                                        isDone = contacts.first['isDone'];
+                                        isDoneHandyman =
+                                            contacts.first['isDoneHandyman'];
+                                        confirmation =
+                                            contacts.first['isDoneUser'];
                                       }
 
                                       // Tampilkan tombol berdasarkan nilai isDone
-                                      if (isDone) {
-                                        return buildRatingAndReportButtons();
+                                      if (isDoneHandyman) {
+                                        if (confirmation) {
+                                          return buildRatingAndReportButtons();
+                                        } else {
+                                          return konfirmasiButton();
+                                        }
                                       } else {
                                         return buildSubmitButton();
                                       }
@@ -582,14 +783,15 @@ class _ChatPageState extends State<ChatPage> {
             }));
   }
 
+//kirimpesan
   void _kirimPesan() {
     var pesan = _pesanController.text;
     _pesanController.clear();
 
     var message = Message_Log(
-      pengirimEmail:
-          this.widget.pengirimEmail, // Gantilah dengan ID pengirim yang sesuai
-      penerimaEmail: this.widget.penerimaEmail,
+      pengirimUser:
+          this.widget.pengirimUser, // Gantilah dengan ID pengirim yang sesuai
+      pengirimHandyman: this.widget.pengirimHandyman,
       isiPesan: pesan,
       sent: FirebaseAuth.instance.currentUser!.email.toString(),
       isDone: true,
@@ -598,6 +800,6 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     FirebaseFirestore.instance.collection('log_pesan').add(message.toMap());
-    Retrieve(this.widget.pengirimEmail);
+    Retrieve(this.widget.pengirimHandyman);
   }
 }

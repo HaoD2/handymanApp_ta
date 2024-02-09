@@ -106,112 +106,109 @@ class _profileState extends State<profile> {
                       ),
                       child: Container(
                         margin: const EdgeInsets.all(15),
-                        child: ListTile(
-                          leading: Image.asset(
-                            "assets/images/icon_profile.png",
-                            fit: BoxFit.cover,
-                          ),
-                          trailing: Container(
-                            margin: const EdgeInsets.only(bottom: 50),
-                            child: const Icon(Icons.edit),
-                          ),
-                          title: Column(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 15),
-                                child: Text(
+                        child: Column(
+                          children: [
+                            ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(
+                                    "assets/images/icon_profile.png"),
+                                radius: 20, // Atur sesuai kebutuhan Anda
+                              ),
+                              title: Text(
                                   "${FirebaseAuth.instance.currentUser?.email}",
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                     fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                              FutureBuilder<dynamic>(
-                                initialData: const {},
-                                future: getData(),
-                                builder:
-                                    (context, AsyncSnapshot<dynamic> snapshot) {
-                                  if (!snapshot.hasData ||
-                                      snapshot.data == null ||
-                                      snapshot.data.isEmpty ||
-                                      snapshot.hasError) {
-                                    if (snapshot.data == {}) {
-                                      return Container();
-                                    }
-                                  }
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: snapshot.data.length,
-                                    itemBuilder: (_, index) {
-                                      final data = snapshot.data[index];
-                                      final status = data['status'];
-                                      final statusHandyman =
-                                          data['status_handyman'];
-                                      if (data == null) {
-                                        logout();
-                                      }
-                                      // Menampilkan berdasarkan status
-                                      if (status == 1 && statusHandyman == 1) {
-                                        return Container(
-                                          child: Column(
-                                            children: [
-                                              ListTile(
-                                                leading: Icon(Icons.verified),
-                                                title: Text('Verified'),
-                                              ),
-                                              ListTile(
-                                                leading: Icon(Icons.verified),
-                                                title:
-                                                    Text('Handyman Verified'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      } else if (status == 1 &&
-                                          statusHandyman == 0) {
-                                        return Container(
-                                          child: Column(
-                                            children: [
-                                              ListTile(
-                                                leading: Icon(Icons.verified),
-                                                title: Text('Verified'),
-                                              ),
-                                              ListTile(
-                                                leading: Icon(Icons.warning),
-                                                title:
-                                                    Text('Handyman Unverified'),
-                                                onTap: () {
-                                                  Navigator.of(context,
-                                                          rootNavigator: true)
-                                                      .pushAndRemoveUntil(
-                                                    MaterialPageRoute(
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return formRequestHandyman(
-                                                            email: FirebaseAuth
-                                                                .instance
-                                                                .currentUser
-                                                                ?.email);
-                                                      },
-                                                    ),
-                                                    (_) => false,
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  );
+                                  )),
+                              trailing: IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  // Tambahkan logika untuk tombol edit di sini
                                 },
                               ),
-                            ],
-                          ),
+                            ),
+                            FutureBuilder<dynamic>(
+                              initialData: const {},
+                              future: getData(),
+                              builder:
+                                  (context, AsyncSnapshot<dynamic> snapshot) {
+                                if (!snapshot.hasData ||
+                                    snapshot.data == null ||
+                                    snapshot.data.isEmpty ||
+                                    snapshot.hasError) {
+                                  if (snapshot.data == {}) {
+                                    return Container();
+                                  }
+                                }
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: snapshot.data.length,
+                                  itemBuilder: (_, index) {
+                                    final data = snapshot.data[index];
+                                    final status = data['status'];
+                                    final statusHandyman =
+                                        data['status_handyman'];
+                                    if (data == null) {
+                                      logout();
+                                    }
+                                    // Menampilkan berdasarkan status
+                                    if (status == 1 && statusHandyman == 1) {
+                                      return Container(
+                                        child: Column(
+                                          children: [
+                                            ListTile(
+                                              leading: Icon(Icons.verified),
+                                              title: Text('Verified'),
+                                            ),
+                                            ListTile(
+                                              leading: Icon(Icons.verified),
+                                              title: Text('Handyman Verified'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else if (status == 1 &&
+                                        statusHandyman == 0) {
+                                      return Container(
+                                        child: Column(
+                                          children: [
+                                            ListTile(
+                                              leading: Icon(Icons.verified),
+                                              title: Text('Verified'),
+                                            ),
+                                            ListTile(
+                                              leading: Icon(Icons.warning),
+                                              title:
+                                                  Text('Handyman Unverified'),
+                                              onTap: () {
+                                                Navigator.of(context,
+                                                        rootNavigator: true)
+                                                    .pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return formRequestHandyman(
+                                                          email: FirebaseAuth
+                                                              .instance
+                                                              .currentUser
+                                                              ?.email);
+                                                    },
+                                                  ),
+                                                  (_) => false,
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),

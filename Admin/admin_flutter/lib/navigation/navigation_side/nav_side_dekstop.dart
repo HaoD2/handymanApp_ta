@@ -3,6 +3,7 @@ import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
 import 'package:admin_flutter/route/laporan/laporan_insight/main_insight.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
 import 'package:admin_flutter/route/menu/layanan_menu/main_LM.dart';
+import 'package:admin_flutter/route/menu/request_saldo/main_RS.dart';
 import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,22 @@ class NavigationSideDekstop extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => LaporanInsight()),
+              );
+            },
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          ListTile(
+            leading: Icon(Icons.monetization_on, color: Colors.white),
+            title: Text('Request Saldo',
+                style: TextStyle(
+                    color: Colors.white, fontSize: sizeDesktopTextContent)),
+            onTap: () {
+              // Action for Rapports
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RequestSaldo()),
               );
             },
           ),

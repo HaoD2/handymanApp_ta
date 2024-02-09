@@ -430,7 +430,9 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                     child: FormBuilderTextField(
                       name: 'address',
                       controller: locationController,
-                      decoration: InputDecoration(labelText: 'Location'),
+                      decoration: InputDecoration(
+                          labelText: 'Location',
+                          labelStyle: TextStyle(fontSize: 20)),
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                       ]),

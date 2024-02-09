@@ -47,7 +47,7 @@ class _ChatPageState extends State<ChatPage> {
           FirebaseFirestore.instance
               .collection('kontak')
               .doc(doc.id)
-              .update({'isReportDone': true});
+              .update({'isReportDoneHandyman': true});
         });
       });
     } catch (e) {
@@ -99,25 +99,38 @@ class _ChatPageState extends State<ChatPage> {
   Widget buildSubmitButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              controller: _pesanController,
-              decoration: InputDecoration(labelText: 'Pesan'),
+      child: SingleChildScrollView(
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: _pesanController,
+                decoration: InputDecoration(labelText: 'Pesan'),
+              ),
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.send),
-            onPressed: () {
-              _kirimPesan();
-            },
-          ),
-        ],
+            IconButton(
+              icon: Icon(Icons.send),
+              onPressed: () {
+                if (_pesanController.text.isNotEmpty) {
+                  _kirimPesan();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Pesan tidak boleh kosong!'),
+                      duration:
+                          Duration(seconds: 2), // Optional, durasi snackbar
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
+//Fungsi ketika sudah submit
   Widget buildMessageOnly() {
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
@@ -378,20 +391,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
-        minWidth: 0,
-        maxWidth: MediaQuery.of(context).size.width,
-        maxHeight: 600,
-      ),
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-            'assets/images/home_decoration.png',
-          ),
-          fit: BoxFit.fill,
-          alignment: Alignment.topCenter,
-        ),
-      ),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Chat dengan ${widget.pengirimUser}'),
@@ -431,7 +430,8 @@ class _ChatPageState extends State<ChatPage> {
                       .then((querySnapshot) {
                     querySnapshot.docs.forEach((doc) {
                       // Perbarui nilai isDone menjadi true
-                      doc.reference.update({'isDone': true}).then((value) {
+                      doc.reference
+                          .update({'isDoneHandyman': true}).then((value) {
                         print('Nilai isDone telah diperbarui menjadi true');
 
                         // Lakukan pengecekan isDone
@@ -443,7 +443,8 @@ class _ChatPageState extends State<ChatPage> {
                             .then((updatedSnapshot) {
                           var updatedDocs = updatedSnapshot.docs;
                           if (updatedDocs.isNotEmpty) {
-                            var updatedIsDone = updatedDocs.first['isDone'];
+                            var updatedIsDone =
+                                updatedDocs.first['isDoneHandyman'];
 
                             // Jika isDone sudah true, panggil fungsi isDone()
                             if (updatedIsDone) {
@@ -478,7 +479,7 @@ class _ChatPageState extends State<ChatPage> {
                 );
               } else {
                 var isReportdone =
-                    snapshot.data!.docs.first['isReportDone'] ?? false;
+                    snapshot.data!.docs.first['isReportDoneHandyman'] ?? false;
                 return isReportdone
                     ? buildMessageOnly()
                     : Column(
@@ -500,8 +501,8 @@ class _ChatPageState extends State<ChatPage> {
                                 messages.sort((a, b) {
                                   Timestamp timeA = a['waktu'] as Timestamp;
                                   Timestamp timeB = b['waktu'] as Timestamp;
-                                  return timeA.compareTo(
-                                      timeB); // Mengurutkan dari yang terbaru ke yang terlama
+                                  return timeB.compareTo(
+                                      timeA); // Mengurutkan dari yang terlama ke yang terbaru
                                 });
                                 return ListView.builder(
                                     reverse: true,
@@ -511,7 +512,7 @@ class _ChatPageState extends State<ChatPage> {
                                       var isiPesan = message['isiPesan'];
                                       var sent = message['sent'];
                                       var pengirimUID =
-                                          message['pengirimEmail'];
+                                          message['pengirimHandyman'];
                                       var waktu = message['waktu'];
                                       bool isCurrentUser = sent ==
                                           FirebaseAuth
@@ -583,7 +584,8 @@ class _ChatPageState extends State<ChatPage> {
                                       bool isDone = false;
 
                                       if (contacts.isNotEmpty) {
-                                        isDone = contacts.first['isDone'];
+                                        isDone =
+                                            contacts.first['isDoneHandyman'];
                                       }
 
                                       // Tampilkan tombol berdasarkan nilai isDone
