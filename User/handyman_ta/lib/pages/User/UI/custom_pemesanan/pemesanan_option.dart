@@ -32,6 +32,7 @@ class PemesananOption extends ConsumerStatefulWidget {
 class _PemesananOptionState extends ConsumerState<PemesananOption>
     with SingleTickerProviderStateMixin {
   Position? _currentPosition;
+  final dateController = TextEditingController();
   FocusNode _textFieldFocusNode = FocusNode();
   TimeOfDay selectedTimeEnd = TimeOfDay.now();
   TimeOfDay selectedTimeStart = TimeOfDay.now();
@@ -42,8 +43,9 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
   final endTimeController = TextEditingController();
   TextEditingController handymanController = TextEditingController();
   TextEditingController lokasiController = TextEditingController();
-  final TextEditingController _minController = TextEditingController();
-  final TextEditingController _maxController = TextEditingController();
+  DateTime? selectedDateTime;
+
+  final TextEditingController priceController = TextEditingController();
   int _currentPageIndex = 0;
 //form handler
   GlobalKey<FormBuilderState> formKey1 = GlobalKey<FormBuilderState>();
@@ -51,6 +53,7 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
   GlobalKey<FormBuilderState> formKey3 = GlobalKey<FormBuilderState>();
   GlobalKey<FormBuilderState> formKey4 = GlobalKey<FormBuilderState>();
   GlobalKey<FormBuilderState> formKey5 = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> formKey6 = GlobalKey<FormBuilderState>();
   final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID', symbol: 'Rp'); // Formatter mata uang
   //RangeValues
@@ -125,8 +128,6 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
 
   @override
   void dispose() {
-    _minFocus.dispose();
-    _maxFocus.dispose();
     animationController.dispose();
     super.dispose();
   }
@@ -200,14 +201,14 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                             MaterialPageRoute(
                               builder: (BuildContext context) {
                                 return detail_custom(
-                                  deskripsi: detailPemesananControlller.text,
-                                  alamat: lokasiController.text,
-                                  require_handyman: handymanController.text,
-                                  start_time: startTimeController.text,
-                                  end_time: endTimeController.text,
-                                  min: _minController.text,
-                                  max: _maxController.text,
-                                );
+                                    deskripsi: detailPemesananControlller.text,
+                                    alamat: lokasiController.text,
+                                    require_handyman: handymanController.text,
+                                    start_time: startTimeController.text,
+                                    end_time: endTimeController.text,
+                                    price: priceController.text,
+                                    dateTime: dateController.text,
+                                    position: _currentPosition);
                               },
                             ),
                           );
@@ -376,77 +377,14 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                       Expanded(
                         child: TextFormField(
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: 'Min Value'),
-                          controller: _minController,
-                          onChanged: (value) {
-                            int min = int.tryParse(value) ?? 0;
-                            int max = int.tryParse(_maxController.text) ?? 0;
-
-                            if (min > max) {
-                              min = max;
-                              _minController.text = min.toString();
-                            }
-
-                            if (min > 10000000) {
-                              min =
-                                  10000000; // Batasi nilai minimum menjadi 10 juta
-                              _minController.text = min.toString();
-                            }
-
-                            setState(() {
-                              _minValue = min.toDouble();
-                            });
-                          },
+                          decoration: InputDecoration(labelText: 'Price Value'),
+                          controller: priceController,
                         ),
                       ),
                       SizedBox(width: 16),
-                      Expanded(
-                        child: TextFormField(
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: 'Max Value'),
-                          controller: _maxController,
-                          onChanged: (value) {
-                            int min = int.tryParse(_minController.text) ?? 0;
-                            int max = int.tryParse(value) ?? 0;
-
-                            if (max < min) {
-                              max = min;
-                              _maxController.text = max.toString();
-                            }
-
-                            if (max > 10000000) {
-                              max =
-                                  10000000; // Batasi nilai maksimum menjadi 10 juta
-                              _maxController.text = max.toString();
-                            }
-
-                            setState(() {
-                              _maxValue = max.toDouble();
-                            });
-                          },
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: 20),
-                  RangeSlider(
-                    values: RangeValues(_minValue, _maxValue),
-                    min: 0,
-                    max: 10000000, // Ubah nilai maksimum menjadi 10 juta
-                    divisions: 100,
-                    labels: RangeLabels(
-                      currencyFormatter.format(_minValue),
-                      currencyFormatter.format(_maxValue),
-                    ),
-                    onChanged: (RangeValues values) {
-                      setState(() {
-                        _minValue = values.start;
-                        _maxValue = values.end;
-                        _minController.text = _minValue.toInt().toString();
-                        _maxController.text = _maxValue.toInt().toString();
-                      });
-                    },
-                  ),
                 ],
               ),
             ),
@@ -518,6 +456,35 @@ class _PemesananOptionState extends ConsumerState<PemesananOption>
                   ),
                 ],
               ),
+            ),
+          ),
+        );
+      case 5:
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0, end: 1).animate(
+            CurvedAnimation(parent: animationController, curve: Curves.ease),
+          ),
+          key: ValueKey<int>(uniqueKey),
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: FormBuilderDateTimePicker(
+              name: 'date',
+              decoration: InputDecoration(
+                labelText: 'Select Date',
+                prefixIcon: Icon(Icons.calendar_today),
+              ),
+              initialValue: selectedDateTime,
+              inputType: InputType.date,
+              controller: dateController,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+              ]),
+              valueTransformer: (DateTime? value) {
+                if (value != null) {
+                  return value.toString();
+                }
+                return null;
+              },
             ),
           ),
         );

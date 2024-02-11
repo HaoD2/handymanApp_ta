@@ -144,10 +144,6 @@ class _homeState extends State<home> {
     setState(() {
       dataList = fetchedData;
     });
-
-    for (var i = 0; i < dataList.length; i++) {
-      print(dataList[i].imageName);
-    }
   }
 
   @override
