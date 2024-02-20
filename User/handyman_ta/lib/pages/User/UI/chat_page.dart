@@ -108,7 +108,7 @@ class _ChatPageState extends State<ChatPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
-          child: Text('Rating'),
+          child: Text('Rating Layanan'),
           onPressed: () async {
             QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                 .collection('kontak')
@@ -464,6 +464,7 @@ class _ChatPageState extends State<ChatPage> {
 
 // Membuat fungsi untuk mengupdate status request_handyman menjadi success
   Future<void> updateRequestAndUserBalance(BuildContext context) async {
+    print("updateRequestAndUserBalance");
     // Ambil nilai price dari request_handyman
     int price = 0;
     await FirebaseFirestore.instance
@@ -477,23 +478,10 @@ class _ChatPageState extends State<ChatPage> {
         FirebaseFirestore.instance
             .collection('request_handyman')
             .doc(doc.id)
-            .update({'status': 'success'});
+            .update({'status': 'success', 'status_done': true});
       });
     });
-    await FirebaseFirestore.instance
-        .collection('request_handyman')
-        .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        price = doc['price'];
-        // Update status request_handyman menjadi success
-        FirebaseFirestore.instance
-            .collection('request_handyman')
-            .doc(doc.id)
-            .update({'status': 'success'});
-      });
-    });
+
 // Ambil saldo pengguna
     int saldo = 0;
     await FirebaseFirestore.instance

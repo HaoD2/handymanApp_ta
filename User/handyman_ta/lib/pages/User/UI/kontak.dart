@@ -49,12 +49,13 @@ class _Kontak_UserState extends State<Kontak_User> {
               .where('pengirimUser',
                   isEqualTo: FirebaseAuth.instance.currentUser?.email)
               .snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+          builder: (context, kontakSnapshot) {
+            if (!kontakSnapshot.hasData) {
               return CircularProgressIndicator();
             }
 
-            var contacts = snapshot.data!.docs;
+            var contacts = kontakSnapshot.data!.docs;
+
             return ListView.builder(
               itemCount: contacts.length,
               itemBuilder: (context, index) {
@@ -62,30 +63,61 @@ class _Kontak_UserState extends State<Kontak_User> {
                 var pengirimHandyman = contact['pengirimHandyman'];
                 var pengirimUser = contact['pengirimUser'];
                 var uid_pemesanan = contact['uid_pemesanan'];
+
                 return FutureBuilder<QuerySnapshot>(
                   future: FirebaseFirestore.instance
-                      .collection(
-                          'request_handyman') // Ganti dengan nama koleksi yang sesuai
-                      .where('uid',
-                          isEqualTo:
-                              uid_pemesanan) // Ganti dengan nama dokumen atau UID yang sesuai
+                      .collection('request_handyman')
+                      .where('uid', isEqualTo: uid_pemesanan.toString())
+                      .where('user',
+                          isEqualTo: FirebaseAuth.instance.currentUser?.email)
                       .get(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                  builder: (BuildContext context, snapshot) {
                     if (snapshot.hasError) {
                       return Text("Error: ${snapshot.error}");
                     }
 
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.data!.docs.isEmpty) {
-                        // Tampilkan pesan bahwa data tidak ditemukan atau lakukan tindakan lain
-                        return Text("Data not found");
-                      }
-                      // Ambil data dari snapshot yang diperoleh
-                      var data = snapshot.data!.docs.first.data();
-                      if (data is Map<String, dynamic>) {
-                        var tipe_pekerjaan = data['tipe_pekerjaan'];
-                        var pemesananUID = data['uid'];
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    // Ambil dokumen pertama dari QuerySnapshot
+                    var requestData = snapshot.data!.docs.isNotEmpty
+                        ? snapshot.data!.docs.first
+                        : null;
+
+                    print(
+                        'Snapshot data length: ${snapshot.data!.docs.length}'); // Debugging
+
+                    if (requestData == null) {
+                      // Debugging
+                      return Container();
+                    }
+                    // Akses data dari dokumen
+                    var tipe_pekerjaan = requestData['tipe_pekerjaan'];
+                    var uid = requestData['uid'];
+
+                    // Dapatkan nama pengguna dari koleksi 'users'
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .where('email', isEqualTo: pengirimHandyman)
+                          .snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> userSnapshot) {
+                        if (userSnapshot.hasError) {
+                          return Text("Error: ${userSnapshot.error}");
+                        }
+
+                        if (userSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+
+                        var users = userSnapshot.data!.docs;
+                        var namaPengguna = users.isNotEmpty
+                            ? users.first['nama']
+                            : 'Nama Tidak Ditemukan';
+
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: Stack(
@@ -100,13 +132,11 @@ class _Kontak_UserState extends State<Kontak_User> {
                           ),
                           title: Container(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment
-                                  .start, // Untuk membuat teks menjadi rata di kiri
-                              crossAxisAlignment: CrossAxisAlignment
-                                  .start, // Untuk mengatur teks ke kiri
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  pengirimHandyman,
+                                  namaPengguna,
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 16,
@@ -114,7 +144,7 @@ class _Kontak_UserState extends State<Kontak_User> {
                                   ),
                                 ),
                                 Text(
-                                  tipe_pekerjaan + " - " + pemesananUID,
+                                  '$tipe_pekerjaan - $uid',
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 10,
@@ -137,10 +167,8 @@ class _Kontak_UserState extends State<Kontak_User> {
                             );
                           },
                         );
-                      }
-                    }
-
-                    return CircularProgressIndicator(); // Tampilkan loading jika data sedang diambil
+                      },
+                    );
                   },
                 );
               },

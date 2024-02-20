@@ -25,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   bool isChatDone = false;
   bool _notProfessional = false;
   bool _badService = false;
+  int _rating = 1;
   bool _poorCommunication = false;
   bool _unclearCost = false;
   var isiPesan = "";
@@ -63,36 +64,42 @@ class _ChatPageState extends State<ChatPage> {
     QuerySnapshot querySnapshot =
         await usersCollection.where('email', isEqualTo: email).get();
     print(email);
-    final token_sent = querySnapshot.docs.first['token_messaging'];
-    final res =
-        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-              'Authorization':
-                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-            },
-            body: jsonEncode(<String, dynamic>{
-              'priority': 'high',
-              'data': {
-                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                'status': 'done',
-                'body': 'MyHandyman',
-                'title': 'Halo ' + email + 'kamu mendapatkan Chat',
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final token_sent = querySnapshot.docs.first['token_messaging'];
+      print(token_sent);
+      final res =
+          await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+              headers: <String, String>{
+                'Content-Type': 'application/json',
+                'Authorization':
+                    'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
               },
-              'notification': {
-                'body': 'MyHandyman',
-                'title': 'Halo ' + email + 'kamu mendapatkan Chat',
-                'android_channel_id': "dbFood"
-              },
-              "to": token_sent
-            }));
-    if (res.statusCode == 200) {
-      print('>>>>>>>>>>>>>>>>>>>>success');
-      final responseData = jsonDecode(res.body);
+              body: jsonEncode(<String, dynamic>{
+                'priority': 'high',
+                'data': {
+                  'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                  'status': 'done',
+                  'body': 'MyHandyman',
+                  'title': 'Halo ' + email + 'kamu mendapatkan Chat',
+                },
+                'notification': {
+                  'body': 'MyHandyman',
+                  'title': 'Halo ' + email + 'kamu mendapatkan Chat',
+                  'android_channel_id': "dbFood"
+                },
+                "to": token_sent
+              }));
+      if (res.statusCode == 200) {
+        print('>>>>>>>>>>>>>>>>>>>>success');
+        final responseData = jsonDecode(res.body);
+      } else {
+        print(res.body);
+        print(res.statusCode.toString() + ">>>>>");
+        print('>>>>>>>>>>>>>>>>>>>>gagal');
+      }
     } else {
-      print(res.body);
-      print(res.statusCode.toString() + ">>>>>");
-      print('>>>>>>>>>>>>>>>>>>>>gagal');
+      print('No document found with the provided email.');
     }
   }
 
@@ -203,11 +210,160 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+//tambh rating nilai layanan
+  Future<DocumentReference> tambahRatingLayanan(
+    String namaLayanan,
+    int nilaiRating,
+    String komentar,
+  ) async {
+    CollectionReference ratingLayananCollection =
+        FirebaseFirestore.instance.collection('rating_layanan');
+
+    return await ratingLayananCollection.add({
+      'nama_layanan': namaLayanan,
+      'nilai_Rating': nilaiRating,
+      'komentar': komentar,
+    });
+  }
+
+  Future<void> updateIsRatingDone() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('kontak')
+          .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          FirebaseFirestore.instance
+              .collection('kontak')
+              .doc(doc.id)
+              .update({'isRatingDoneHandyman': true});
+        });
+      });
+    } catch (e) {
+      print('Error updating isRatingDone: $e');
+      // Handle error jika diperlukan
+    }
+  }
+
 // Fungsi untuk menampilkan tombol "Rating" dan "Report"
   Widget buildRatingAndReportButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        ElevatedButton(
+          child: Text('Rating Layanan'),
+          onPressed: () async {
+            QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                .collection('kontak')
+                .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                .where('isRatingDoneHandyman', isEqualTo: false)
+                .get();
+
+            if (querySnapshot.docs.isNotEmpty) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  String _ratingComment = '';
+                  return AlertDialog(
+                    title: Text('Beri Rating'),
+                    content: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text('Score: $_rating/5'),
+                            Slider(
+                              value: _rating.toDouble(),
+                              min: 1,
+                              max: 5,
+                              divisions: 5,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rating = value.round();
+                                });
+                              },
+                            ),
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Tambahkan komentar (opsional)',
+                              ),
+                              onChanged: (value) {
+                                _ratingComment = value;
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Tutup dialog
+                        },
+                        child: Text('Batal'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // Lakukan sesuatu dengan nilai _rating
+                          print('Rating: $_rating');
+                          try {
+                            QuerySnapshot querySnapshot =
+                                await FirebaseFirestore.instance
+                                    .collection('request_handyman')
+                                    .where('uid',
+                                        isEqualTo: this.widget.uid_pemesanan)
+                                    .get();
+
+                            if (querySnapshot.docs.isNotEmpty) {
+                              // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
+                              String tipePekerjaan =
+                                  querySnapshot.docs.first['tipe_pekerjaan'];
+                              tambahRatingLayanan(
+                                  tipePekerjaan, _rating, _ratingComment);
+                              updateIsRatingDone();
+                            } else {
+                              return null; // Tidak ada dokumen dengan kondisi yang diberikan
+                            }
+                          } catch (e) {
+                            print('Error: $e');
+                            return null;
+                          }
+
+                          setState(() {
+                            isChatDone = true;
+                            _rating =
+                                0; // Reset rating setelah disubmit jika diperlukan
+                          });
+                          Navigator.of(context).pop(); // Tutup dialog
+                        },
+                        child: Text('Submit'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            } else {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Warning'),
+                    content: Text('Kamu sudah memberikan rating!'),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          },
+        ),
         SizedBox(width: 10),
         ElevatedButton(
           child: Text('Report'),
