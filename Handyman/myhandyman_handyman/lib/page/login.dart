@@ -61,8 +61,16 @@ class _LoginPageState extends State<LoginPage> {
               print('Gagal melakukan query: $error');
             });
           }
-          Navigator.pushReplacementNamed(
-              context, userHandyman.routeName); // Ganti dengan rute yang sesuai
+          if (mounted) {
+            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return userHandyman();
+                },
+              ),
+              (_) => false,
+            );
+          } // Ganti dengan rute yang sesuai
         }
       } else {
         // Login gagal, tampilkan pesan kesalahan kepada pengguna

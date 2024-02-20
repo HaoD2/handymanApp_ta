@@ -49,43 +49,67 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
 
     QuerySnapshot querySnapshot = await usersCollection
         .where('email', isEqualTo: this.widget.email)
+        .where('status_kerja', isEqualTo: false)
         .get();
     final token_sent = querySnapshot.docs.first['token_messaging'];
-    final res =
-        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-              'Authorization':
-                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-            },
-            body: jsonEncode(<String, dynamic>{
-              'priority': 'high',
-              'data': {
-                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                'status': 'done',
-                'body': 'MyHandyman',
-                'title': 'Halo ' +
-                    this.widget.email +
-                    ' kamu berhasil mendapatkan Handyman !',
-              },
-              'notification': {
-                'body': 'MyHandyman',
-                'title': 'Halo ' +
-                    this.widget.email +
-                    ' kamu berhasil mendapatkan Handyman !',
-                'android_channel_id': "dbFood"
-              },
-              "to": token_sent
-            }));
-    if (res.statusCode == 200) {
-      print('>>>>>>>>>>>>>>>>>>>>success');
-      final responseData = jsonDecode(res.body);
-      InsertData(this.widget.data,
-          FirebaseAuth.instance.currentUser!.email.toString());
+
+    if (querySnapshot.docs.first['status_kerja'] == true) {
+      // Menampilkan alert box jika status_kerja adalah true
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Terdapat Pesanan yang belum selesai'),
+            actions: <Widget>[
+              ElevatedButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     } else {
-      print(res.body);
-      print(res.statusCode.toString() + ">>>>>");
-      print('>>>>>>>>>>>>>>>>>>>>gagal');
+      final res = await http.post(
+        Uri.parse("https://fcm.googleapis.com/fcm/send"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'priority': 'high',
+          'data': {
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'status': 'done',
+            'body': 'MyHandyman',
+            'title': 'Halo ' +
+                this.widget.email +
+                ' kamu berhasil mendapatkan Handyman !',
+          },
+          'notification': {
+            'body': 'MyHandyman',
+            'title': 'Halo ' +
+                this.widget.email +
+                ' kamu berhasil mendapatkan Handyman !',
+            'android_channel_id': "dbFood"
+          },
+          "to": token_sent
+        }),
+      );
+
+      if (res.statusCode == 200) {
+        print('>>>>>>>>>>>>>>>>>>>>success');
+        final responseData = jsonDecode(res.body);
+        InsertData(this.widget.data,
+            FirebaseAuth.instance.currentUser!.email.toString());
+      } else {
+        print(res.body);
+        print(res.statusCode.toString() + ">>>>>");
+        print('>>>>>>>>>>>>>>>>>>>>gagal');
+      }
     }
   }
 

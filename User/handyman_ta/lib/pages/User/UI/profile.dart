@@ -108,26 +108,6 @@ class _profileState extends State<profile> {
                         margin: const EdgeInsets.all(15),
                         child: Column(
                           children: [
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: AssetImage(
-                                    "assets/images/icon_profile.png"),
-                                radius: 20, // Atur sesuai kebutuhan Anda
-                              ),
-                              title: Text(
-                                  "${FirebaseAuth.instance.currentUser?.email}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                  )),
-                              trailing: IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: () {
-                                  // Tambahkan logika untuk tombol edit di sini
-                                },
-                              ),
-                            ),
                             FutureBuilder<dynamic>(
                               initialData: const {},
                               future: getData(),
@@ -148,6 +128,7 @@ class _profileState extends State<profile> {
                                   itemBuilder: (_, index) {
                                     final data = snapshot.data[index];
                                     final status = data['status'];
+                                    final nama = data['nama'];
                                     final statusHandyman =
                                         data['status_handyman'];
                                     if (data == null) {
@@ -158,6 +139,41 @@ class _profileState extends State<profile> {
                                       return Container(
                                         child: Column(
                                           children: [
+                                            ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundImage: AssetImage(
+                                                    "assets/images/icon_profile.png"),
+                                                radius:
+                                                    20, // Atur sesuai kebutuhan Anda
+                                              ),
+                                              title: Text("$nama}",
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                    fontSize: 15,
+                                                  )),
+                                              trailing: IconButton(
+                                                icon: Icon(Icons.edit),
+                                                onPressed: () {
+                                                  // Tambahkan logika untuk tombol edit di sini
+                                                  Navigator.of(context,
+                                                          rootNavigator: true)
+                                                      .pushAndRemoveUntil(
+                                                    MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return changepassword(
+                                                            email: FirebaseAuth
+                                                                .instance
+                                                                .currentUser
+                                                                ?.email);
+                                                      },
+                                                    ),
+                                                    (_) => false,
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                             ListTile(
                                               leading: Icon(Icons.verified),
                                               title: Text('Verified'),
@@ -174,6 +190,41 @@ class _profileState extends State<profile> {
                                       return Container(
                                         child: Column(
                                           children: [
+                                            ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundImage: AssetImage(
+                                                    "assets/images/icon_profile.png"),
+                                                radius:
+                                                    20, // Atur sesuai kebutuhan Anda
+                                              ),
+                                              title: Text("$nama",
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                    fontSize: 15,
+                                                  )),
+                                              trailing: IconButton(
+                                                icon: Icon(Icons.edit),
+                                                onPressed: () {
+                                                  // Tambahkan logika untuk tombol edit di sini
+                                                  Navigator.of(context,
+                                                          rootNavigator: true)
+                                                      .pushAndRemoveUntil(
+                                                    MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return changepassword(
+                                                            email: FirebaseAuth
+                                                                .instance
+                                                                .currentUser
+                                                                ?.email);
+                                                      },
+                                                    ),
+                                                    (_) => false,
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                             ListTile(
                                               leading: Icon(Icons.verified),
                                               title: Text('Verified'),
@@ -275,36 +326,6 @@ class _profileState extends State<profile> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return favourite_page();
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.lock),
-                              ),
-                              title: const Text(
-                                'Change Password',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return changepassword(
-                                          email: FirebaseAuth
-                                              .instance.currentUser?.email);
                                     },
                                   ),
                                   (_) => false,
@@ -429,36 +450,6 @@ class _profileState extends State<profile> {
                                     },
                                   );
                                 }),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.exit_to_app),
-                              ),
-                              title: const Text(
-                                'Testing',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return showRequestHandyman(
-                                          email: FirebaseAuth
-                                              .instance.currentUser?.email);
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
                           ),
                         ],
                       ),

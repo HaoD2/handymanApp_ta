@@ -24,8 +24,10 @@ class _showAll_listState extends State<showAll_list> {
     }
 
     // Mengambil semua dokumen dengan kondisi status adalah "pending" atau "acquired"
-    QuerySnapshot querySnapshot =
-        await _request_handyman.where('user', isEqualTo: user.email).get();
+    QuerySnapshot querySnapshot = await _request_handyman
+        .where('user', isEqualTo: user.email)
+        .where('status_done', isEqualTo: false)
+        .get();
 
     if (querySnapshot.docs.isNotEmpty) {
       return querySnapshot.docs;
@@ -37,72 +39,58 @@ class _showAll_listState extends State<showAll_list> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const userHomepage(),
-                )),
-          ),
-          title: const Text("Details"),
-          centerTitle: true,
-        ),
-        body: Container(
-          constraints: BoxConstraints(
-            minWidth: 0,
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: 600,
-          ),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/images/home_decoration.png',
-              ),
-              fit: BoxFit.fill,
-              alignment: Alignment.topCenter,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const userHomepage(),
             ),
           ),
-          child: FutureBuilder<List<DocumentSnapshot>?>(
-            future: getDataReqList(),
-            builder:
-                (context, AsyncSnapshot<List<DocumentSnapshot>?> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.hasData &&
-                  snapshot.data != null &&
-                  snapshot.data!.isNotEmpty) {
-                List<DocumentSnapshot> documents = snapshot.data!;
-                return ListView.builder(
-                  itemCount: documents.length,
-                  itemBuilder: (context, index) {
-                    var data = documents[index].data() as Map<String, dynamic>;
+        ),
+        title: const Text("Details"),
+        centerTitle: true,
+      ),
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 700,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
+            ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: FutureBuilder<List<DocumentSnapshot>?>(
+          future: getDataReqList(),
+          builder: (context, AsyncSnapshot<List<DocumentSnapshot>?> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (snapshot.hasData &&
+                snapshot.data != null &&
+                snapshot.data!.isNotEmpty) {
+              List<DocumentSnapshot> documents = snapshot.data!;
+              return ListView.builder(
+                itemCount: documents.length,
+                itemBuilder: (context, index) {
+                  var data = documents[index].data() as Map<String, dynamic>;
 
-                    // Set color based on the status
-                    Color statusColor;
-                    switch (data['status']) {
-                      case 'pending':
-                        statusColor = const Color.fromARGB(212, 255, 235,
-                            59); // Set your desired color for pending status
-                        break;
-                      case 'on-progress':
-                        statusColor = Colors
-                            .blue; // Set your desired color for on-progress status
-                        break;
-                      case 'success':
-                        statusColor = const Color.fromARGB(255, 64, 255,
-                            71); // Set your desired color for success status
-                        break;
-                      default:
-                        statusColor = Colors
-                            .black; // Set default color or any other color
-                    }
+                  // Set icon based on the status name
 
-                    return Card(
-                      margin: EdgeInsets.all(15),
+                  return Card(
+                    margin: EdgeInsets.all(15),
+                    child: Container(
+                      height: 350,
                       child: Column(
                         children: [
                           Container(
@@ -134,22 +122,34 @@ class _showAll_listState extends State<showAll_list> {
                             ),
                           ),
                           // ... (Repeat the process for other Text widgets)
-                          Container(
-                            margin: EdgeInsets.all(5),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Status: ${data['status']}',
-                              style: TextStyle(color: statusColor),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildProgressIndicator(
+                                  'Pending',
+                                  data['status'] == 'pending',
+                                  Icons.pending_actions),
+                              _buildProgressLine(),
+                              _buildProgressIndicator(
+                                  'On Progress',
+                                  data['status'] == 'on-progress',
+                                  Icons.hourglass_empty),
+                              _buildProgressLine(),
+                              _buildProgressIndicator(
+                                  'Success',
+                                  data['status'] == 'success',
+                                  Icons.check_circle),
+                            ],
                           ),
                         ],
                       ),
-                    );
-                  },
-                );
-              } else {
-                return Center(
-                    child: Text(
+                    ),
+                  );
+                },
+              );
+            } else {
+              return Center(
+                child: Text(
                   'Belum ada Pesanan',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
@@ -157,10 +157,43 @@ class _showAll_listState extends State<showAll_list> {
                     color: Colors.black87,
                     fontFamily: 'OpenSans',
                   ),
-                ));
-              }
-            },
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressIndicator(
+      String label, bool isActive, IconData statusIcon) {
+    return Column(
+      children: [
+        Container(
+          width: 50, // Ubah lebar sesuai kebutuhan Anda
+          height: 50, // Ubah tinggi sesuai kebutuhan Anda
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isActive ? Colors.blue : Colors.grey,
           ),
-        ));
+          child: Icon(
+            statusIcon,
+            color: Colors.white,
+            size: 30, // Ubah ukuran ikon sesuai kebutuhan Anda
+          ),
+        ),
+        SizedBox(height: 5),
+        Text(label),
+      ],
+    );
+  }
+
+  Widget _buildProgressLine() {
+    return Container(
+      height: 2,
+      width: 80, // Lebar garis
+      color: Colors.grey,
+    );
   }
 }

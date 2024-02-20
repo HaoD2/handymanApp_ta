@@ -170,8 +170,8 @@ class _profileHandymanState extends State<profileHandyman> {
                                           itemBuilder: (_, index) {
                                             final data = snapshot.data[index];
                                             final saldo = data['saldo'];
-                                            tempSaldo =
-                                                int.parse(saldo.toString());
+                                            tempSaldo = int.parse(
+                                                saldo.toString() ?? '0');
                                             final status = data['status'];
                                             final statusHandyman =
                                                 data['status_handyman'];

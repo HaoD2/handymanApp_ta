@@ -66,8 +66,6 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacementNamed(context, userHomepage.routeName);
         }
       } else {
-        // Login gagal, tampilkan pesan kesalahan kepada pengguna
-        // Kamu dapat menggunakan pesan kesalahan dari loginResult
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(loginResult),
           duration: Duration(seconds: 3),
@@ -78,121 +76,119 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Container(
-          constraints: BoxConstraints(
-            minWidth: 0,
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: 600,
-          ),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/images/home_decoration.png',
-              ),
-              fit: BoxFit.fill,
-              alignment: Alignment.topCenter,
+    return Scaffold(
+      body: Container(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: 600,
+        ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/home_decoration.png',
             ),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
           ),
-          child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.only(top: 180, left: 16, right: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  FormBuilder(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        FormBuilderTextField(
-                          name: 'Email',
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                            FormBuilderValidators.email(),
-                          ]),
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          controller: usernameController,
-                        ),
-                        const SizedBox(height: 10),
-                        FormBuilderTextField(
-                          name: 'password',
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () async {
-                          loginUser();
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.only(top: 180, left: 16, right: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                FormBuilder(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      FormBuilderTextField(
+                        name: 'Email',
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                          FormBuilderValidators.email(),
+                        ]),
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          backgroundColor:
-                              Colors.blue, // warna latar belakang biru
                         ),
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                            color: Colors.white, // warna teks putih
+                        controller: usernameController,
+                      ),
+                      const SizedBox(height: 10),
+                      FormBuilderTextField(
+                        name: 'password',
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                        ]),
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                       ),
-                      SizedBox(width: 200),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            RegisterPage.routeName,
-                            (route) => false,
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          backgroundColor:
-                              Colors.blue, // warna latar belakang biru
-                        ),
-                        child: const Text(
-                          "Register",
-                          style: TextStyle(
-                            color: Colors.white, // warna teks putih
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: 15),
                     ],
-                  )
-                ],
-              ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        loginUser();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor:
+                            Colors.blue, // warna latar belakang biru
+                      ),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          color: Colors.white, // warna teks putih
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 200),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          RegisterPage.routeName,
+                          (route) => false,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor:
+                            Colors.blue, // warna latar belakang biru
+                      ),
+                      child: const Text(
+                        "Register",
+                        style: TextStyle(
+                          color: Colors.white, // warna teks putih
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
         ),

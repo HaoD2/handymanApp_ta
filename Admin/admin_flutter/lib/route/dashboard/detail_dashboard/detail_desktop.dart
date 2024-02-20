@@ -48,7 +48,14 @@ class _detail_desktopState extends State<detail_desktop> {
             return Card(
               child: Column(
                 children: [
-                  Image.network(data['certificateImage']),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Image.network(
+                      data['certificateImage'],
+                      width: 300,
+                      height: 300,
+                    ),
+                  ),
                   ListTile(
                     title: Text('Name: ${data['name']}'),
                     subtitle: Column(

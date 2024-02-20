@@ -30,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   bool confirmation = false;
-  int _rating = 0;
+  int _rating = 1;
   bool isChatDone = false;
   bool _notProfessional = false;
   bool _badService = false;
@@ -109,89 +109,101 @@ class _ChatPageState extends State<ChatPage> {
       children: [
         ElevatedButton(
           child: Text('Rating'),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                String _ratingComment = '';
-                return AlertDialog(
-                  title: Text('Beri Rating'),
-                  content: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text('Score: $_rating/5'),
-                          Slider(
-                            value: _rating.toDouble(),
-                            min: 0,
-                            max: 5,
-                            divisions: 5,
-                            onChanged: (value) {
-                              setState(() {
-                                _rating = value.round();
-                              });
-                            },
-                          ),
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Tambahkan komentar (opsional)',
+          onPressed: () async {
+            QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                .collection('kontak')
+                .where('uid_pemesanan', isEqualTo: widget.uid_pemesanan)
+                .where('isRatingDoneUser', isEqualTo: false)
+                .get();
+
+            if (querySnapshot.docs.isNotEmpty) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  String _ratingComment = '';
+                  return AlertDialog(
+                    title: Text('Beri Rating'),
+                    content: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text('Score: $_rating/5'),
+                            Slider(
+                              value: _rating.toDouble(),
+                              min: 1,
+                              max: 5,
+                              divisions: 5,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rating = value.round();
+                                });
+                              },
                             ),
-                            onChanged: (value) {
-                              _ratingComment = value;
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  actions: <Widget>[
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Tutup dialog
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Tambahkan komentar (opsional)',
+                              ),
+                              onChanged: (value) {
+                                _ratingComment = value;
+                              },
+                            ),
+                          ],
+                        );
                       },
-                      child: Text('Batal'),
                     ),
-                    TextButton(
-                      onPressed: () async {
-                        // Lakukan sesuatu dengan nilai _rating
-                        print('Rating: $_rating');
-                        try {
-                          QuerySnapshot querySnapshot = await FirebaseFirestore
-                              .instance
-                              .collection('request_handyman')
-                              .where('uid',
-                                  isEqualTo: this.widget.uid_pemesanan)
-                              .get();
+                    actions: <Widget>[
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Tutup dialog
+                        },
+                        child: Text('Batal'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // Lakukan sesuatu dengan nilai _rating
+                          print('Rating: $_rating');
+                          try {
+                            QuerySnapshot querySnapshot =
+                                await FirebaseFirestore.instance
+                                    .collection('request_handyman')
+                                    .where('uid',
+                                        isEqualTo: this.widget.uid_pemesanan)
+                                    .get();
 
-                          if (querySnapshot.docs.isNotEmpty) {
-                            // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
-                            String tipePekerjaan =
-                                querySnapshot.docs.first['tipe_pekerjaan'];
-                            tambahRatingLayanan(
-                                tipePekerjaan, _rating, _ratingComment);
-                            updateIsRatingDone();
-                          } else {
-                            return null; // Tidak ada dokumen dengan kondisi yang diberikan
+                            if (querySnapshot.docs.isNotEmpty) {
+                              // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
+                              String tipePekerjaan =
+                                  querySnapshot.docs.first['tipe_pekerjaan'];
+                              tambahRatingLayanan(
+                                  tipePekerjaan, _rating, _ratingComment);
+                              updateIsRatingDone();
+                            } else {
+                              return null; // Tidak ada dokumen dengan kondisi yang diberikan
+                            }
+                          } catch (e) {
+                            print('Error: $e');
+                            return null;
                           }
-                        } catch (e) {
-                          print('Error: $e');
-                          return null;
-                        }
 
-                        setState(() {
-                          isChatDone = true;
-                          _rating =
-                              0; // Reset rating setelah disubmit jika diperlukan
-                        });
-                        Navigator.of(context).pop(); // Tutup dialog
-                      },
-                      child: Text('Submit'),
-                    ),
-                  ],
-                );
-              },
-            );
+                          setState(() {
+                            isChatDone = true;
+                            _rating =
+                                0; // Reset rating setelah disubmit jika diperlukan
+                          });
+                          Navigator.of(context).pop(); // Tutup dialog
+                        },
+                        child: Text('Submit'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            } else {
+              // Tidak ada dokumen yang memenuhi kondisi
+              // Tampilkan pesan atau tindakan lain yang sesuai
+              print('Tidak ada dokumen yang memenuhi kondisi');
+            }
           },
         ),
         SizedBox(width: 10),
@@ -267,9 +279,8 @@ class _ChatPageState extends State<ChatPage> {
                             // Handle submit here
 
                             tambahReport(
-                                FirebaseAuth.instance.currentUser!.email
-                                    .toString(),
                                 this.widget.pengirimUser,
+                                this.widget.pengirimHandyman,
                                 DateTime.now(),
                                 _reportComment,
                                 _notProfessional,
@@ -442,7 +453,7 @@ class _ChatPageState extends State<ChatPage> {
           FirebaseFirestore.instance
               .collection('kontak')
               .doc(doc.id)
-              .update({'isRatingDone': true});
+              .update({'isRatingDoneUser': true});
         });
       });
     } catch (e) {
@@ -500,7 +511,7 @@ class _ChatPageState extends State<ChatPage> {
           FirebaseFirestore.instance
               .collection('users')
               .doc(doc.id)
-              .update({'saldo': saldo, 'status_pesan': false}).then((_) {
+              .update({'saldo': saldo, 'status_kerja': false}).then((_) {
             // Berhasil mengupdate saldo
           }).catchError((error) {
             // Gagal mengupdate saldo
@@ -520,6 +531,32 @@ class _ChatPageState extends State<ChatPage> {
             // Gagal menambahkan field saldo
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Gagal menambahkan field saldo: $error'),
+            ));
+          });
+        }
+      });
+    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: widget.pengirimUser)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // Mengecek apakah dokumen adalah dokumen yang valid dan memiliki field saldo
+        if (doc.exists &&
+            doc.data() is Map<String, dynamic> &&
+            (doc.data() as Map<String, dynamic>).containsKey('saldo')) {
+          saldo = doc['saldo'] + price;
+          // Update saldo pengguna
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(doc.id)
+              .update({'status_pesan': false}).then((_) {
+            // Berhasil mengupdate saldo
+          }).catchError((error) {
+            // Gagal mengupdate saldo
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Gagal mengupdate saldo: $error'),
             ));
           });
         }

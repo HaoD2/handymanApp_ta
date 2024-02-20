@@ -51,7 +51,8 @@ class _requestPekerjaanState extends State<requestPekerjaan> {
 
     // Mengambil semua dokumen dengan kondisi status adalah "pending" atau "acquired"
     QuerySnapshot querySnapshot = await _request_handyman
-        .where('status', whereIn: ['pending', 'on-progress'])
+        .where('status', whereIn: ['pending', 'on-progress', 'success'])
+        .where('status_done', isEqualTo: false)
         .where('user', isEqualTo: user.email)
         .get();
 

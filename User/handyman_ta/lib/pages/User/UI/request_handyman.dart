@@ -37,12 +37,14 @@ class _formRequestHandymanState extends State<formRequestHandyman> {
 
           // Simpan data ke Firestore
           final CollectionReference handymanReqCollection =
-              FirebaseFirestore.instance.collection('handyman_req');
+              FirebaseFirestore.instance.collection('handyman_req_forms');
 
           await handymanReqCollection.add({
             'name': _formKey.currentState!.fields['name']?.value,
+            'email': widget.email.toString(),
             'skill': _formKey.currentState!.fields['skill']?.value,
             'certificateImage': certificateImageUrl,
+            'date': Timestamp.now()
             // Tambahkan field lain sesuai kebutuhan
           });
 

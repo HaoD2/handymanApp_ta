@@ -225,6 +225,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       Timestamp timestamp = Timestamp.fromDate(dateTime);
       String price = PriceController.text;
       // Dapatkan referensi ke collection "request_handyman" di Firebase
+      // Dapatkan referensi ke collection "request_handyman" di Firebase
       final CollectionReference requestCollection =
           FirebaseFirestore.instance.collection('request_handyman');
       String today = DateTime.now()
@@ -256,13 +257,14 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       }
 
 // Gabungkan semuanya untuk membuat kode unik
-      String uniqueCode = 'ORDER$today$orderNumber';
+      String uniqueCode = 'ORDERLH$today$orderNumber';
       // Lakukan operasi form submission sesuai kebutuhan Anda
       Map<String, dynamic> requestData = {
         'uid': uniqueCode,
         'tipe_pekerjaan': this.widget.layanan,
         'user': user,
         'status': "pending",
+        'status_done': false,
         'address': address,
         'dateTime': dateTime,
         'start_time': start_time,

@@ -182,23 +182,12 @@ class _homeState extends State<home> {
                       padding:
                           const EdgeInsets.only(top: 50, right: 50, left: 50),
                       child: const Text(
-                        'Welcome',
+                        'MyHandyman',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                           fontSize: 18,
                         ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(top: 50, left: 125),
-                      child: IconButton(
-                        icon: Icon(Icons.notifications),
-                        onPressed: () {
-                          // Tambahkan logika notifikasi di sini
-                          // Misalnya tampilkan snackbar atau navigasi ke layar notifikasi
-                          // Sesuaikan dengan kebutuhan aplikasi kamu
-                        },
                       ),
                     ),
                   ],

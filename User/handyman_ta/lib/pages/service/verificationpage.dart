@@ -8,8 +8,10 @@ import 'package:handyman_ta/pages/service/authServices.dart';
 import 'package:handyman_ta/pages/service/fcmAPI.dart';
 
 class VerificationPage extends StatefulWidget {
-  const VerificationPage({Key? key, this.email}) : super(key: key);
-  final email;
+  const VerificationPage(
+      {Key? key, this.email, this.nama, this.date, this.notelp})
+      : super(key: key);
+  final email, date, nama, notelp;
 
   @override
   State<VerificationPage> createState() => _VerificationPageState();
@@ -114,11 +116,17 @@ class _VerificationPageState extends State<VerificationPage> {
       await ref.doc(user!.uid).set({
         'uid': _auth.currentUser?.uid,
         'email': FirebaseAuth.instance.currentUser!.email,
+        'nama': widget.nama,
+        'date': widget.date,
+        'notelp': widget.notelp,
+        'saldo': 0,
         'status': 1,
         'status_verif': 1,
         'status_handyman': 0,
+        'status_pesan': false,
+        'status_kerja': false,
         'status_akun': 1,
-        'token_messaging': ""
+        'token_messaging': fcmToken,
       });
 
       Navigator.pushReplacementNamed(context, userHomepage.routeName);

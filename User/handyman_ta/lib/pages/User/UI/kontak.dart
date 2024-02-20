@@ -53,6 +53,7 @@ class _Kontak_UserState extends State<Kontak_User> {
             if (!snapshot.hasData) {
               return CircularProgressIndicator();
             }
+
             var contacts = snapshot.data!.docs;
             return ListView.builder(
               itemCount: contacts.length,
@@ -76,6 +77,10 @@ class _Kontak_UserState extends State<Kontak_User> {
                     }
 
                     if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.data!.docs.isEmpty) {
+                        // Tampilkan pesan bahwa data tidak ditemukan atau lakukan tindakan lain
+                        return Text("Data not found");
+                      }
                       // Ambil data dari snapshot yang diperoleh
                       var data = snapshot.data!.docs.first.data();
                       if (data is Map<String, dynamic>) {
