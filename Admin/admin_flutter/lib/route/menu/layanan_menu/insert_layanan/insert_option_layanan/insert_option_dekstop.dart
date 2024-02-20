@@ -1,3 +1,4 @@
+import 'package:admin_flutter/route/menu/layanan_menu/Dekstop_LM.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +16,38 @@ class InsertOptionDekstop extends StatefulWidget {
 class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
   List<List<String>> textFieldValues = [[]];
   List<String> tempLayanan = [];
-  Future<void> insertToFirestore() async {
+
+  void showSuccessAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text("Pekerjaan telah ditambahkan"),
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                navigateToCRUDMenu(context); // Navigate to CRUDMenuDekstop
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Function to navigate to CRUDMenuDekstop
+  void navigateToCRUDMenu(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => CRUDMenuDekstop()),
+    );
+  }
+
+// Function to insert data to Firestore
+  Future<void> insertToFirestore(BuildContext context) async {
     CollectionReference layanan =
         FirebaseFirestore.instance.collection('pekerjaan');
 
@@ -53,12 +85,8 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
           .add(data); // Tambahkan data ke list untuk disimpan ke Firestore
     }
 
-// Simpan data ke Firestore
-    for (var data in dataToSave) {
-      CollectionReference input_option =
-          FirebaseFirestore.instance.collection('input_option');
-      await input_option.add(data);
-    }
+    // After insertion is completed, show success alert dialog
+    showSuccessAlertDialog(context);
   }
 
   @override
@@ -150,7 +178,7 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          insertToFirestore();
+          insertToFirestore(context);
         },
         label: Text('Submit'),
         icon: Icon(Icons.cloud_upload),

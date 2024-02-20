@@ -42,7 +42,7 @@ class _Request_Saldo_DekstopState extends State<Request_Saldo_Dekstop> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Laporan Pelanggaran'),
+                          Text('Request Saldo'),
                           SizedBox(
                             height: 24,
                           ),

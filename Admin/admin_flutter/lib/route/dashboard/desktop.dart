@@ -39,10 +39,20 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
           .where('email', isEqualTo: email)
           .get()
           .then((querySnapshot) {
-        querySnapshot.docs.forEach((doc) {
+        querySnapshot.docs.forEach((doc) async {
           usersCollection.doc(doc.id).update({'status_handyman': 1});
+                await handymarReqFormCollection
+          .where('email', isEqualTo: email)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          // Remove request
+          handymarReqFormCollection.doc(doc.id).delete();
         });
       });
+        });
+      });
+      
       String token_sent = '';
       QuerySnapshot<Map<String, dynamic>> querySnapshot =
           await FirebaseFirestore.instance
@@ -142,7 +152,7 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Success"),
+            title: Text("Maaf!"),
             content: Text("Permintaan dibatalkan!"),
             actions: [
               TextButton(
