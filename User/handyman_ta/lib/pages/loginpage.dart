@@ -22,6 +22,53 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
   final AuthServices _authService = AuthServices();
 
+  void loginCheck() async {
+    String username = usernameController.text.toString();
+    String password = passwordController.text.toString();
+
+    // Mengecek apakah pengguna ada dalam koleksi users
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .where('email', isEqualTo: username)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Pengguna ditemukan, cek status_akun
+      var userData = querySnapshot.docs.first.data();
+      int statusAkun = userData['status_akun'];
+
+      if (statusAkun == 1) {
+        loginUser();
+        print('Login berhasil');
+      } else {
+        // Status akun bukan 1, beri peringatan
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Status Akun Terkena Ban"),
+              content:
+                  Text("Anda tidak dapat login karena akun Anda terkena ban."),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } else {
+      // Pengguna tidak ditemukan
+      // Tambahkan logika untuk menangani kasus ini sesuai kebutuhan Anda
+      print('Pengguna tidak ditemukan');
+    }
+  }
+
   void loginUser() async {
     // Ganti dengan email dan password sesuai input pengguna
 
@@ -141,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: <Widget>[
                     TextButton(
                       onPressed: () async {
-                        loginUser();
+                        loginCheck();
                       },
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(

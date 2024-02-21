@@ -41,18 +41,27 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
           .then((querySnapshot) {
         querySnapshot.docs.forEach((doc) async {
           usersCollection.doc(doc.id).update({'status_handyman': 1});
-                await handymarReqFormCollection
-          .where('email', isEqualTo: email)
-          .get()
-          .then((querySnapshot) {
-        querySnapshot.docs.forEach((doc) {
-          // Remove request
-          handymarReqFormCollection.doc(doc.id).delete();
+          await handymarReqFormCollection
+              .where('email', isEqualTo: email)
+              .get()
+              .then((querySnapshot) {
+            querySnapshot.docs.forEach((doc) async {
+              // Remove request
+              handymarReqFormCollection.doc(doc.id).delete();
+              await handymarReqFormCollection
+                  .where('email', isEqualTo: email)
+                  .get()
+                  .then((querySnapshot) {
+                querySnapshot.docs.forEach((doc1) {
+                  // Remove request
+                  handymarReqFormCollection.doc(doc1.id).delete();
+                });
+              });
+            });
+          });
         });
       });
-        });
-      });
-      
+
       String token_sent = '';
       QuerySnapshot<Map<String, dynamic>> querySnapshot =
           await FirebaseFirestore.instance

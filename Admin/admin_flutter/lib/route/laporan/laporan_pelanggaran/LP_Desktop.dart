@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/LP_Detail/LPD_main.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +25,100 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
     _dataStream = FirebaseFirestore.instance
         .collection('pelanggaran_user')
         .snapshots(); // Mengambil stream dari koleksi 'handyman_req_forms'
+  }
+
+  Future<void> updateBan(String email) async {
+    try {
+      // Melakukan query untuk mendapatkan dokumen pengguna dengan email yang sesuai
+      final userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      // Jika ditemukan dokumen pengguna dengan email yang sesuai
+      if (userQuery.docs.isNotEmpty) {
+        // Mendapatkan referensi dokumen pengguna yang ditemukan
+        final userDocRef = userQuery.docs.first.reference;
+
+        // Melakukan pembaruan status_akun menjadi 0 untuk dilarang
+        await userDocRef.update({'status_akun': 0});
+
+        // Selanjutnya, kirim pemberitahuan kepada pengguna bahwa mereka telah dilarang
+        await sendNotification(email, 'Peringatan, Akun Anda Telah Diblokir!');
+      } else {
+        print('Pengguna dengan email $email tidak ditemukan');
+      }
+    } catch (e) {
+      print('Error saat memperbarui status akun: $e');
+    }
+  }
+
+  void deletePelanggaran(String pelapor, String terlapor) async {
+    try {
+      // Lakukan query untuk mendapatkan dokumen yang sesuai dengan kriteria
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('pelanggaran_user')
+          .where('nama_pelapor', isEqualTo: pelapor)
+          .where('nama_terlapor', isEqualTo: terlapor)
+          .get();
+
+      // Iterasi melalui setiap dokumen yang sesuai dan hapus satu per satu
+      querySnapshot.docs.forEach((doc) async {
+        await doc.reference.delete();
+      });
+
+      print('Data berhasil dihapus');
+    } catch (e) {
+      print('Error saat menghapus data: $e');
+    }
+  }
+
+  // Fungsi untuk memperbarui peringatan
+  void updateWarning(String email) async {
+    // Lakukan apa pun yang diperlukan untuk memperbarui peringatan di sini
+
+    // Selanjutnya, kirim pemberitahuan peringatan kepada pengguna
+    await sendNotification(
+        email, 'Peringatan, Anda Telah Melakukan Pelanggaran!');
+  }
+
+  // Fungsi untuk mengirim pemberitahuan menggunakan FCM
+  Future<void> sendNotification(String email, String message) async {
+    try {
+      // Di sini token_sent harus diambil dari database berdasarkan email pengguna
+      String token_sent = "TOKEN_PENGGUNA_DI_SINI";
+
+      final res =
+          await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+              headers: <String, String>{
+                'Content-Type': 'application/json',
+                'Authorization':
+                    'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
+              },
+              body: jsonEncode(<String, dynamic>{
+                'priority': 'high',
+                'data': {
+                  'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                  'status': 'done',
+                  'body': 'MyHandyman',
+                  'title': message,
+                },
+                'notification': {
+                  'body': message,
+                  'title': message,
+                  'android_channel_id': "dbFood"
+                },
+                "to": token_sent
+              }));
+
+      if (res.statusCode == 200) {
+        print('Pemberitahuan berhasil dikirim');
+      } else {
+        print('Gagal mengirim pemberitahuan: ${res.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
@@ -123,7 +219,51 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                                             minWidth: 150.0,
                                             height: 100.0,
                                             child: ElevatedButton(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text("Pilih Aksi"),
+                                                      content:
+                                                          SingleChildScrollView(
+                                                        child: ListBody(
+                                                          children: <Widget>[
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                updateWarning(data[
+                                                                    'nama_terlapor']);
+
+                                                                // Aksi jika tombol "Warning" ditekan
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                                // Tambahkan aksi yang ingin dilakukan saat tombol "Warning" ditekan
+                                                              },
+                                                              child: Text(
+                                                                  "Warning"),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                updateBan(data[
+                                                                    'nama_terlapor']);
+                                                                // Aksi jika tombol "Ban" ditekan
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                                // Tambahkan aksi yang ingin dilakukan saat tombol "Ban" ditekan
+                                                              },
+                                                              child:
+                                                                  Text("Ban"),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
                                               child: Text("Submit",
                                                   style: TextStyle(
                                                       fontSize:
@@ -135,7 +275,42 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                                             minWidth: 150.0,
                                             height: 100.0,
                                             child: ElevatedButton(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text("Konfirmasi"),
+                                                      content: Text(
+                                                          "Apakah Anda yakin ingin menolak pelanggaran ini?"),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: Text("Tidak"),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            deletePelanggaran(
+                                                                data[
+                                                                    'nama_pelapor'],
+                                                                data[
+                                                                    'nama_terlapor']); // Panggil fungsi untuk menghapus data
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: Text("Ya"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
                                               child: Text("Tolak",
                                                   style: TextStyle(
                                                       fontSize:
@@ -197,7 +372,6 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
               ],
             ),
           ),
-          Text(screenWidth.toString()),
         ],
       ),
     );
