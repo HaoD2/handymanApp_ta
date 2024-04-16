@@ -111,12 +111,6 @@ class CRUDMenuDekstopState extends State<CRUDMenuDekstop> {
                                             fontSize:
                                                 sizeTableDesktopTextContent),
                                       )),
-                                      DataCell(Text(
-                                        data['price'].toString(),
-                                        style: TextStyle(
-                                            fontSize:
-                                                sizeTableDesktopTextContent),
-                                      )),
                                       DataCell(Row(
                                         children: [
                                           ButtonTheme(
@@ -183,11 +177,6 @@ class CRUDMenuDekstopState extends State<CRUDMenuDekstop> {
                                       )),
                                       DataColumn(
                                           label: Text("Nama Layanan",
-                                              style: TextStyle(
-                                                  fontSize:
-                                                      sizeTableDesktopTextTitle))),
-                                      DataColumn(
-                                          label: Text("Harga",
                                               style: TextStyle(
                                                   fontSize:
                                                       sizeTableDesktopTextTitle))),

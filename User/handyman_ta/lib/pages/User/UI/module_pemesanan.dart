@@ -492,6 +492,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                       ),
                       initialValue: selectedDateTime,
                       inputType: InputType.date,
+                      firstDate: DateTime.now().subtract(Duration(days: 1)),
+                      lastDate: DateTime(2100),
                       controller: dateController,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),

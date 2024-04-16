@@ -1,6 +1,8 @@
 import 'package:admin_flutter/constants/app_colors.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
+import 'package:admin_flutter/route/menu/request_saldo/main_RS.dart';
+import 'package:admin_flutter/route/menu/request_saldo/rs_detail/rsd_main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -100,6 +102,30 @@ class _Request_Saldo_DekstopState extends State<Request_Saldo_Dekstop> {
                                             height: 100.0,
                                             child: ElevatedButton(
                                               onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          RequestSaldoDetail(
+                                                            email:
+                                                                data['email'],
+                                                          )),
+                                                );
+                                                setState(() {
+                                                  selectedUID = tempID;
+                                                });
+                                              },
+                                              child: Text("Detail",
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          sizeTableDesktopTextContent)),
+                                            ),
+                                          ),
+                                          ButtonTheme(
+                                            minWidth: 150.0,
+                                            height: 100.0,
+                                            child: ElevatedButton(
+                                              onPressed: () {
                                                 setState(() {
                                                   selectedUID = tempID;
                                                 });
@@ -177,7 +203,6 @@ class _Request_Saldo_DekstopState extends State<Request_Saldo_Dekstop> {
               ],
             ),
           ),
-          Text(screenWidth.toString()),
         ],
       ),
     );

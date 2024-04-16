@@ -36,6 +36,7 @@ class pemesanan_details extends StatefulWidget {
 class _pemesanan_detailsState extends State<pemesanan_details> {
   Pekerjaan? pekerjaan;
   bool isLoading = false;
+  LatLng? pekerjaanLocation;
   List<Pekerjaan> datas = [];
   @override
   void initState() {
@@ -119,7 +120,10 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
     if (listData != null) {
       setState(() {
         pekerjaan = listData;
-        print(pekerjaan?.address);
+        pekerjaanLocation = LatLng(
+          pekerjaan?.location.latitude ?? 0,
+          pekerjaan?.location.longitude ?? 0,
+        );
       });
     }
   }
@@ -259,10 +263,10 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
                 child: FlutterMap(
                   options: MapOptions(
                     center: LatLng(
-                      pekerjaan?.location.latitude ?? 0,
-                      pekerjaan?.location.longitude ?? 0,
+                      pekerjaan?.location.latitude ?? -6.966667,
+                      pekerjaan?.location.longitude ?? 110.7122,
                     ),
-                    zoom: 13.0,
+                    zoom: 5.0,
                   ),
                   children: [
                     TileLayer(
@@ -276,8 +280,8 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
                           width: 40.0,
                           height: 40.0,
                           point: LatLng(
-                            pekerjaan?.location.latitude ?? 0,
-                            pekerjaan?.location.longitude ?? 0,
+                            pekerjaan?.location.latitude ?? -6.966667,
+                            pekerjaan?.location.longitude ?? 110.7122,
                           ),
                           builder: (ctx) => Container(
                             child: Icon(

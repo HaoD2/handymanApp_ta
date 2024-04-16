@@ -18,7 +18,7 @@ class AuthServices {
       if (e is FirebaseAuthException) {
         print(
             "Firebase Auth Exception - Code: ${e.code}, Message: ${e.message}");
-        // Handle specific Firebase Auth exceptions using e.code
+        // Handle Spesifik Error
         switch (e.code) {
           case "invalid-email":
             return "Your email address appears to be malformed.";

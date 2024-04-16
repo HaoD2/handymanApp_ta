@@ -358,16 +358,6 @@ class _detail_customState extends State<detail_custom> {
                 ),
               ),
             SizedBox(height: 10),
-            Container(
-                margin: EdgeInsets.all(15),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Gambar (Optional)",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                )),
             ElevatedButton(
               onPressed: () async {
                 _submitForm();

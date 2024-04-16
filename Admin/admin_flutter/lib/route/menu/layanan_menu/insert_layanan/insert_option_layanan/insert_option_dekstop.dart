@@ -74,15 +74,17 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
           textFieldIndex++) {
         inputs.add(textFieldValues[index][textFieldIndex]);
       }
-
+      CollectionReference input_option =
+          FirebaseFirestore.instance.collection('input_option');
       Map<String, dynamic> data = {
         'input': inputs,
         'option_layanan': tempLayanan[
             index], // Setiap elemen dalam tempLayanan digunakan sebagai nama pekerjaan
       };
 
-      dataToSave
-          .add(data); // Tambahkan data ke list untuk disimpan ke Firestore
+      dataToSave.add(data);
+      // Tambahkan data ke list untuk disimpan ke Firestore
+      input_option.add(data);
     }
 
     // After insertion is completed, show success alert dialog
@@ -114,7 +116,7 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dynamic Form'),
+        title: Text('Form Pekerjaan'),
       ),
       body: ListView.builder(
         itemCount: tempLayanan.length,
@@ -148,7 +150,7 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
                                 });
                               },
                               decoration: InputDecoration(
-                                labelText: 'Textbox ${textFieldIndex + 1}',
+                                labelText: 'Pekerjaan',
                               ),
                               initialValue: value,
                             ),

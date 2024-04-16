@@ -43,8 +43,10 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
         // Melakukan pembaruan status_akun menjadi 0 untuk dilarang
         await userDocRef.update({'status_akun': 0});
 
+        final tokenMessaging = userQuery.docs.first['token_messaging'];
         // Selanjutnya, kirim pemberitahuan kepada pengguna bahwa mereka telah dilarang
-        await sendNotification(email, 'Peringatan, Akun Anda Telah Diblokir!');
+        await sendNotification(
+            tokenMessaging, 'Peringatan, Akun Anda Telah Diblokir!');
       } else {
         print('Pengguna dengan email $email tidak ditemukan');
       }
@@ -83,10 +85,9 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
   }
 
   // Fungsi untuk mengirim pemberitahuan menggunakan FCM
-  Future<void> sendNotification(String email, String message) async {
+  Future<void> sendNotification(String tokenMessaging, String message) async {
     try {
       // Di sini token_sent harus diambil dari database berdasarkan email pengguna
-      String token_sent = "TOKEN_PENGGUNA_DI_SINI";
 
       final res =
           await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
@@ -108,7 +109,7 @@ class _LaporanPelanggaranDekstopState extends State<LaporanPelanggaranDekstop> {
                   'title': message,
                   'android_channel_id': "dbFood"
                 },
-                "to": token_sent
+                "to": tokenMessaging
               }));
 
       if (res.statusCode == 200) {

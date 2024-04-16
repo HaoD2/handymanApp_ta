@@ -146,7 +146,7 @@ class _profileState extends State<profile> {
                                                 radius:
                                                     20, // Atur sesuai kebutuhan Anda
                                               ),
-                                              title: Text("$nama}",
+                                              title: Text("$nama",
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.black,

@@ -49,6 +49,9 @@ class _detail_desktopState extends State<detail_desktop> {
               child: Column(
                 children: [
                   Container(
+                      alignment: Alignment.topLeft,
+                      child: Text('Gambar Sertifikat')),
+                  Container(
                     alignment: Alignment.centerLeft,
                     child: Image.network(
                       data['certificateImage'],

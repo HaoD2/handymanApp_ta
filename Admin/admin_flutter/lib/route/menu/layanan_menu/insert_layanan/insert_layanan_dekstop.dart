@@ -60,19 +60,6 @@ class _insertLayananDekstopState extends State<insertLayananDekstop> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              controller: harga,
-              decoration: InputDecoration(
-                labelText: 'Harga',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                price = value;
-              },
-            ),
-          ),
           ListView.builder(
             shrinkWrap: true,
             itemCount: controllers1.length,
@@ -135,7 +122,6 @@ class _insertLayananDekstopState extends State<insertLayananDekstop> {
                   MaterialPageRoute(
                       builder: (context) => MainInsertOption(
                             layanan: textList.toList(),
-                            harga: price,
                             nama_pekerjaan: Pekerjaan,
                           )));
             },
