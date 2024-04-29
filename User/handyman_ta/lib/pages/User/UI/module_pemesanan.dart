@@ -240,12 +240,12 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           .limit(1)
           .get();
 
-      int lastOrderNumber = 0;
+      BigInt lastOrderNumber = BigInt.zero;
 
       if (lastOrder.docs.isNotEmpty) {
         // Jika ada pemesanan sebelumnya, ambil nomor urutnya
-        lastOrderNumber =
-            int.parse(lastOrder.docs.first.get('uid').substring(13)) + 1;
+        String uid = lastOrder.docs.first.get('uid').substring(13);
+        lastOrderNumber = BigInt.parse(uid) + BigInt.one;
       }
 
 // Format nomor urut menjadi 6 digit dengan padding nol

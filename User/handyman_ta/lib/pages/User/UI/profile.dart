@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handyman_ta/pages/Admin/showReqHandyman.dart';
 import 'package:handyman_ta/pages/User/UI/favourites.dart';
+import 'package:handyman_ta/pages/User/UI/history_pemesanan.dart';
 import 'package:handyman_ta/pages/User/UI/request_handyman.dart';
 import 'package:handyman_ta/pages/User/home.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
@@ -276,18 +277,30 @@ class _profileState extends State<profile> {
                           Container(
                             margin: const EdgeInsets.all(5),
                             child: ListTile(
-                                trailing: Container(
-                                  margin: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.history_rounded),
+                              trailing: Container(
+                                margin: const EdgeInsets.all(5),
+                                child: const Icon(Icons.history_rounded),
+                              ),
+                              title: const Text(
+                                'History Pemesanan',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  fontSize: 15,
                                 ),
-                                title: const Text(
-                                  'History Pemesanan',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 15,
+                              ),
+                              onTap: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return history_pemesanan();
+                                    },
                                   ),
-                                )),
+                                  (_) => false,
+                                );
+                              },
+                            ),
                           ),
                           Container(
                             margin: const EdgeInsets.all(5),
