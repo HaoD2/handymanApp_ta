@@ -197,41 +197,23 @@ class _detail_customState extends State<detail_custom> {
     if (res.statusCode == 200) {
       print('>>>>>>>>>>>>>>>>>>>>success');
       final responseData = jsonDecode(res.body);
-      print(responseData);
-      try {
-        // Clear form
-        await FirebaseFirestore.instance
-            .collection('request_handyman')
-            .add(requestData);
-        await FirebaseFirestore.instance
-            .collection('users')
-            .where('email', isEqualTo: user)
-            .get()
-            .then((QuerySnapshot querySnapshot) {
-          querySnapshot.docs.forEach((doc) {
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(doc.id)
-                .update({'status_pesan': true});
-          });
-        });
 
-        setState(() {
-          requestImage = null;
-        });
-      } catch (e) {
-        print('Error inserting data: $e');
-      }
       print(responseData['redirect']);
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return SnapScreen(
-                redirect_url: responseData['redirect'], order_id: uniqueCode);
+              redirect_url: responseData['redirect'],
+              order_id: uniqueCode,
+              requestData: requestData,
+            );
           },
         ),
         (_) => false,
       );
+      setState(() {
+        requestImage = null;
+      });
     } else {
       print(res.body);
       print(res.statusCode.toString() + ">>>>>");

@@ -1,11 +1,13 @@
 import 'dart:convert';
-
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:myhandyman_handyman/page/history_pemesanan.dart';
 import 'package:myhandyman_handyman/page/login.dart';
+import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:myhandyman_handyman/service/authservice.dart';
 import 'package:http/http.dart' as http;
 import 'package:myhandyman_handyman/service/changepassword.dart';
@@ -20,7 +22,10 @@ class profileHandyman extends StatefulWidget {
 
 class _profileHandymanState extends State<profileHandyman> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NumberFormat formatCurrency =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
   int tempSaldo = 0;
+
   TextEditingController saldoController = TextEditingController();
 
   final AuthService _authService = AuthService();
@@ -47,7 +52,7 @@ class _profileHandymanState extends State<profileHandyman> {
         .get();
 
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-    print(allData);
+
     return allData;
   }
 
@@ -89,9 +94,10 @@ class _profileHandymanState extends State<profileHandyman> {
   @override
   void initState() {
     super.initState();
-
+    setState(() {});
     // Periksa status otentikasi pengguna saat halaman diinisialisasi
     _checkAuthentication();
+    getData();
   }
 
   @override
@@ -124,125 +130,155 @@ class _profileHandymanState extends State<profileHandyman> {
                       child: ListTile(
                         title: Column(
                           children: [
-                            FutureBuilder<dynamic>(
-                              initialData: const {},
-                              future: getData(),
-                              builder:
-                                  (context, AsyncSnapshot<dynamic> snapshot) {
-                                if (!snapshot.hasData ||
-                                    snapshot.data == null ||
-                                    snapshot.data.isEmpty ||
-                                    snapshot.hasError) {
-                                  if (snapshot.data == {}) {
-                                    return Container();
-                                  }
+                            StreamBuilder<QuerySnapshot>(
+                              stream: _users
+                                  .where("email",
+                                      isEqualTo: FirebaseAuth
+                                          .instance.currentUser?.email)
+                                  .snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator(); // Tampilkan indikator loading jika data masih diambil
                                 }
+                                if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                }
+
+                                if (snapshot.data == null ||
+                                    snapshot.data!.docs.isEmpty) {
+                                  return Text('No data available');
+                                }
+
+                                final List<DocumentSnapshot> documents =
+                                    snapshot.data!.docs;
+                                final allData =
+                                    documents.map((doc) => doc.data()).toList();
+
                                 return Container(
-                                    margin: const EdgeInsets.only(top: 15),
-                                    child: Column(
-                                      children: [
-                                        ListTile(
-                                          leading: CircleAvatar(
-                                            backgroundImage: AssetImage(
-                                                "assets/images/icon_profile.png"),
-                                            radius:
-                                                20, // Atur sesuai kebutuhan Anda
-                                          ),
-                                          title: Text(
-                                              "${FirebaseAuth.instance.currentUser?.email}",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                                fontSize: 15,
-                                              )),
-                                          trailing: IconButton(
-                                            icon: Icon(Icons.edit),
-                                            onPressed: () {
-                                              // Tambahkan logika untuk tombol edit di sini
-                                            },
+                                  margin: const EdgeInsets.only(top: 15),
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundImage: AssetImage(
+                                              "assets/images/icon_profile.png"),
+                                          radius: 20,
+                                        ),
+                                        title: Text(
+                                          "${FirebaseAuth.instance.currentUser?.email}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                            fontSize: 15,
                                           ),
                                         ),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data.length,
-                                          itemBuilder: (_, index) {
-                                            final data = snapshot.data[index];
-                                            final saldo = data['saldo'];
-                                            tempSaldo = int.parse(
-                                                saldo.toString() ?? '0');
-                                            final status = data['status'];
-                                            final statusHandyman =
-                                                data['status_handyman'];
-
-                                            // Menampilkan berdasarkan status
-                                            if (status == 1 &&
-                                                statusHandyman == 1) {
-                                              return Container(
-                                                child: Column(
-                                                  children: [
-                                                    ListTile(
-                                                      leading:
-                                                          Icon(Icons.verified),
-                                                      title: Text('Verified'),
-                                                    ),
-                                                    ListTile(
-                                                      leading:
-                                                          Icon(Icons.verified),
-                                                      title: Text(
-                                                          'Handyman Verified'),
-                                                    ),
-                                                    ListTile(
-                                                      leading: Icon(
-                                                          Icons.money_sharp),
-                                                      title: Text('Saldo : ' +
-                                                          saldo.toString()),
-                                                      onTap: () {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return Dialog(
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10),
-                                                              ),
-                                                              elevation: 0,
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .transparent,
-                                                              child: SaldoBox(
-                                                                  context),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            } else if (status == 1 &&
-                                                statusHandyman == 0) {
-                                              return Container(
-                                                child: Column(
-                                                  children: [
-                                                    ListTile(
-                                                      leading:
-                                                          Icon(Icons.verified),
-                                                      title: Text('Verified'),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
+                                        trailing: IconButton(
+                                          icon: Icon(Icons.edit),
+                                          onPressed: () {
+                                            // Tambahkan logika untuk tombol edit di sini
                                           },
                                         ),
-                                      ],
-                                    ));
+                                      ),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: allData.length,
+                                        itemBuilder: (_, index) {
+                                          final List<
+                                                  QueryDocumentSnapshot<
+                                                      Object?>> documents =
+                                              snapshot.data!.docs;
+                                          if (index >= documents.length) {
+                                            // Handle case when index is out of bounds
+                                            return Container();
+                                          }
+                                          final Map<String, dynamic>? data =
+                                              documents[index].data()
+                                                  as Map<String, dynamic>?;
+                                          if (data == null) {
+                                            // Handle case when data is null
+                                            return Container();
+                                          }
+                                          final saldo = data['saldo'];
+                                          final status = data['status'];
+                                          final statusHandyman =
+                                              data['status_handyman'];
+
+                                          // Menampilkan berdasarkan status
+                                          if (status == 1 &&
+                                              statusHandyman == 1) {
+                                            return Container(
+                                              child: Column(
+                                                children: [
+                                                  ListTile(
+                                                    leading:
+                                                        Icon(Icons.verified),
+                                                    title: Text('Verified'),
+                                                  ),
+                                                  ListTile(
+                                                    leading:
+                                                        Icon(Icons.verified),
+                                                    title: Text(
+                                                        'Handyman Verified'),
+                                                  ),
+                                                  ListTile(
+                                                    leading:
+                                                        Icon(Icons.money_sharp),
+                                                    title: Text('Saldo : ' +
+                                                        formatCurrency.format(
+                                                            int.parse(saldo
+                                                                .toString()))),
+                                                    onTap: () {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return Dialog(
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                            ),
+                                                            elevation: 0,
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            child: SaldoBox(
+                                                                context, saldo),
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          } else if (status == 1 &&
+                                              statusHandyman == 0) {
+                                            return Container(
+                                              child: Column(
+                                                children: [
+                                                  ListTile(
+                                                    leading:
+                                                        Icon(Icons.verified),
+                                                    title: Text('Verified'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                          return Container(); // Return a default empty container if conditions are not met
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                             ),
                           ],
@@ -262,18 +298,30 @@ class _profileHandymanState extends State<profileHandyman> {
                           Container(
                             margin: const EdgeInsets.all(5),
                             child: ListTile(
-                                trailing: Container(
-                                  margin: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.history_rounded),
+                              trailing: Container(
+                                margin: const EdgeInsets.all(5),
+                                child: const Icon(Icons.history_rounded),
+                              ),
+                              title: const Text(
+                                'History Pemesanan',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  fontSize: 15,
                                 ),
-                                title: const Text(
-                                  'History Pemesanan',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 15,
+                              ),
+                              onTap: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return history_pemesanan();
+                                    },
                                   ),
-                                )),
+                                  (_) => false,
+                                );
+                              },
+                            ),
                           ),
                           Container(
                             margin: const EdgeInsets.all(5),
@@ -429,7 +477,7 @@ class _profileHandymanState extends State<profileHandyman> {
     );
   }
 
-  Widget SaldoBox(BuildContext context1) {
+  Widget SaldoBox(BuildContext context1, int saldo) {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -441,7 +489,7 @@ class _profileHandymanState extends State<profileHandyman> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            'Jumlah Saldo : ' + tempSaldo.toString(),
+            'Jumlah Saldo : ' + saldo.toString(),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -465,7 +513,48 @@ class _profileHandymanState extends State<profileHandyman> {
             children: <Widget>[
               ElevatedButton(
                 onPressed: () {
-                  _submitSaldo(context1);
+                  double saldopay = double.parse(saldoController.text) ?? 0.0;
+                  double pajak = saldopay * 0.05;
+                  double totalPengambilan = saldopay - pajak;
+                  print(saldo);
+                  print(saldopay);
+                  showDialog(
+                    context: context1,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Ringkasan Pengambilan Saldo'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                                'Total Pengambilan Saldo: ${formatCurrency.format(saldopay)}'),
+                            SizedBox(height: 10),
+                            Text('Pajak (5%): ${formatCurrency.format(pajak)}'),
+                            SizedBox(height: 10),
+                            Text(
+                                'Total yang diterima: ${formatCurrency.format(totalPengambilan)}'),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Tutup dialog
+                            },
+                            child: Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              _submitSaldo(context1);
+
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 child: Text('Submit'),
               ),
@@ -474,6 +563,7 @@ class _profileHandymanState extends State<profileHandyman> {
               ),
               ElevatedButton(
                 onPressed: () {
+                  saldoController.text = "";
                   Navigator.of(context1).pop();
                 },
                 child: Text('Close'),
@@ -490,24 +580,20 @@ class _profileHandymanState extends State<profileHandyman> {
     String saldoText = saldoController.text;
     if (saldoText.isEmpty) {
       _showErrorDialog('Silakan masukkan jumlah saldo.');
-      return;
     }
 
     int? saldo = int.tryParse(saldoText.toString());
     if (saldo == null || saldo < 50000) {
       _showErrorDialog('Saldo minimal yang bisa diambil adalah 50,000.');
-      return;
     }
 
-    if (saldo > tempSaldo) {
+    if (saldo! > tempSaldo) {
       _showErrorDialog('Saldo tidak mencukupi.');
-      return;
     }
 
     String? email = FirebaseAuth.instance.currentUser!.email;
-    String tanggal = DateTime.now().toString(); // Mengambil tanggal saat ini
+    String tanggal = DateTime.now().toString();
 
-    // Menambahkan data ke Firebase Firestore
     FirebaseFirestore.instance.collection('request_saldo_handyman').add({
       'email': email,
       'total_saldo': saldo,
@@ -515,7 +601,7 @@ class _profileHandymanState extends State<profileHandyman> {
     }).then((value) {
       Navigator.of(context1).pop(); // Tutup dialog setelah submit
       print('Data berhasil ditambahkan!');
-      // Mengambil saldo dari database users berdasarkan email
+
       FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: email)
@@ -523,44 +609,37 @@ class _profileHandymanState extends State<profileHandyman> {
           .then((QuerySnapshot querySnapshot) {
         if (querySnapshot.docs.isNotEmpty) {
           var userData = querySnapshot.docs.first.data();
-          // Update saldo user
-          // Memeriksa dan mengambil saldo jika userData adalah Map<String, dynamic>
           if (userData is Map<String, dynamic>) {
             var saldoCurrent = userData['saldo'] as int;
             print('Saldo user sebelum: $saldoCurrent');
 
-            // Update saldo user
             int newSaldo = saldoCurrent - saldo;
             FirebaseFirestore.instance
                 .collection('users')
-                .doc(querySnapshot
-                    .docs.first.id) // Dokumen yang sesuai dengan query
+                .doc(querySnapshot.docs.first.id)
                 .update({'saldo': newSaldo}).then((_) {
               print('Saldo berhasil diupdate.');
-              // Tambahkan penanganan setelah saldo berhasil diupdate jika diperlukan
             }).catchError((error) {
               print('Error saat melakukan update saldo: $error');
-              // Tambahkan penanganan error jika update saldo gagal
             });
           } else {
             print('Data saldo tidak valid.');
-            // Tambahkan penanganan jika data saldo tidak valid
           }
         } else {
           print('Email tidak ditemukan di database users.');
-          // Tambahkan penanganan ketika email tidak ditemukan di database users
         }
       }).catchError((error) {
         print('Error saat mengambil data user: $error');
-        // Tambahkan penanganan error saat mengambil data user
       });
+
       ScaffoldMessenger.of(context1).showSnackBar(
         SnackBar(
           content: Text('Request saldo berhasil dikirim!'),
-          duration: Duration(seconds: 2), // Durasi tampilan snack bar
+          duration: Duration(seconds: 3),
         ),
       );
-      // Tambahkan kode lain yang perlu dieksekusi setelah data ditambahkan
+
+      // Tambahkan navigasi dan efek refresh di sini
     }).catchError((error) {
       print('Error: $error');
     });
@@ -585,4 +664,13 @@ class _profileHandymanState extends State<profileHandyman> {
       },
     );
   }
+}
+
+void _showSuccessSnackbar(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Request saldo berhasil dikirim!'),
+      duration: Duration(seconds: 2),
+    ),
+  );
 }

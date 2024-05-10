@@ -9,6 +9,7 @@ import 'package:myhandyman_handyman/page/profile.dart';
 import 'package:myhandyman_handyman/service/filtermenu.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class userHandyman extends StatelessWidget {
@@ -193,6 +194,8 @@ class _homeState extends State<home> {
     });
   }
 
+  final NumberFormat formatCurrency =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
   @override
   void initState() {
     super.initState();
@@ -327,27 +330,79 @@ class _homeState extends State<home> {
                         item.location.longitude,
                       ) /
                       1000;
+
                   return ListTile(
                     title: Text(
                       'Option Menu: ${item.optionMenu.join(', ')}',
                     ), // Menggabungkan multiple values dengan koma
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text('Start Time: ${item.startTime}'),
-                        Text('End Time: ${item.endTime}'),
-                        Text('Description: ${item.description}'),
-                        Text('Price: ${item.price}'),
-                        Row(
-                          children: <Widget>[
-                            Icon(Icons.access_time),
-                            Text(
-                                'Date Time: ${item.datetime.toDate()}'), // Konversi Timestamp ke DateTime
-                          ],
-                        ),
-                        Text(
-                            'Jarak ke Lokasi: ${calculatedDistance.toStringAsFixed(2)} kilometer'),
-                      ],
+                    subtitle: Card(
+                      // Define the shape of the card
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      // Define how the card's content should be clipped
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      // Define the child widget of the card
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // Add padding around the row widget
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                // Add an image widget to display an image
+                                item.image != null && item.image.isNotEmpty
+                                    ? Image.network(
+                                        item.image,
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        'assets/images/no-photos.jpg',
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+
+                                // Add some spacing between the image and the text
+                                Container(width: 20),
+                                // Add an expanded widget to take up the remaining horizontal space
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      // Add some spacing between the top of the card and the title
+                                      Container(height: 5),
+                                      // Add a title widget
+                                      Text(
+                                        item.tipe_Pekerjaan,
+                                      ),
+                                      // Add some spacing between the title and the subtitle
+                                      Container(height: 5),
+                                      // Add a subtitle widget
+                                      Text(
+                                        formatCurrency.format(
+                                            int.parse(item.price.toString())),
+                                      ),
+                                      // Add some spacing between the subtitle and the text
+                                      Container(height: 10),
+                                      // Add a text widget to display some text
+                                      Text(
+                                        '${calculatedDistance.toStringAsFixed(1)} kilometer',
+                                        maxLines: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     onTap: () {
                       Navigator.of(context, rootNavigator: true)

@@ -174,7 +174,7 @@ class _ChatPageState extends State<ChatPage> {
                             if (querySnapshot.docs.isNotEmpty) {
                               // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
                               String tipePekerjaan =
-                                  querySnapshot.docs.first['tipe_pekerjaan'];
+                                  querySnapshot.docs.first['taken_by'];
                               tambahRatingLayanan(
                                   tipePekerjaan, _rating, _ratingComment);
                               updateIsRatingDone();
@@ -401,15 +401,15 @@ class _ChatPageState extends State<ChatPage> {
 
 //rating layanan
   Future<DocumentReference> tambahRatingLayanan(
-    String namaLayanan,
+    String namaUser,
     int nilaiRating,
     String komentar,
   ) async {
     CollectionReference ratingLayananCollection =
-        FirebaseFirestore.instance.collection('rating_layanan');
+        FirebaseFirestore.instance.collection('rating_user');
 
     return await ratingLayananCollection.add({
-      'nama_layanan': namaLayanan,
+      'nama_user': namaUser,
       'nilai_Rating': nilaiRating,
       'komentar': komentar,
     });
@@ -694,7 +694,7 @@ class _ChatPageState extends State<ChatPage> {
                                   return CircularProgressIndicator();
                                 }
                                 var messages = snapshot.data!.docs;
-                                messages.sort((a, b) {
+                                messages.sort((b, a) {
                                   Timestamp timeA = a['waktu'] as Timestamp;
                                   Timestamp timeB = b['waktu'] as Timestamp;
                                   return timeA.compareTo(

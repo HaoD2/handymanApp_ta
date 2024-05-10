@@ -75,6 +75,32 @@ router.post('/purchase', async (req, res) => {
     }
 });
 
+router.post('/cancelPurchase', async (req, res) => {
+    res.setHeader('Accept', 'application/json');
+    res.setHeader('Content-Type', 'application/json');
+    try {
+        const data = req.body;
+        const snap = new midtransClient.Snap({
+            isProduction: false,
+            serverKey: SERVER_KEY,
+            clientKey: CLIENT_KEY
+        });
+        if (!data) {
+            return res.status(400).json({ message: 'Invalid parameter' });
+        }
 
+        snap.transaction.cancel(data.order_id)
+            .then((response) => {
+                console.log(response);
+                return res.status(200).json(response);
+            });
+
+    } catch (ex) {
+        return res.status(500).json({ message: ex.message });
+    }
+
+
+
+});
 
 module.exports = router;

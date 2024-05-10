@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:myhandyman_handyman/page/login.dart';
+import 'package:myhandyman_handyman/page/profile.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:myhandyman_handyman/service/fcmAPI.dart';
@@ -53,7 +54,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Home',
-      routes: {userHandyman.routeName: (context) => const userHandyman()},
+      routes: {
+        userHandyman.routeName: (context) => const userHandyman(),
+        LoginPage.routeName: (context) => const LoginPage(),
+        profileHandyman.routeName: (context) => const profileHandyman(),
+      },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

@@ -224,43 +224,52 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       String end_time = endTimeController.text;
       Timestamp timestamp = Timestamp.fromDate(dateTime);
       String price = PriceController.text;
-      // Dapatkan referensi ke collection "request_handyman" di Firebase
-      // Dapatkan referensi ke collection "request_handyman" di Firebase
       final CollectionReference requestCollection =
           FirebaseFirestore.instance.collection('request_handyman');
-      String today = DateTime.now()
-          .toLocal()
-          .toString()
-          .substring(0, 10)
-          .replaceAll("-", "");
+      String today = DateFormat('ddMMyyyy').format(DateTime.now());
 
 // Dapatkan nomor urut terakhir dari database
       QuerySnapshot lastOrder = await requestCollection
+          .orderBy('created_date', descending: true)
           .orderBy('uid', descending: true)
           .limit(1)
           .get();
 
+      // Simulasi nomor urut terakhir dari database
       BigInt lastOrderNumber = BigInt.zero;
 
       if (lastOrder.docs.isNotEmpty) {
         // Jika ada pemesanan sebelumnya, ambil nomor urutnya
-        String uid = lastOrder.docs.first.get('uid').substring(13);
-        lastOrderNumber = BigInt.parse(uid) + BigInt.one;
+        String uid = lastOrder.docs.first.get('uid').substring(
+            15); // Ubah dari 8 menjadi 14 untuk mendapatkan nomor urut
+        lastOrderNumber = BigInt.parse(uid);
       }
 
-// Format nomor urut menjadi 6 digit dengan padding nol
-      String orderNumber = lastOrderNumber.toString().padLeft(6, '0');
+      // Ubah Timestamp menjadi DateTime untuk created_date
+      DateTime? lastOrderDate = lastOrder.docs.isNotEmpty
+          ? (lastOrder.docs.first.get('created_date') as Timestamp).toDate()
+          : null;
 
-// Jika nomor urut masih 0, mulai dari "ORDER061123000001"
-      if (lastOrderNumber == 0) {
-        orderNumber = "000001";
+      if (lastOrderDate != null && lastOrderDate.day == DateTime.now().day) {
+        print('masuk');
+        lastOrderNumber += BigInt.one; // Tambahkan satu digit terakhir
+      } else {
+        print('tidak msk');
+        lastOrderNumber = BigInt.from(int.parse(lastOrder.docs.first
+                    .get('created_date')
+                    .replaceAll('-', '')) *
+                100000 +
+            1);
       }
 
-// Gabungkan semuanya untuk membuat kode unik
-      String uniqueCode = 'ORDERLH$today$orderNumber';
+      // Gabungkan semuanya untuk membuat kode unik
+      String uniqueCode =
+          'ORDERLH${DateFormat('ddMMyyyy').format(DateTime.now())}${lastOrderNumber.toString().padLeft(5, '0')}';
+
       // Lakukan operasi form submission sesuai kebutuhan Anda
       Map<String, dynamic> requestData = {
         'uid': uniqueCode,
+        'created_date': DateTime.now(),
         'tipe_pekerjaan': this.widget.layanan,
         'user': user,
         'status': "pending",
@@ -345,42 +354,23 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       if (res.statusCode == 200) {
         print('>>>>>>>>>>>>>>>>>>>>success');
         final responseData = jsonDecode(res.body);
-        print(responseData);
-        try {
-          // Clear form
-          await FirebaseFirestore.instance
-              .collection('request_handyman')
-              .add(requestData);
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('email', isEqualTo: user)
-              .get()
-              .then((QuerySnapshot querySnapshot) {
-            querySnapshot.docs.forEach((doc) {
-              FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(doc.id)
-                  .update({'status_pesan': true});
-            });
-          });
-
-          _formKey.currentState!.reset();
-          setState(() {
-            requestImage = null;
-          });
-        } catch (e) {
-          print('Error inserting data: $e');
-        }
         print(responseData['redirect']);
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return SnapScreen(
-                  redirect_url: responseData['redirect'], order_id: uniqueCode);
+                redirect_url: responseData['redirect'],
+                order_id: uniqueCode,
+                requestData: requestData,
+              );
             },
           ),
           (_) => false,
         );
+        _formKey.currentState!.reset();
+        setState(() {
+          requestImage = null;
+        });
       } else {
         print(res.body);
         print(res.statusCode.toString() + ">>>>>");
@@ -606,14 +596,16 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                               (option) => FormBuilderFieldOption(value: option))
                           .toList(),
                       onChanged: (selected) {
-                        setState(() {
-                          selectedOptions = List<String>.from(selected!);
-                          showTextbox =
-                              selectedOptions.contains("Lain - Lainnya");
-                          if (!showTextbox) {
-                            otherOptionController.clear();
-                          }
-                        });
+                        if (selected != null) {
+                          setState(() {
+                            selectedOptions = List<String>.from(selected);
+                            showTextbox =
+                                selectedOptions.contains("Lain - Lainnya");
+                            if (!showTextbox) {
+                              otherOptionController.clear();
+                            }
+                          });
+                        }
                       },
                     ),
                   ),

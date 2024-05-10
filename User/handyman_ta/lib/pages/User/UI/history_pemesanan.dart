@@ -38,7 +38,7 @@ class _history_pemesananState extends State<history_pemesanan> {
   Future<String?> getUserName(String email) async {
     final QuerySnapshot userSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .where('email', isEqualTo: email)
+        .where('taken_by', isEqualTo: email)
         .get();
 
     if (userSnapshot.docs.isNotEmpty) {
@@ -90,7 +90,7 @@ class _history_pemesananState extends State<history_pemesanan> {
         constraints: BoxConstraints(
             minWidth: 0,
             maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height / 2),
+            maxHeight: MediaQuery.of(context).size.height),
         padding: const EdgeInsets.all(10),
         decoration: const BoxDecoration(
           image: DecorationImage(
