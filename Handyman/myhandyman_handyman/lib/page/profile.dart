@@ -27,7 +27,8 @@ class _profileHandymanState extends State<profileHandyman> {
   int tempSaldo = 0;
 
   TextEditingController saldoController = TextEditingController();
-
+  TextEditingController norekController = TextEditingController();
+  String bankValue = 'BCA';
   final AuthService _authService = AuthService();
   void _checkAuthentication() {
     final User? user = _auth.currentUser;
@@ -41,6 +42,7 @@ class _profileHandymanState extends State<profileHandyman> {
   @override
   void dispose() {
     saldoController.dispose();
+    norekController.dispose();
     super.dispose();
   }
 
@@ -160,27 +162,6 @@ class _profileHandymanState extends State<profileHandyman> {
                                   margin: const EdgeInsets.only(top: 15),
                                   child: Column(
                                     children: [
-                                      ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundImage: AssetImage(
-                                              "assets/images/icon_profile.png"),
-                                          radius: 20,
-                                        ),
-                                        title: Text(
-                                          "${FirebaseAuth.instance.currentUser?.email}",
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        trailing: IconButton(
-                                          icon: Icon(Icons.edit),
-                                          onPressed: () {
-                                            // Tambahkan logika untuk tombol edit di sini
-                                          },
-                                        ),
-                                      ),
                                       ListView.builder(
                                         shrinkWrap: true,
                                         physics:
@@ -204,6 +185,7 @@ class _profileHandymanState extends State<profileHandyman> {
                                           }
                                           final saldo = data['saldo'];
                                           final status = data['status'];
+                                          final nama = data['nama'];
                                           final statusHandyman =
                                               data['status_handyman'];
 
@@ -213,6 +195,28 @@ class _profileHandymanState extends State<profileHandyman> {
                                             return Container(
                                               child: Column(
                                                 children: [
+                                                  ListTile(
+                                                    leading: CircleAvatar(
+                                                      backgroundImage: AssetImage(
+                                                          "assets/images/icon_profile.png"),
+                                                      radius: 20,
+                                                    ),
+                                                    title: Text(
+                                                      "${nama}",
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                    trailing: IconButton(
+                                                      icon: Icon(Icons.edit),
+                                                      onPressed: () {
+                                                        // Tambahkan logika untuk tombol edit di sini
+                                                      },
+                                                    ),
+                                                  ),
                                                   ListTile(
                                                     leading:
                                                         Icon(Icons.verified),
@@ -509,52 +513,117 @@ class _profileHandymanState extends State<profileHandyman> {
               FormBuilderValidators.min(50000)
             ]),
           ),
+          SizedBox(
+            height: 20,
+          ),
+          DropdownButtonFormField<String>(
+            value: bankValue,
+            onChanged: (String? newValue) {
+              setState(() {
+                bankValue = newValue!;
+              });
+            },
+            items: <String>['BCA', 'BRI', 'Mandiri']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Pilih Bank',
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          FormBuilderTextField(
+            name: 'No Rekening',
+            controller: norekController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Masukkan No Rekening Saldo ',
+            ),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+            ]),
+          ),
           Row(
             children: <Widget>[
               ElevatedButton(
-                onPressed: () {
-                  double saldopay = double.parse(saldoController.text) ?? 0.0;
-                  double pajak = saldopay * 0.05;
-                  double totalPengambilan = saldopay - pajak;
-                  print(saldo);
-                  print(saldopay);
-                  showDialog(
-                    context: context1,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Ringkasan Pengambilan Saldo'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                                'Total Pengambilan Saldo: ${formatCurrency.format(saldopay)}'),
-                            SizedBox(height: 10),
-                            Text('Pajak (5%): ${formatCurrency.format(pajak)}'),
-                            SizedBox(height: 10),
-                            Text(
-                                'Total yang diterima: ${formatCurrency.format(totalPengambilan)}'),
+                onPressed: () async {
+                  if (saldoController.text.isEmpty ||
+                      norekController.text.isEmpty ||
+                      saldoController.text == '' ||
+                      norekController.text == '') {
+                    print('masuk');
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Peringatan'),
+                          content: Text('Mohon lengkapi semua field.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
                           ],
-                        ),
-                        actions: <Widget>[
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Tutup dialog
-                            },
-                            child: Text('Cancel'),
+                        );
+                      },
+                    );
+                  } else {
+                    double saldopay = double.parse(saldoController.text) ?? 0.0;
+                    double pajak = saldopay * 0.05;
+                    double totalPengambilan = saldopay - pajak;
+                    print(saldo);
+                    print(saldopay);
+                    showDialog(
+                      context: context1,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Ringkasan Pengambilan Saldo'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                  'Total Pengambilan Saldo: ${formatCurrency.format(saldopay)}'),
+                              SizedBox(height: 10),
+                              Text(
+                                  'Pajak (5%): ${formatCurrency.format(pajak)}'),
+                              SizedBox(height: 10),
+                              Text(
+                                  'Total yang diterima: ${formatCurrency.format(totalPengambilan)}'),
+                            ],
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              _submitSaldo(context1);
+                          actions: <Widget>[
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Tutup dialog
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                _submitSaldo(context1);
 
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  norekController.clear();
+                                  saldoController.clear();
+                                });
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
                 },
                 child: Text('Submit'),
               ),
@@ -593,9 +662,12 @@ class _profileHandymanState extends State<profileHandyman> {
 
     String? email = FirebaseAuth.instance.currentUser!.email;
     String tanggal = DateTime.now().toString();
+    String noRekening = norekController.text;
 
     FirebaseFirestore.instance.collection('request_saldo_handyman').add({
       'email': email,
+      'no_rekening': noRekening,
+      'bank': bankValue,
       'total_saldo': saldo,
       'tanggal': tanggal,
     }).then((value) {
@@ -638,7 +710,10 @@ class _profileHandymanState extends State<profileHandyman> {
           duration: Duration(seconds: 3),
         ),
       );
-
+      setState(() {
+        saldoController.clear();
+        norekController.clear();
+      });
       // Tambahkan navigasi dan efek refresh di sini
     }).catchError((error) {
       print('Error: $error');

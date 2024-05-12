@@ -105,54 +105,67 @@ class _KontakPageState extends State<KontakPage> {
                             ? users.first['nama']
                             : 'Nama Tidak Ditemukan';
 
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: AssetImage(
-                                    'assets/images/icon_profile.png'),
-                              )
-                            ],
-                          ),
-                          title: Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        return Padding(
+                          padding: EdgeInsets.only(
+                              left: 16.0,
+                              right: 16.0,
+                              top: 8.0,
+                              bottom: 8.0), // Tambahkan jarak vertikal di sini
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Stack(
+                              alignment: Alignment.bottomRight,
                               children: [
-                                Text(
-                                  namaPengguna,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  '$tipe_pekerjaan - $uid',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage: AssetImage(
+                                      'assets/images/icon_profile.png'),
                                 ),
                               ],
                             ),
-                          ),
-                          onTap: () {
-                            Navigator.of(context, rootNavigator: true)
-                                .pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return ChatPage(pengirimHandyman,
-                                      pengirimUser, uid_pemesanan);
-                                },
+                            title: Container(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                      height:
+                                          8), // Tambahkan jarak vertikal di sini
+                                  Text(
+                                    namaPengguna,
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          4), // Tambahkan jarak vertikal di sini
+                                  Text(
+                                    '$tipe_pekerjaan - $uid',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              (_) => false,
-                            );
-                          },
+                            ),
+                            onTap: () {
+                              Navigator.of(context, rootNavigator: true)
+                                  .pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return ChatPage(pengirimHandyman,
+                                        pengirimUser, uid_pemesanan);
+                                  },
+                                ),
+                                (_) => false,
+                              );
+                            },
+                          ),
                         );
                       },
                     );

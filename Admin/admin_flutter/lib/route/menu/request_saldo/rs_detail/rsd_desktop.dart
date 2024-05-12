@@ -49,10 +49,10 @@ class _rsdDesktopState extends State<rsdDesktop> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('No rekening: ${data['no_rek']}'),
+                        Text('No rekening: ${data['no_rekening']}'),
                         Text(
                             'Date: ${data['tanggal'].toString().substring(0, 19)}'),
-                        Text('Bank Destination: ${data['bank_dest']}'),
+                        Text('Bank Destination: ${data['bank']}'),
                       ],
                     ),
                   ),

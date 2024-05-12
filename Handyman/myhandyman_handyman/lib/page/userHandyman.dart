@@ -332,9 +332,7 @@ class _homeState extends State<home> {
                       1000;
 
                   return ListTile(
-                    title: Text(
-                      'Option Menu: ${item.optionMenu.join(', ')}',
-                    ), // Menggabungkan multiple values dengan koma
+                    // Menggabungkan multiple values dengan koma
                     subtitle: Card(
                       // Define the shape of the card
                       shape: RoundedRectangleBorder(
@@ -347,6 +345,12 @@ class _homeState extends State<home> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           // Add padding around the row widget
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Text(
+                              '${item.optionMenu.join(', ')}',
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(15),
                             child: Row(
