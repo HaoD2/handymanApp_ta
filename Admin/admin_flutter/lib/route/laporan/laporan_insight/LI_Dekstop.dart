@@ -1,3 +1,7 @@
+import 'dart:math';
+import 'package:intl/intl.dart';
+import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
+import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -12,10 +16,83 @@ class LaporanInsightDekstop extends StatefulWidget {
 
 class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  double temp = 0.0;
+  List<FlSpot> _spots = [];
+  List<FlSpot> _data_Money = [];
+  Map<int, Widget> _titleCache = {};
+  List<String> _jobTypes = [];
+  double maxY = 0;
 
   @override
   void initState() {
     super.initState();
+    _fetchData();
+    _fetchDataMoney();
+  }
+
+  Future<void> _fetchData() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    QuerySnapshot querySnapshot =
+        await firestore.collection('request_handyman').get();
+    Map<String, int> jobTypeCounts = {};
+
+    for (var doc in querySnapshot.docs) {
+      String jobType = doc['tipe_pekerjaan'];
+
+      if (jobTypeCounts.containsKey(jobType)) {
+        jobTypeCounts[jobType] = jobTypeCounts[jobType]! + 1;
+      } else {
+        jobTypeCounts[jobType] = 1;
+      }
+    }
+    print(jobTypeCounts);
+    // Convert keys to a set to remove duplicates, then back to a list
+    List<String> jobTypes = jobTypeCounts.keys.toSet().toList();
+    print(jobTypes);
+    List<FlSpot> spots = jobTypeCounts.entries.map((entry) {
+      int index = jobTypes.indexOf(entry.key);
+// Debugging print
+      return FlSpot(index.toDouble(), entry.value.toDouble());
+    }).toList();
+
+    setState(() {
+      _spots = spots;
+      _jobTypes = jobTypes;
+    });
+  }
+
+  Future<void> _fetchDataMoney() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('request_handyman')
+        .where('status', whereIn: ['pending', 'on-progress', 'success']).get();
+
+    Map<String, double> monthlyEarnings = {};
+
+    for (var doc in querySnapshot.docs) {
+      DateTime date = doc['created_date'].toDate();
+      String monthYear = DateFormat('yyyy-MM').format(date);
+      double price = doc['price'].toDouble();
+
+      if (monthlyEarnings.containsKey(monthYear)) {
+        monthlyEarnings[monthYear] = monthlyEarnings[monthYear]! + price;
+      } else {
+        monthlyEarnings[monthYear] = price;
+      }
+    }
+
+    List<FlSpot> spots_money = [];
+    List<String> sortedKeys = monthlyEarnings.keys.toList()..sort();
+    for (int i = 0; i < sortedKeys.length; i++) {
+      double totalPrice = monthlyEarnings[sortedKeys[i]]!;
+      spots_money.add(FlSpot(i.toDouble(), totalPrice));
+      if (totalPrice > maxY) {
+        maxY = totalPrice;
+      }
+    }
+
+    setState(() {
+      _data_Money = spots_money;
+    });
   }
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -56,183 +133,215 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
     }
   }
 
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = 'Jan';
-        break;
-      case 1:
-        text = 'Feb';
-        break;
-      case 2:
-        text = 'Mar';
-        break;
-      case 3:
-        text = 'Apr';
-        break;
-      case 4:
-        text = 'May';
-        break;
-      case 5:
-        text = 'Jun';
-        break;
-      case 6:
-        text = 'Jul';
-        break;
-      case 7:
-        text = 'Aug';
-        break;
-      case 8:
-        text = 'Sep';
-        break;
-      case 9:
-        text = 'Oct';
-        break;
-      case 10:
-        text = 'Nov';
-        break;
-      case 11:
-        text = 'Dec';
-        break;
-      default:
-        return Container();
-    }
-
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 4,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10,
-          color: Colors.amber,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget leftTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Colors.red,
-      fontSize: 12,
-    );
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      child: Text('\$ ${value + 0.5}', style: style),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    const cutOffYValue = 5.0;
+    double screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: Column(
+        children: [
+          NavigationHeaderResponsive(),
+          Expanded(
+            child: Row(
+              children: [
+                Container(child: NavigationSideResponsive()),
+                Container(
+                  child: Column(children: [
+                    Expanded(
+                      child: Center(
+                        child: Column(children: [
+                          SizedBox(
+                            height: 50,
+                          ),
+                          Container(
+                              width: 500,
+                              height: 300,
+                              child: _spots.isEmpty
+                                  ? CircularProgressIndicator()
+                                  : LineChart(LineChartData(
+                                      minY: 0,
+                                      maxY: temp + 20,
+                                      gridData: FlGridData(
+                                        show: true,
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        leftTitles: AxisTitles(
+                                          axisNameSize: 15,
+                                          axisNameWidget: Container(
+                                              child: Text(
+                                                  'Banyak Pesanan dalam Layanan')),
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            getTitlesWidget:
+                                                (double value, TitleMeta meta) {
+                                              return SideTitleWidget(
+                                                axisSide: meta.axisSide,
+                                                child: Text(
+                                                  value.toString(),
+                                                  style: TextStyle(fontSize: 7),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            getTitlesWidget:
+                                                (double value, TitleMeta meta) {
+                                              int index = value.toInt();
+                                              if (!_titleCache
+                                                  .containsKey(index)) {
+                                                print(
+                                                    'Rendering index: $index');
+                                              }
 
-    return AspectRatio(
-      aspectRatio: 2,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 12,
-          right: 28,
-          top: 22,
-          bottom: 12,
-        ),
-        child: LineChart(
-          LineChartData(
-            lineTouchData: const LineTouchData(enabled: false),
-            lineBarsData: [
-              LineChartBarData(
-                spots: const [
-                  FlSpot(0, 4),
-                  FlSpot(1, 3.5),
-                  FlSpot(2, 4.5),
-                  FlSpot(3, 1),
-                  FlSpot(4, 4),
-                  FlSpot(5, 6),
-                  FlSpot(6, 6.5),
-                  FlSpot(7, 6),
-                  FlSpot(8, 4),
-                  FlSpot(9, 6),
-                  FlSpot(10, 6),
-                  FlSpot(11, 7),
-                ],
-                isCurved: true,
-                barWidth: 8,
-                color: Colors.blue,
-                belowBarData: BarAreaData(
-                  show: true,
-                  color: Colors.black,
-                  cutOffY: cutOffYValue,
-                  applyCutOffY: true,
+                                              // Caching title widget
+                                              if (index >= 0 &&
+                                                  index < _jobTypes.length) {
+                                                if (!_titleCache
+                                                    .containsKey(index)) {
+                                                  _titleCache[index] =
+                                                      SideTitleWidget(
+                                                    axisSide: meta.axisSide,
+                                                    child: Text(
+                                                      _jobTypes[index],
+                                                      style: TextStyle(
+                                                          fontSize: 7),
+                                                    ),
+                                                  );
+                                                  print(
+                                                      'Index $index is valid and corresponds to: ${_jobTypes[index]}'); // Debugging print
+                                                }
+                                                return _titleCache[index]!;
+                                              } else {
+                                                if (!_titleCache
+                                                    .containsKey(index)) {
+                                                  _titleCache[index] =
+                                                      SideTitleWidget(
+                                                    axisSide: meta.axisSide,
+                                                    child: Text(''),
+                                                  );
+                                                  print(
+                                                      'Index $index is invalid'); // Debugging print
+                                                }
+                                                return _titleCache[index]!;
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        topTitles: AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false),
+                                        ),
+                                        rightTitles: AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false),
+                                        ),
+                                      ),
+                                      borderData: FlBorderData(show: true),
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          spots: _spots,
+                                          isCurved: true,
+                                          color: Colors.blue,
+                                          barWidth: 4,
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            color: Colors.blue.withOpacity(0.3),
+                                          ),
+                                        ),
+                                      ],
+                                    ))),
+                        ]),
+                      ),
+                    )
+                  ]),
                 ),
-                aboveBarData: BarAreaData(
-                  show: true,
-                  color: Colors.purple,
-                  cutOffY: cutOffYValue,
-                  applyCutOffY: true,
+                Container(
+                  width: 500,
+                  height: 300,
+                  child: _data_Money.isEmpty
+                      ? CircularProgressIndicator()
+                      : LineChart(
+                          LineChartData(
+                            minY: 0,
+                            maxY: maxY + 20,
+                            gridData: FlGridData(
+                              show: true,
+                            ),
+                            titlesData: FlTitlesData(
+                              show: true,
+                              leftTitles: AxisTitles(
+                                axisNameSize: 15,
+                                axisNameWidget:
+                                    Container(child: Text('Total Uang (IDR)')),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget:
+                                      (double value, TitleMeta meta) {
+                                    return SideTitleWidget(
+                                      axisSide: meta.axisSide,
+                                      child: Text(
+                                        value.toString(),
+                                        style: TextStyle(fontSize: 7),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget:
+                                      (double value, TitleMeta meta) {
+                                    int index = value.toInt();
+                                    if (index >= 0 &&
+                                        index < _data_Money.length) {
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        child: Text(
+                                          DateFormat('MMM').format(
+                                              DateTime(2024, index + 1)),
+                                          style: TextStyle(fontSize: 7),
+                                        ),
+                                      );
+                                    } else {
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        child: Text(''),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                            ),
+                            borderData: FlBorderData(show: true),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: _data_Money,
+                                isCurved: true,
+                                color: Colors.blue,
+                                barWidth: 4,
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color: Colors.blue.withOpacity(0.3),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                 ),
-                dotData: const FlDotData(
-                  show: false,
-                ),
-              ),
-            ],
-            minY: 0,
-            titlesData: FlTitlesData(
-              show: true,
-              topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              bottomTitles: AxisTitles(
-                axisNameWidget: Text(
-                  '2019',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.yellow,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 18,
-                  interval: 1,
-                  getTitlesWidget: bottomTitleWidgets,
-                ),
-              ),
-              leftTitles: AxisTitles(
-                axisNameSize: 20,
-                axisNameWidget: const Text(
-                  'Value',
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
-                ),
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  interval: 1,
-                  reservedSize: 40,
-                  getTitlesWidget: leftTitleWidgets,
-                ),
-              ),
-            ),
-            borderData: FlBorderData(
-              show: true,
-              border: Border.all(
-                color: Colors.red,
-              ),
-            ),
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              horizontalInterval: 1,
-              checkToShowHorizontalLine: (double value) {
-                return value == 1 || value == 6 || value == 4 || value == 5;
-              },
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

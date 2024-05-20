@@ -6,10 +6,14 @@ import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
+  final options = DefaultFirebaseOptions.currentPlatform;
+  if (options == null) {
+    print('Firebase options are null. Please check your configuration.');
+  } else {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
