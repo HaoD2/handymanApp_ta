@@ -22,6 +22,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   Map<int, Widget> _titleCache = {};
   List<String> _jobTypes = [];
   double maxY = 0;
+  String errorMessage = '';
 
   @override
   void initState() {
@@ -45,10 +46,10 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
         jobTypeCounts[jobType] = 1;
       }
     }
-    print(jobTypeCounts);
+
     // Convert keys to a set to remove duplicates, then back to a list
     List<String> jobTypes = jobTypeCounts.keys.toSet().toList();
-    print(jobTypes);
+
     List<FlSpot> spots = jobTypeCounts.entries.map((entry) {
       int index = jobTypes.indexOf(entry.key);
 // Debugging print
@@ -62,37 +63,50 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   }
 
   Future<void> _fetchDataMoney() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('request_handyman')
-        .where('status', whereIn: ['pending', 'on-progress', 'success']).get();
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('request_handyman')
+          .where('status',
+              whereIn: ['pending', 'on-progress', 'success']).get();
 
-    Map<String, double> monthlyEarnings = {};
+      Map<String, double> monthlyEarnings = {};
 
-    for (var doc in querySnapshot.docs) {
-      DateTime date = doc['created_date'].toDate();
-      String monthYear = DateFormat('yyyy-MM').format(date);
-      double price = doc['price'].toDouble();
+      for (var doc in querySnapshot.docs) {
+        DateTime date = doc['created_date'].toDate();
+        String monthYear = DateFormat('yyyy-MM').format(date);
+        double price;
+        try {
+          price = double.parse(doc['price'].toString());
+        } catch (e) {
+          print('Failed to parse price for document ${doc.id}: $e');
+          continue; // Skip this document if price is not valid
+        }
 
-      if (monthlyEarnings.containsKey(monthYear)) {
-        monthlyEarnings[monthYear] = monthlyEarnings[monthYear]! + price;
-      } else {
-        monthlyEarnings[monthYear] = price;
+        if (monthlyEarnings.containsKey(monthYear)) {
+          monthlyEarnings[monthYear] = monthlyEarnings[monthYear]! + price;
+        } else {
+          monthlyEarnings[monthYear] = price;
+        }
       }
-    }
 
-    List<FlSpot> spots_money = [];
-    List<String> sortedKeys = monthlyEarnings.keys.toList()..sort();
-    for (int i = 0; i < sortedKeys.length; i++) {
-      double totalPrice = monthlyEarnings[sortedKeys[i]]!;
-      spots_money.add(FlSpot(i.toDouble(), totalPrice));
-      if (totalPrice > maxY) {
-        maxY = totalPrice;
+      List<FlSpot> spots_money = [];
+      List<String> sortedKeys = monthlyEarnings.keys.toList()..sort();
+      for (int i = 0; i < sortedKeys.length; i++) {
+        double totalPrice = monthlyEarnings[sortedKeys[i]]!;
+        spots_money.add(FlSpot(i.toDouble(), totalPrice));
+        if (totalPrice > maxY) {
+          maxY = totalPrice;
+        }
       }
-    }
 
-    setState(() {
-      _data_Money = spots_money;
-    });
+      setState(() {
+        _data_Money = spots_money;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Failed to fetch data: $e';
+      });
+    }
   }
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -191,10 +205,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                 (double value, TitleMeta meta) {
                                               int index = value.toInt();
                                               if (!_titleCache
-                                                  .containsKey(index)) {
-                                                print(
-                                                    'Rendering index: $index');
-                                              }
+                                                  .containsKey(index)) {}
 
                                               // Caching title widget
                                               if (index >= 0 &&
@@ -210,8 +221,6 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                           fontSize: 7),
                                                     ),
                                                   );
-                                                  print(
-                                                      'Index $index is valid and corresponds to: ${_jobTypes[index]}'); // Debugging print
                                                 }
                                                 return _titleCache[index]!;
                                               } else {
@@ -222,8 +231,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                     axisSide: meta.axisSide,
                                                     child: Text(''),
                                                   );
-                                                  print(
-                                                      'Index $index is invalid'); // Debugging print
+// Debugging print
                                                 }
                                                 return _titleCache[index]!;
                                               }
