@@ -140,6 +140,18 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "community_charts_common",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/community_charts_common-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "community_charts_flutter",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/community_charts_flutter-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
       "name": "crypto",
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.3",
       "packageUri": "lib/",
@@ -150,6 +162,12 @@
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.6",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "d_chart",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/d_chart-2.6.9",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "dart_console",
@@ -626,7 +644,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-05-20T20:28:44.552061Z",
+  "generated": "2024-05-21T19:32:52.133744Z",
   "generator": "pub",
   "generatorVersion": "3.2.0"
 }
