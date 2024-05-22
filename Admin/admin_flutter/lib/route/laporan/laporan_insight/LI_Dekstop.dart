@@ -18,66 +18,73 @@ class LaporanInsightDekstop extends StatefulWidget {
 class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-
+  NumericGroup _numericGroup = NumericGroup(id: '1', data: []);
   @override
   void initState() {
     super.initState();
-    // _fetchDataPekerjaan();
-    // _fetchDataMoney();
+    _fetchDataPekerjaan();
+    _fetchDataMoney();
   }
 
-  // Future<Map<String, int>> _fetchDataPekerjaan() async {
-  //   try {
-  //     QuerySnapshot snapshot =
-  //         await FirebaseFirestore.instance.collection('request_handyman').get();
-  //     Map<String, int> pekerjaanCount = {};
-  //     Map<String, Set<String>> monthSet = {};
-  //     List<String> months = [
-  //       'January',
-  //       'February',
-  //       'March',
-  //       'April',
-  //       'May',
-  //       'June',
-  //       'July',
-  //       'August',
-  //       'September',
-  //       'October',
-  //       'November',
-  //       'December'
-  //     ];
+  Future<Map<String, int>> _fetchDataPekerjaan() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('request_handyman').get();
+      Map<String, int> pekerjaanCount = {};
 
-  //     for (var doc in snapshot.docs) {
-  //       String tipePekerjaan = doc['tipe_pekerjaan'];
-  //       Timestamp createdDate = doc['created_date'];
-  //       DateTime date = createdDate.toDate();
-  //       String month = months[date.month - 1]; // Mengambil nama bulan
+      for (var doc in snapshot.docs) {
+        String tipePekerjaan = doc['tipe_pekerjaan'];
 
-  //       // Menghitung jumlah pesanan berdasarkan tipe pekerjaan
-  //       if (pekerjaanCount.containsKey(tipePekerjaan)) {
-  //         pekerjaanCount[tipePekerjaan] = pekerjaanCount[tipePekerjaan]! + 1;
-  //       } else {
-  //         pekerjaanCount[tipePekerjaan] = 1;
-  //       }
+        // Menghitung jumlah pesanan berdasarkan tipe pekerjaan
+        if (pekerjaanCount.containsKey(tipePekerjaan)) {
+          pekerjaanCount[tipePekerjaan] = pekerjaanCount[tipePekerjaan]! + 1;
+        } else {
+          pekerjaanCount[tipePekerjaan] = 1;
+        }
+      }
 
-  //       // Menyimpan bulan tanpa duplikasi untuk tipe pekerjaan tersebut
-  //       if (!monthSet.containsKey(tipePekerjaan)) {
-  //         monthSet[tipePekerjaan] = <String>{};
-  //       }
-  //       monthSet[tipePekerjaan]!.add(month);
-  //     }
+      // Print the count of each job type
 
-  //     // Mengkonversi monthSet ke pekerjaanCount untuk bulan
-  //     for (var key in monthSet.keys) {
-  //       pekerjaanCount[key] = monthSet[key]!.length;
-  //     }
+      return pekerjaanCount;
+    } catch (e) {
+      print("Error fetching data: $e");
+      throw e;
+    }
+  }
 
-  //     return pekerjaanCount;
-  //   } catch (e) {
-  //     print("Error fetching data: $e");
-  //     throw e;
-  //   }
-  // }
+  Future<Map<String, double>> _fetchDataMoney() async {
+    // Mendapatkan data dari Firebase
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('revenues').get();
+
+    // Mengonversi data menjadi Map<String, double>
+    Map<String, double> monthlyRevenue = {
+      'Jan': 0.0,
+      'Feb': 0.0,
+      'Mar': 0.0,
+      'Apr': 0.0,
+      'May': 0.0,
+      'Jun': 0.0,
+      'Jul': 0.0,
+      'Aug': 0.0,
+      'Sep': 0.0,
+      'Oct': 0.0,
+      'Nov': 0.0,
+      'Dec': 0.0,
+    };
+
+    for (var doc in querySnapshot.docs) {
+      Timestamp timestamp = doc['created_date'];
+      String priceString =
+          doc['price']; // Ambil harga dari database sebagai string
+      double price = double.tryParse(priceString) ?? 0.0; // Konversi ke double
+      DateTime date = timestamp.toDate();
+      String monthAbbreviation = DateFormat('MMM').format(date);
+      monthlyRevenue.update(monthAbbreviation, (value) => value + price);
+    }
+
+    return monthlyRevenue;
+  }
 
   Future<void> sendDataToAnalytics() async {
     // Mendapatkan data dari Firestore
@@ -126,45 +133,104 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
             child: Row(
               children: [
                 Container(child: NavigationSideResponsive()),
-                // Container(
-                //   width: 250,
-                //   height: 500,
-                //   child: FutureBuilder<Map<String, int>>(
-                //     future: _fetchDataPekerjaan(),
-                //     builder: (context, snapshot) {
-                //       if (snapshot.connectionState == ConnectionState.waiting) {
-                //         return Center(child: CircularProgressIndicator());
-                //       } else if (snapshot.hasError) {
-                //         return Center(child: Text('Error: ${snapshot.error}'));
-                //       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                //         return Center(child: Text('No data available'));
-                //       } else {
-                //         Map<String, int> pekerjaanData = snapshot.data!;
-                //         List<String> pekerjaanKeys =
-                //             pekerjaanData.keys.toList();
-                //         List<int> pekerjaanValues =
-                //             pekerjaanData.values.toList();
+                Container(
+                  width: 550,
+                  height: 500,
+                  child: FutureBuilder<Map<String, int>>(
+                    future: _fetchDataPekerjaan(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(child: Text('No data available'));
+                      } else {
+                        Map<String, int> pekerjaanData = snapshot.data!;
+                        List<String> pekerjaanKeys =
+                            pekerjaanData.keys.toList();
 
-                //         // Membuat chart berdasarkan data yang diambil
-                //         return AspectRatio(
-                //           aspectRatio: 16 / 9,
-                //           child: DChartBarO(
-                //             groupList: pekerjaanKeys.map((key) {
-                //               return OrdinalGroup(
-                //                 id: key,
-                //                 data: [
-                //                   OrdinalData(
-                //                       domain: key,
-                //                       measure: pekerjaanData[key] ?? 0),
-                //                 ],
-                //               );
-                //             }).toList(),
-                //           ),
-                //         );
-                //       }
-                //     },
-                //   ),
-                // ),
+                        // Membuat chart berdasarkan data yang diambil
+                        return Container(
+                          child: DChartBarO(
+                            groupList: pekerjaanKeys.map((key) {
+                              return OrdinalGroup(
+                                id: key,
+                                data: [
+                                  OrdinalData(
+                                    domain: key,
+                                    measure: pekerjaanData[key] ?? 0,
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                            barLabelValue: (group, ordinalData, index) {
+                              return ordinalData.measure.round().toString();
+                            },
+                            configRenderBar: ConfigRenderBar(
+                                maxBarWidthPx: 500, minBarLengthPx: 500),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Container(
+                  width: 700,
+                  height: 500,
+                  child: FutureBuilder<Map<String, double>>(
+                    future: _fetchDataMoney(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(child: Text('No data available'));
+                      } else {
+                        Map<String, double> revenueData = snapshot.data!;
+                        List<String> monthAbbreviations = [
+                          'Jan',
+                          'Feb',
+                          'Mar',
+                          'Apr',
+                          'May',
+                          'Jun',
+                          'Jul',
+                          'Aug',
+                          'Sep',
+                          'Oct',
+                          'Nov',
+                          'Dec',
+                        ];
+
+                        // Membuat chart berdasarkan data yang diambil
+                        return Container(
+                          child: DChartBarO(
+                            groupList: [
+                              OrdinalGroup(
+                                id: 'Revenue',
+                                data: monthAbbreviations.map((month) {
+                                  return OrdinalData(
+                                    domain: month,
+                                    measure: revenueData[month] ?? 0,
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                            barLabelValue: (group, ordinalData, index) {
+                              return ordinalData.measure.round().toString();
+                            },
+                            configRenderBar: ConfigRenderBar(
+                              maxBarWidthPx: 500,
+                              minBarLengthPx: 500,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                )
               ],
             ),
           ),
