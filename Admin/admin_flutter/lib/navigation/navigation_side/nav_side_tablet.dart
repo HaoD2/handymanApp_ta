@@ -14,6 +14,7 @@ class NavigationSideTablet extends StatelessWidget {
     return Container(
       width: 250,
       color: Colors.deepPurple.shade400,
+      alignment: Alignment.centerLeft,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [

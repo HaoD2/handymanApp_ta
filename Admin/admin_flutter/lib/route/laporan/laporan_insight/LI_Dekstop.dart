@@ -18,6 +18,7 @@ class LaporanInsightDekstop extends StatefulWidget {
 class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   NumericGroup _numericGroup = NumericGroup(id: '1', data: []);
   @override
   void initState() {
@@ -55,7 +56,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   Future<Map<String, double>> _fetchDataMoney() async {
     // Mendapatkan data dari Firebase
     QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('revenues').get();
+        await FirebaseFirestore.instance.collection('request_handyman').get();
 
     // Mengonversi data menjadi Map<String, double>
     Map<String, double> monthlyRevenue = {
@@ -131,106 +132,209 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
           NavigationHeaderResponsive(),
           Expanded(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(child: NavigationSideResponsive()),
                 Container(
-                  width: 550,
-                  height: 500,
-                  child: FutureBuilder<Map<String, int>>(
-                    future: _fetchDataPekerjaan(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No data available'));
-                      } else {
-                        Map<String, int> pekerjaanData = snapshot.data!;
-                        List<String> pekerjaanKeys =
-                            pekerjaanData.keys.toList();
-
-                        // Membuat chart berdasarkan data yang diambil
-                        return Container(
-                          child: DChartBarO(
-                            groupList: pekerjaanKeys.map((key) {
-                              return OrdinalGroup(
-                                id: key,
-                                data: [
-                                  OrdinalData(
-                                    domain: key,
-                                    measure: pekerjaanData[key] ?? 0,
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                            barLabelValue: (group, ordinalData, index) {
-                              return ordinalData.measure.round().toString();
-                            },
-                            configRenderBar: ConfigRenderBar(
-                                maxBarWidthPx: 500, minBarLengthPx: 500),
-                          ),
-                        );
-                      }
-                    },
-                  ),
+                  child: NavigationSideResponsive(),
                 ),
-                Container(
-                  width: 700,
-                  height: 500,
-                  child: FutureBuilder<Map<String, double>>(
-                    future: _fetchDataMoney(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No data available'));
-                      } else {
-                        Map<String, double> revenueData = snapshot.data!;
-                        List<String> monthAbbreviations = [
-                          'Jan',
-                          'Feb',
-                          'Mar',
-                          'Apr',
-                          'May',
-                          'Jun',
-                          'Jul',
-                          'Aug',
-                          'Sep',
-                          'Oct',
-                          'Nov',
-                          'Dec',
-                        ];
+                SizedBox(
+                  width: 20, // Jarak antara menu dan bingkai grafik
+                ),
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      width: 500, // Lebar bingkai yang menampung dua grafik
 
-                        // Membuat chart berdasarkan data yang diambil
-                        return Container(
-                          child: DChartBarO(
-                            groupList: [
-                              OrdinalGroup(
-                                id: 'Revenue',
-                                data: monthAbbreviations.map((month) {
-                                  return OrdinalData(
-                                    domain: month,
-                                    measure: revenueData[month] ?? 0,
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                            barLabelValue: (group, ordinalData, index) {
-                              return ordinalData.measure.round().toString();
-                            },
-                            configRenderBar: ConfigRenderBar(
-                              maxBarWidthPx: 500,
-                              minBarLengthPx: 500,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Spacer(), // Memberikan jarak di atas grafik pertama
+                          Container(
+                            width: 500,
+                            height: 300,
+                            child: FutureBuilder<Map<String, int>>(
+                              future: _fetchDataPekerjaan(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text('Error: ${snapshot.error}'));
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Center(
+                                      child: Text('No data available'));
+                                } else {
+                                  Map<String, int> pekerjaanData =
+                                      snapshot.data!;
+                                  List<String> pekerjaanKeys =
+                                      pekerjaanData.keys.toList();
+
+                                  // Membuat chart berdasarkan data yang diambil
+                                  return Container(
+                                      child: DChartBarO(
+                                    groupList: pekerjaanKeys.map((key) {
+                                      return OrdinalGroup(
+                                        id: key,
+                                        data: [
+                                          OrdinalData(
+                                            domain: key,
+                                            measure: pekerjaanData[key] ?? 0,
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                    domainAxis: DomainAxis(
+                                      labelStyle: LabelStyle(fontSize: 10),
+                                    ),
+                                    measureAxis: MeasureAxis(
+                                        showLine: true, thickLength: 5),
+                                  ));
+                                }
+                              },
                             ),
                           ),
-                        );
-                      }
-                    },
+                          SizedBox(
+                            height: 20, // Jarak antara dua grafik dalam bingkai
+                          ),
+                          Container(
+                            width: 500,
+                            height: 300,
+                            child: FutureBuilder<Map<String, int>>(
+                              future:
+                                  _fetchDataPekerjaan(), // Misalkan menggunakan data yang sama
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text('Error: ${snapshot.error}'));
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Center(
+                                      child: Text('No data available'));
+                                } else {
+                                  Map<String, int> pekerjaanData =
+                                      snapshot.data!;
+                                  List<String> pekerjaanKeys =
+                                      pekerjaanData.keys.toList();
+
+                                  // Membuat chart berdasarkan data yang diambil
+                                  return Container(
+                                    child: DChartBarO(
+                                      barLabelValue:
+                                          (group, ordinalData, index) {
+                                        return ordinalData.measure
+                                            .round()
+                                            .toString();
+                                      },
+                                      barLabelDecorator: BarLabelDecorator(),
+                                      groupList: pekerjaanKeys.map((key) {
+                                        return OrdinalGroup(
+                                          id: key,
+                                          data: [
+                                            OrdinalData(
+                                              domain: key,
+                                              measure: pekerjaanData[key] ?? 0,
+                                            ),
+                                          ],
+                                        );
+                                      }).toList(),
+                                      domainAxis: DomainAxis(
+                                        labelStyle: LabelStyle(
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                      measureAxis: MeasureAxis(
+                                          showLine: true, thickLength: 5),
+                                      configRenderBar: ConfigRenderBar(
+                                          maxBarWidthPx: 500,
+                                          fillPattern: FillPattern.solid,
+                                          minBarLengthPx: 500),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          Spacer(), // Memberikan jarak di bawah grafik kedua
+                        ],
+                      ),
+                    ),
                   ),
-                )
+                ),
+                SizedBox(
+                  width: 20, // Jarak antara bingkai grafik dan grafik besar
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 550,
+                        height: 350,
+                        child: FutureBuilder<Map<String, double>>(
+                          future: _fetchDataMoney(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error: ${snapshot.error}'));
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return Center(child: Text('No data available'));
+                            } else {
+                              Map<String, double> revenueData = snapshot.data!;
+                              List<String> monthAbbreviations = [
+                                'Jan',
+                                'Feb',
+                                'Mar',
+                                'Apr',
+                                'May',
+                                'Jun',
+                                'Jul',
+                                'Aug',
+                                'Sep',
+                                'Oct',
+                                'Nov',
+                                'Dec',
+                              ];
+
+                              // Membuat chart berdasarkan data yang diambil
+                              return Container(
+                                child: DChartBarO(
+                                  groupList: [
+                                    OrdinalGroup(
+                                      id: 'Revenue',
+                                      data: monthAbbreviations.map((month) {
+                                        return OrdinalData(
+                                          domain: month,
+                                          measure: revenueData[month] ?? 0,
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                  measureAxis: MeasureAxis(
+                                      showLine: true, thickLength: 5),
+                                  configRenderBar: ConfigRenderBar(
+                                    maxBarWidthPx: 500,
+                                    minBarLengthPx: 500,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
