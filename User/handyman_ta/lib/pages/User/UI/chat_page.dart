@@ -173,10 +173,10 @@ class _ChatPageState extends State<ChatPage> {
 
                             if (querySnapshot.docs.isNotEmpty) {
                               // Ambil nilai tipe_pekerjaan dari dokumen pertama yang cocok dengan kondisi
-                              String tipePekerjaan =
+                              String taken_by =
                                   querySnapshot.docs.first['taken_by'];
                               tambahRatingLayanan(
-                                  tipePekerjaan, _rating, _ratingComment);
+                                  taken_by, _rating, _ratingComment);
                               updateIsRatingDone();
                             } else {
                               return null; // Tidak ada dokumen dengan kondisi yang diberikan
