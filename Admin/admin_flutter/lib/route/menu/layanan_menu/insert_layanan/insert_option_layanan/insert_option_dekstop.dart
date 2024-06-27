@@ -64,9 +64,6 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
       'nama_layanan': this.widget.nama_pekerjaan,
       'option': tempLayanan,
     });
-
-    List<Map<String, dynamic>> dataToSave = [];
-
     for (int index = 0; index < tempLayanan.length; index++) {
       List<String> inputs = [];
       for (int textFieldIndex = 0;
@@ -82,11 +79,9 @@ class _InsertOptionDekstopState extends State<InsertOptionDekstop> {
             index], // Setiap elemen dalam tempLayanan digunakan sebagai nama pekerjaan
       };
 
-      dataToSave.add(data);
       // Tambahkan data ke list untuk disimpan ke Firestore
       input_option.add(data);
     }
-
     // After insertion is completed, show success alert dialog
     showSuccessAlertDialog(context);
   }

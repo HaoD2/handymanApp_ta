@@ -174,7 +174,7 @@ class _Request_Saldo_DekstopState extends State<Request_Saldo_Dekstop> {
                                                   fontSize:
                                                       sizeTableDesktopTextTitle))),
                                       DataColumn(
-                                          label: Text("tanggal_pelanggaran",
+                                          label: Text("Tanggal Request",
                                               style: TextStyle(
                                                   fontSize:
                                                       sizeTableDesktopTextTitle))),

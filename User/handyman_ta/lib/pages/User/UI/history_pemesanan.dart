@@ -334,7 +334,8 @@ class _history_pemesananState extends State<history_pemesanan> {
                                 height: 5,
                               ),
                               if ((rateNow == false || rateNow == null) &&
-                                  requestData['status'] == "success")
+                                  (requestData['status'] == "success" &&
+                                      requestData['status_done'] == true))
                                 GestureDetector(
                                   onTap: () => _showRatingDialog(
                                       requestId, requestData['tipe_pekerjaan']),
