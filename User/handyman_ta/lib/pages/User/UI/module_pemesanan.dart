@@ -255,11 +255,14 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         lastOrderNumber += BigInt.one; // Tambahkan satu digit terakhir
       } else {
         print('tidak msk');
-        lastOrderNumber = BigInt.from(int.parse(lastOrder.docs.first
-                    .get('created_date')
-                    .replaceAll('-', '')) *
-                100000 +
-            1);
+        Timestamp timestamps = lastOrder.docs.first.get('created_date');
+
+// Konversi Timestamp menjadi String dengan format yang diinginkan
+        String formattedDate =
+            DateFormat('yyyy-MM-dd').format(timestamps.toDate());
+
+        lastOrderNumber = BigInt.from(
+            int.parse(formattedDate.replaceAll('-', '')) * 100000 + 1);
       }
 
       // Gabungkan semuanya untuk membuat kode unik
@@ -352,9 +355,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           headers: headers,
           body: jsonEncode(requestAPI));
       if (res.statusCode == 200) {
-        print('>>>>>>>>>>>>>>>>>>>>success');
         final responseData = jsonDecode(res.body);
-        print(responseData['redirect']);
+
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {

@@ -88,7 +88,7 @@ class _showAll_listState extends State<showAll_list> {
                 itemCount: documents.length,
                 itemBuilder: (context, index) {
                   var data = documents[index].data() as Map<String, dynamic>;
-                  String pengirimHandyman = data['taken_by'];
+                  String pengirimHandyman = data['taken_by'] ?? "UNKNOWN";
                   String pengirimUser = data['user'];
                   String uid_pemesanan = data['uid'];
                   // Set icon based on the status name

@@ -81,6 +81,9 @@ class _VerificationPageState extends State<VerificationPage> {
   sendVerificationEmail() async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
+      if (user == null) {
+        print('No user is signed in');
+      }
       await user.sendEmailVerification();
 
       setState(() => canResentEmail = false);

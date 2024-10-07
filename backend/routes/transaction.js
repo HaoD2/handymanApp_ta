@@ -58,13 +58,12 @@ router.post('/purchase', async (req, res) => {
             }
 
         };
-        console.log(param);
+
         const transaction = await snap.createTransaction(param);
         const transaction_token = transaction.token;
         const transaction_redirect = transaction.redirect_url;
 
-        console.log(transaction_token);
-        console.log(transaction_redirect);
+
         return res.status(200).json(
             {
                 "token": transaction_token,
@@ -72,6 +71,7 @@ router.post('/purchase', async (req, res) => {
             });
     } catch (ex) {
         return res.status(500).json({ message: ex.message });
+
     }
 });
 

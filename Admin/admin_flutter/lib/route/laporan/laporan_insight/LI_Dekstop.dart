@@ -205,28 +205,9 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
 
   List<ChartData> _generateChartData(Map<String, double> revenueData) {
     List<ChartData> chartData = [];
-    if (selectedMonth == 'All') {
-      revenueData.forEach((month, value) {
-        chartData.add(ChartData(x: month, y: value));
-      });
-    } else {
-      revenueData.forEach((month, value) {
-        // Check if the month matches the selectedMonth
-        if (DateFormat('MMM').format(DateFormat('MMM').parse(month)) ==
-            selectedMonth) {
-          DateTime firstDayOfMonth = DateFormat('MMM').parse(month);
-          int daysInMonth = DateUtils.getDaysInMonth(
-              firstDayOfMonth.year, firstDayOfMonth.month);
-          for (int i = 1; i <= daysInMonth; i++) {
-            DateTime date =
-                DateTime(firstDayOfMonth.year, firstDayOfMonth.month, i);
-            chartData.add(ChartData(
-                x: DateFormat('yyyy-MM-dd').format(date),
-                y: value / daysInMonth));
-          }
-        }
-      });
-    }
+    revenueData.forEach((month, value) {
+      chartData.add(ChartData(x: month, y: value));
+    });
     return chartData;
   }
 
@@ -401,35 +382,10 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                               padding: EdgeInsets.symmetric(horizontal: 20),
                               child: Column(
                                 children: [
-                                  DropdownButton<String>(
-                                    value: selectedMonth,
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        selectedMonth = newValue!;
-                                      });
-                                    },
-                                    items: <String>[
-                                      'All',
-                                      'Jan',
-                                      'Feb',
-                                      'Mar',
-                                      'Apr',
-                                      'May',
-                                      'Jun',
-                                      'Jul',
-                                      'Aug',
-                                      'Sep',
-                                      'Oct',
-                                      'Nov',
-                                      'Dec'
-                                    ].map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
+                                  Container(
+                                    child: Text('Data Pendapatan (RP)'),
                                   ),
+                                  // DropdownButton
                                   Expanded(
                                     child: FutureBuilder<
                                         Map<String, Map<String, double>>>(
@@ -454,27 +410,20 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                           List<ChartData> pendingData =
                                               _generateChartData(
                                                   revenueData['pending']!);
-                                          List<ChartData> onProgressData =
-                                              _generateChartData(
-                                                  revenueData['on-progress']!);
                                           List<ChartData> successData =
                                               _generateChartData(
                                                   revenueData['success']!);
 
                                           return SfCartesianChart(
-                                            primaryXAxis: selectedMonth == 'All'
-                                                ? CategoryAxis()
-                                                : DateTimeAxis(),
+                                            primaryXAxis:
+                                                CategoryAxis(), // Since we're only showing yearly data
                                             series: <ChartSeries>[
                                               ColumnSeries<ChartData, dynamic>(
-                                                name: 'cancel',
+                                                name: 'Cancel',
                                                 dataSource: pendingData,
-                                                xValueMapper: (ChartData data,
-                                                        _) =>
-                                                    selectedMonth == 'All'
-                                                        ? data.x
-                                                        : DateTime.parse(
-                                                            data.x),
+                                                xValueMapper:
+                                                    (ChartData data, _) =>
+                                                        data.x,
                                                 yValueMapper:
                                                     (ChartData data, _) =>
                                                         data.y,
@@ -482,12 +431,9 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                               ColumnSeries<ChartData, dynamic>(
                                                 name: 'Success',
                                                 dataSource: successData,
-                                                xValueMapper: (ChartData data,
-                                                        _) =>
-                                                    selectedMonth == 'All'
-                                                        ? data.x
-                                                        : DateTime.parse(
-                                                            data.x),
+                                                xValueMapper:
+                                                    (ChartData data, _) =>
+                                                        data.x,
                                                 yValueMapper:
                                                     (ChartData data, _) =>
                                                         data.y,

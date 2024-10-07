@@ -246,108 +246,103 @@ class _detail_customState extends State<detail_custom> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PemesananOption(),
-              )),
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PemesananOption(),
+            ),
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Deskripsi:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/home_decoration.png'),
+                fit: BoxFit.cover,
               ),
             ),
-            Text(widget.deskripsi),
-            SizedBox(height: 10),
-            Text(
-              'Alamat:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            Text(widget.alamat),
-            SizedBox(height: 10),
-            Text(
-              'Require Handyman:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            Text(widget.require_handyman),
-            SizedBox(height: 10),
-            Text(
-              'Waktu Pekerjaan:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            Text(widget.start_time + " - " + widget.end_time),
-            SizedBox(height: 10),
-            Text(
-              'Budget Harga Pekerjaan: ' + widget.price,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            Container(
-                child: Text(
-              "Koordinat : " + widget.position.toString(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            )),
-            const SizedBox(height: 16.0),
-            Container(
-                margin: EdgeInsets.all(15),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Gambar (Optional)",
+          ),
+          // Konten lainnya di atas background
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Deskripsi:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
-                )),
-
-            // Tambahkan kode untuk mengunggah gambar
-            Container(
-              margin: EdgeInsets.all(15),
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: _getImage,
-                child: Text('Unggah Foto'),
-              ),
-            ),
-            if (requestImage != null)
-              Container(
-                margin: EdgeInsets.all(15),
-                child: Image.file(
-                  File(requestImage!.path),
-                  height: 100.0,
-                  width: 100.0,
                 ),
-              ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () async {
-                _submitForm();
-              },
-              child: const Text('Submit'),
+                Text(widget.deskripsi),
+                SizedBox(height: 10),
+                Text(
+                  'Alamat:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(widget.alamat),
+                SizedBox(height: 10),
+                Text(
+                  'Require Handyman:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(widget.require_handyman),
+                SizedBox(height: 10),
+                Text(
+                  'Waktu Pekerjaan:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(widget.start_time + " - " + widget.end_time),
+                SizedBox(height: 10),
+                Text(
+                  'Budget Harga Pekerjaan: ' + widget.price,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                Container(
+                  margin: EdgeInsets.all(15),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Gambar (Optional)",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(15),
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: _getImage,
+                    child: Text('Unggah Foto'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    _submitForm();
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
