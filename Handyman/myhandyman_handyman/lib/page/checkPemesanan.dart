@@ -100,12 +100,11 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
           "to": token_sent
         }),
       );
-
+      InsertData(this.widget.data,
+          FirebaseAuth.instance.currentUser!.email.toString());
       if (res.statusCode == 200) {
         print('>>>>>>>>>>>>>>>>>>>>success');
         final responseData = jsonDecode(res.body);
-        InsertData(this.widget.data,
-            FirebaseAuth.instance.currentUser!.email.toString());
       } else {
         print(res.body);
         print(res.statusCode.toString() + ">>>>>");
