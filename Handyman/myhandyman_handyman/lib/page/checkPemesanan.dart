@@ -15,6 +15,7 @@ import 'package:myhandyman_handyman/model/message.dart';
 import 'package:myhandyman_handyman/model/pekerjaan.dart';
 import 'package:myhandyman_handyman/page/kontak.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
+import 'package:myhandyman_handyman/service/messagingService.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,6 +39,7 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
   bool isLoading = false;
   LatLng? pekerjaanLocation;
   List<Pekerjaan> datas = [];
+  final messaging = MessagingService();
   @override
   void initState() {
     super.initState();
@@ -73,42 +75,33 @@ class _pemesanan_detailsState extends State<pemesanan_details> {
         },
       );
     } else {
-      final res = await http.post(
-        Uri.parse("https://fcm.googleapis.com/fcm/send"),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization':
-              'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-        },
-        body: jsonEncode(<String, dynamic>{
-          'priority': 'high',
-          'data': {
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'status': 'done',
-            'body': 'MyHandyman',
-            'title': 'Halo ' +
-                this.widget.email +
-                ' kamu berhasil mendapatkan Handyman !',
-          },
-          'notification': {
-            'body': 'MyHandyman',
-            'title': 'Halo ' +
-                this.widget.email +
-                ' kamu berhasil mendapatkan Handyman !',
-            'android_channel_id': "dbFood"
-          },
-          "to": token_sent
-        }),
-      );
-      InsertData(this.widget.data,
-          FirebaseAuth.instance.currentUser!.email.toString());
-      if (res.statusCode == 200) {
-        print('>>>>>>>>>>>>>>>>>>>>success');
-        final responseData = jsonDecode(res.body);
+      final getTrue = await messaging.sendFCMMessage(
+          messaging.getAccessToken().toString(),
+          token_sent,
+          "Pemesanan",
+          "Kamu Mendapatkan Handyman!");
+      print(getTrue);
+      if (getTrue == "success") {
+        InsertData(this.widget.data,
+            FirebaseAuth.instance.currentUser!.email.toString());
       } else {
-        print(res.body);
-        print(res.statusCode.toString() + ">>>>>");
-        print('>>>>>>>>>>>>>>>>>>>>gagal');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Gagal'),
+              content: Text('Pemesanan Gagal didapatkan!'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
     }
   }

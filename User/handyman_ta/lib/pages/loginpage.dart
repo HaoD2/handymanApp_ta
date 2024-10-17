@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:handyman_ta/pages/User/home.dart';
@@ -7,6 +10,9 @@ import 'package:handyman_ta/pages/register.dart';
 import 'package:handyman_ta/pages/service/authServices.dart';
 import 'package:handyman_ta/pages/service/fcmAPI.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:http/http.dart' as http;
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:googleapis/servicecontrol/v1.dart' as servicecontrol;
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
@@ -76,10 +82,10 @@ class _LoginPageState extends State<LoginPage> {
       print(FirebaseAuth.instance.currentUser?.email);
       final loginResult = await _authService.Login(
           usernameController.text.trim(), passwordController.text.trim());
-
       if (loginResult == null) {
         // Login berhasil, arahkan ke halaman UserHome
-        String? fcmToken = await firebaseAPI().initNotification();
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        ;
         if (FirebaseAuth.instance.currentUser != null) {
           String? email = FirebaseAuth.instance.currentUser!.email;
           if (email != null) {

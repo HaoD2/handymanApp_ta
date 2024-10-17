@@ -7,6 +7,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:myhandyman_handyman/service/authservice.dart';
 import 'package:myhandyman_handyman/service/fcmAPI.dart';
+import 'package:myhandyman_handyman/service/messagingService.dart';
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/loginHandyman';
@@ -24,11 +25,12 @@ class _LoginPageState extends State<LoginPage> {
   void loginUser() async {
     // Ganti dengan email dan password sesuai input pengguna
     if (_formKey.currentState!.validate()) {
+      final messaging = MessagingService();
       final loginResult = await _authService.signInWithEmailAndPassword(
           usernameController.text.trim(), passwordController.text.trim());
       if (loginResult == null) {
         // Login berhasil, arahkan ke halaman UserHome
-        String? fcmToken = await firebaseAPI().initNotification();
+        String? fcmToken = await messaging.getToken();
         if (FirebaseAuth.instance.currentUser != null) {
           String? email = FirebaseAuth.instance.currentUser!.email;
           print("ini + $email");

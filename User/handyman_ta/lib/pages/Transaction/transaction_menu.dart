@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:handyman_ta/pages/service/messagingService.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +25,7 @@ class SnapScreen extends StatefulWidget {
 
 class _SnapScreenState extends State<SnapScreen> {
   late bool _isSuccess = false;
+  final messaging = MessagingService();
   late WebViewController webViewController;
   bool _isLoading = false;
   late final WebViewController _controller;
@@ -95,6 +98,13 @@ class _SnapScreenState extends State<SnapScreen> {
                         .update({'status_pesan': true});
                   });
                 });
+                final currentFCMToken =
+                    await FirebaseMessaging.instance.getToken();
+                messaging.sendFCMMessage(
+                    currentFCMToken!,
+                    currentFCMToken!,
+                    "Pembayaran",
+                    "Pembayaran ${this.widget.order_id} anda Berhasil!");
               } catch (e) {
                 print('Error inserting data: $e');
               }

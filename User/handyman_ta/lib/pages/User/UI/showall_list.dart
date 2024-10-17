@@ -29,8 +29,7 @@ class _showAll_listState extends State<showAll_list> {
     QuerySnapshot querySnapshot = await _request_handyman
         .where('user', isEqualTo: user.email)
         .where('status_done', isEqualTo: false)
-        .where('status', isNotEqualTo: 'cancel')
-        .get();
+        .where('status', isNotEqualTo: ['success', 'cancel']).get();
 
     if (querySnapshot.docs.isNotEmpty) {
       return querySnapshot.docs;
@@ -208,7 +207,7 @@ class _showAll_listState extends State<showAll_list> {
                                   if (snapshot.data == null ||
                                       snapshot.data!.docs.isEmpty) {
                                     return Text(
-                                        'User not found'); // Teks jika pengguna tidak ditemukan
+                                        'Belum mendapatkan Handyman'); // Teks jika pengguna tidak ditemukan
                                   }
 
                                   // Ambil data nama pengguna dari snapshot
@@ -319,7 +318,7 @@ class _showAll_listState extends State<showAll_list> {
   Widget _buildProgressLine() {
     return Container(
       height: 2,
-      width: 80, // Lebar garis
+      width: 50, // Lebar garis
       color: Colors.grey,
     );
   }

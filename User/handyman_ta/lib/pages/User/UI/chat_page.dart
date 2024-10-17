@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handyman_ta/pages/Model/message.dart';
 import 'package:handyman_ta/pages/User/home.dart';
+import 'package:handyman_ta/pages/service/messagingService.dart';
 import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -36,6 +37,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _badService = false;
   bool _poorCommunication = false;
   bool _unclearCost = false;
+  final messaging = MessagingService();
 
   @override
   void initState() {
@@ -70,36 +72,8 @@ class _ChatPageState extends State<ChatPage> {
     QuerySnapshot querySnapshot =
         await usersCollection.where('email', isEqualTo: email).get();
     final token_sent = querySnapshot.docs.first['token_messaging'];
-    final res =
-        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-              'Authorization':
-                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-            },
-            body: jsonEncode(<String, dynamic>{
-              'priority': 'high',
-              'data': {
-                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                'status': 'done',
-                'body': 'MyHandyman',
-                'title': 'Halo ' + email + 'kamu mendapatkan Chat',
-              },
-              'notification': {
-                'body': 'MyHandyman',
-                'title': 'Halo ' + email + 'kamu mendapatkan Chat',
-                'android_channel_id': "dbFood"
-              },
-              "to": token_sent
-            }));
-    if (res.statusCode == 200) {
-      print('>>>>>>>>>>>>>>>>>>>>success');
-      final responseData = jsonDecode(res.body);
-    } else {
-      print(res.body);
-      print(res.statusCode.toString() + ">>>>>");
-      print('>>>>>>>>>>>>>>>>>>>>gagal');
-    }
+    messaging.sendFCMMessage(messaging.getToken().toString(), token_sent,
+        "Pesan", "Halo Kamu mendapatkan Pesan!");
   }
 
   //ketika sudah konfirmasi pemesanan

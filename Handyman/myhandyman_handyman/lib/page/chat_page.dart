@@ -7,6 +7,7 @@ import 'package:myhandyman_handyman/model/message.dart';
 import 'package:myhandyman_handyman/page/userHandyman.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:myhandyman_handyman/service/messagingService.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatPage extends StatefulWidget {
@@ -58,6 +59,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void Retrieve(String email) async {
+    final messaging = MessagingService();
     final CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
 
@@ -67,37 +69,8 @@ class _ChatPageState extends State<ChatPage> {
 
     if (querySnapshot.docs.isNotEmpty) {
       final token_sent = querySnapshot.docs.first['token_messaging'];
-      print(token_sent);
-      final res =
-          await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-              headers: <String, String>{
-                'Content-Type': 'application/json',
-                'Authorization':
-                    'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-              },
-              body: jsonEncode(<String, dynamic>{
-                'priority': 'high',
-                'data': {
-                  'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                  'status': 'done',
-                  'body': 'MyHandyman',
-                  'title': 'Halo ' + email + 'kamu mendapatkan Chat',
-                },
-                'notification': {
-                  'body': 'MyHandyman',
-                  'title': 'Halo ' + email + 'kamu mendapatkan Chat',
-                  'android_channel_id': "dbFood"
-                },
-                "to": token_sent
-              }));
-      if (res.statusCode == 200) {
-        print('>>>>>>>>>>>>>>>>>>>>success');
-        final responseData = jsonDecode(res.body);
-      } else {
-        print(res.body);
-        print(res.statusCode.toString() + ">>>>>");
-        print('>>>>>>>>>>>>>>>>>>>>gagal');
-      }
+      messaging.sendFCMMessage(messaging.getToken().toString(), token_sent,
+          "pesan", "Ada Pesan Baru!");
     } else {
       print('No document found with the provided email.');
     }

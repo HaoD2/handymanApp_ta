@@ -69,6 +69,8 @@ dependencies:
   firebase_messaging: ^14.7.2
   timeago: ^3.6.0
   provider: ^6.1.2
+  googleapis: ^13.1.0
+  googleapis_auth: ^1.5.1
 
 
 dev_dependencies:
