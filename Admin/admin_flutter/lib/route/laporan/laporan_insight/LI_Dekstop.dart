@@ -63,8 +63,8 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
       Map<String, int> layananCount = {};
 
       for (var doc in snapshot.docs) {
-        String layanan = doc['tipe_pekerjaan'];
-        double rating = doc['rate'];
+        String layanan = doc['nama_layanan'];
+        double rating = doc['nilai_Rating'];
 
         if (layananRatings.containsKey(layanan)) {
           layananRatings[layanan] = layananRatings[layanan]! + rating;
@@ -419,7 +419,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                 CategoryAxis(), // Since we're only showing yearly data
                                             series: <ChartSeries>[
                                               ColumnSeries<ChartData, dynamic>(
-                                                name: 'Cancel',
+                                                name: 'Pending',
                                                 dataSource: pendingData,
                                                 xValueMapper:
                                                     (ChartData data, _) =>

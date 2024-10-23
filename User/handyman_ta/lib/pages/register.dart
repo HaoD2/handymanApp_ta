@@ -162,31 +162,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 15),
                 Row(
                   children: <Widget>[
-                    // Register Button
-                    TextButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await signUp();
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        "Register",
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 2.6,
-                    ),
-                    // Login Button
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
@@ -204,6 +179,30 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       child: const Text(
                         "Back to Login",
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2.6,
+                    ),
+                    // Register Button
+                    TextButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await signUp();
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Register",
                         style: TextStyle(
                           color: Colors.black,
                         ),

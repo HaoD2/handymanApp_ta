@@ -1,3 +1,4 @@
+
 const { response } = require("express");
 const express = require("express");
 const router = express.Router();
@@ -75,32 +76,43 @@ router.post('/purchase', async (req, res) => {
     }
 });
 
+const fetch = require('node-fetch');
+
 router.post('/cancelPurchase', async (req, res) => {
-    res.setHeader('Accept', 'application/json');
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('accept', 'application/json');
     try {
         const data = req.body;
-        const snap = new midtransClient.Snap({
-            isProduction: false,
-            serverKey: SERVER_KEY,
-            clientKey: CLIENT_KEY
-        });
-        if (!data) {
+        if (!data || !data.order_id) {
             return res.status(400).json({ message: 'Invalid parameter' });
         }
 
-        snap.transaction.cancel(data.order_id)
-            .then((response) => {
-                console.log(response);
-                return res.status(200).json(response);
-            });
+        // URL untuk melakukan pembatalan transaksi di Midtrans
+        const url = `https://api.sandbox.midtrans.com/v2/${data.order_id}/cancel`;
+
+        // Opsi request dengan serverKey Midtrans (autentikasi Basic)
+        const options = {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Basic ${Buffer.from(SERVER_KEY).toString('base64')}`
+            }
+        };
+
+        // Kirim request ke API Midtrans
+        const response = await fetch(url, options);
+        const jsonResponse = await response.json();
+
+        // Kirimkan response dari Midtrans ke client
+        if (response.ok) {
+            return res.status(200).json(jsonResponse);
+        } else {
+            return res.status(response.status).json(jsonResponse);
+        }
 
     } catch (ex) {
         return res.status(500).json({ message: ex.message });
     }
-
-
-
 });
 
 module.exports = router;

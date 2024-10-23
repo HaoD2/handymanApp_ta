@@ -5,10 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:handyman_ta/pages/Model/pekerjaan.dart';
+import 'package:handyman_ta/pages/User/UI/custom_pemesanan/pemesanan_option.dart';
 import 'package:handyman_ta/pages/User/UI/kontak.dart';
+import 'package:handyman_ta/pages/User/UI/option_menu.dart';
 import 'package:handyman_ta/pages/User/UI/profile.dart';
 import 'package:handyman_ta/pages/User/UI/request_pekerjaan.dart';
 import 'package:handyman_ta/pages/loginpage.dart';
+import 'package:handyman_ta/pages/service/authServices.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class userHomepage extends StatelessWidget {
@@ -152,7 +155,6 @@ class _homeState extends State<home> {
     fetchData();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -232,43 +234,126 @@ class _homeState extends State<home> {
             items: dataList.map((pekerjaan) {
               return Builder(
                 builder: (BuildContext context) {
-                  return Center(
-                    child: Stack(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          alignment: Alignment.center,
-                          child: ClipRect(
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: 4,
-                                sigmaY: 4,
+                  return GestureDetector(
+                    onTap: () async {
+                      AuthServices authService = AuthServices();
+                      User? user = await authService.getCurrentUser();
+
+                      if (user != null) {
+                        // Jika user sudah login
+                        if (pekerjaan.title == "Lain - Lainnya") {
+                          Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return PemesananOption(
+                                    layanan: pekerjaan.title);
+                              },
+                            ),
+                            (_) => false,
+                          );
+                        } else {
+                          Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return option_menu(layanan: pekerjaan.title);
+                              },
+                            ),
+                            (_) => false,
+                          );
+                        }
+                      } else {
+                        // Jika user belum login, tampilkan dialog
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Login Required'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                          builder: (BuildContext context) {
+                                            return LoginPage();
+                                          },
+                                        ),
+                                        (_) => false,
+                                      );
+                                    },
+                                    child: Text('Login'),
+                                  ),
+                                  SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                          builder: (BuildContext context) {
+                                            return LoginPage(); // Ubah ke halaman Sign Up jika perlu
+                                          },
+                                        ),
+                                        (_) => false,
+                                      );
+                                    },
+                                    child: Text('Sign Up'),
+                                  ),
+                                  SizedBox(height: 16),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Cancel'),
+                                  ),
+                                ],
                               ),
-                              child: Image.asset(
-                                pekerjaan
-                                    .imageName, // Ganti dengan field yang sesuai
-                                height: 250,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                            );
+                          },
+                        );
+                      }
+                    },
+                    child: Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            alignment: Alignment.center,
+                            child: ClipRect(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                  sigmaX: 4,
+                                  sigmaY: 4,
+                                ),
+                                child: Image.asset(
+                                  pekerjaan.imageName,
+                                  height: 250,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          color: Colors.transparent,
-                          alignment: Alignment.center,
-                          child: Text(
-                            pekerjaan.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                              color: Colors.black87,
-                              fontFamily: 'OpenSans',
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Text(
+                              pekerjaan.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18,
+                                color: Colors.black87,
+                                fontFamily: 'OpenSans',
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },

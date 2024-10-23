@@ -28,7 +28,36 @@ class _SnapScreenState extends State<SnapScreen> {
   final messaging = MessagingService();
   late WebViewController webViewController;
   bool _isLoading = false;
+  bool _dataInserted = false;
   late final WebViewController _controller;
+  Future<void> _insertPaymentData() async {
+    if (_dataInserted) return;
+    _dataInserted = true; // Set flag
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('request_handyman')
+          .add(this.widget.requestData);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(doc.id)
+              .update({'status_pesan': true});
+        });
+      });
+      final currentFCMToken = await FirebaseMessaging.instance.getToken();
+      messaging.sendFCMMessage(currentFCMToken!, currentFCMToken!, "Pembayaran",
+          "Pembayaran ${this.widget.order_id} anda Berhasil!");
+    } catch (e) {
+      print('Error inserting data: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,34 +109,7 @@ class _SnapScreenState extends State<SnapScreen> {
               });
             }
             if (_isSuccess) {
-              try {
-                // Clear form
-                await FirebaseFirestore.instance
-                    .collection('request_handyman')
-                    .add(this.widget.requestData);
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .where('email',
-                        isEqualTo: FirebaseAuth.instance.currentUser?.email)
-                    .get()
-                    .then((QuerySnapshot querySnapshot) {
-                  querySnapshot.docs.forEach((doc) {
-                    FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(doc.id)
-                        .update({'status_pesan': true});
-                  });
-                });
-                final currentFCMToken =
-                    await FirebaseMessaging.instance.getToken();
-                messaging.sendFCMMessage(
-                    currentFCMToken!,
-                    currentFCMToken!,
-                    "Pembayaran",
-                    "Pembayaran ${this.widget.order_id} anda Berhasil!");
-              } catch (e) {
-                print('Error inserting data: $e');
-              }
+              await _insertPaymentData();
             }
           },
           onWebResourceError: (WebResourceError error) {

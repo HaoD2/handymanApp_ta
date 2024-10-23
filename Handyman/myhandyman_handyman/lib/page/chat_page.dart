@@ -278,8 +278,6 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          // Lakukan sesuatu dengan nilai _rating
-                          print('Rating: $_rating');
                           try {
                             QuerySnapshot querySnapshot =
                                 await FirebaseFirestore.instance
@@ -481,40 +479,12 @@ class _ChatPageState extends State<ChatPage> {
   void iSDone(String email) async {
     final CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
-
+    final sendMessage = MessagingService();
     QuerySnapshot querySnapshot =
         await usersCollection.where('email', isEqualTo: email).get();
     final token_sent = querySnapshot.docs.first['token_messaging'];
-    final res =
-        await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-              'Authorization':
-                  'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-            },
-            body: jsonEncode(<String, dynamic>{
-              'priority': 'high',
-              'data': {
-                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                'status': 'done',
-                'body': 'MyHandyman',
-                'title': ' Pemesanan kamu Sudah Selesai !',
-              },
-              'notification': {
-                'body': 'MyHandyman',
-                'title': ' Pemesanan kamu Sudah Selesai !',
-                'android_channel_id': "dbFood"
-              },
-              "to": token_sent
-            }));
-    if (res.statusCode == 200) {
-      print('>>>>>>>>>>>>>>>>>>>>success');
-      final responseData = jsonDecode(res.body);
-    } else {
-      print(res.body);
-      print(res.statusCode.toString() + ">>>>>");
-      print('>>>>>>>>>>>>>>>>>>>>gagal');
-    }
+    sendMessage.sendFCMMessage(sendMessage.getAccessToken().toString(),
+        token_sent, "Pemesanan MyHandyman", "Pemesanan kamu Sudah Selesai !");
   }
 
   @override

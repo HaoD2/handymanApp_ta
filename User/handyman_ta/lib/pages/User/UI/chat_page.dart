@@ -381,7 +381,7 @@ class _ChatPageState extends State<ChatPage> {
   ) async {
     CollectionReference ratingLayananCollection =
         FirebaseFirestore.instance.collection('rating_user');
-
+// rating users
     return await ratingLayananCollection.add({
       'nama_user': namaUser,
       'nilai_Rating': nilaiRating,
@@ -539,6 +539,19 @@ class _ChatPageState extends State<ChatPage> {
                   'Apakah Pekerjaan yang dilakukan Handyman Telah Selesai ?'),
               actions: <Widget>[
                 TextButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.blue),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                      EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+                    ),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(20.0), // Rounded corners
+                      ),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.of(context)
                         .pop(true); // Kembali dengan nilai true (ya)

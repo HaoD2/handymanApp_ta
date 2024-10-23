@@ -374,9 +374,24 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           requestImage = null;
         });
       } else {
-        print(res.body);
-        print(res.statusCode.toString() + ">>>>>");
-        print('>>>>>>>>>>>>>>>>>>>>gagal');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Tidak bisa memesan'),
+              content: Text('Mohon Menunggu, Pesanan Sedang Overload!.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+        return;
       }
     }
   }
