@@ -29,10 +29,14 @@ class _showAll_listState extends State<showAll_list> {
     QuerySnapshot querySnapshot = await _request_handyman
         .where('user', isEqualTo: user.email)
         .where('status_done', isEqualTo: false)
-        .where('status', isNotEqualTo: ['success', 'cancel']).get();
+        .get();
+    List<DocumentSnapshot> filteredDocs = querySnapshot.docs.where((doc) {
+      return doc['status'] != 'success' && doc['status'] != 'cancel';
+    }).toList();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      return querySnapshot.docs;
+    // Mengembalikan hasil jika tidak kosong, atau null jika tidak ada hasil
+    if (filteredDocs.isNotEmpty) {
+      return filteredDocs;
     } else {
       return null; // Tidak ada dokumen yang cocok, mengembalikan null
     }
@@ -87,7 +91,7 @@ class _showAll_listState extends State<showAll_list> {
                 itemCount: documents.length,
                 itemBuilder: (context, index) {
                   var data = documents[index].data() as Map<String, dynamic>;
-                  String pengirimHandyman = data['taken_by'] ?? "UNKNOWN";
+                  String pengirimHandyman = data['taken_by'] ?? "";
                   String pengirimUser = data['user'];
                   String uid_pemesanan = data['uid'];
                   // Set icon based on the status name
@@ -189,52 +193,54 @@ class _showAll_listState extends State<showAll_list> {
                                 // Example icon, you can replace this with your own icon
                                 child: Icon(Icons.person_2_rounded),
                               ),
-                              title: FutureBuilder<QuerySnapshot>(
+                              title: FutureBuilder<List<DocumentSnapshot>>(
                                 future: FirebaseFirestore.instance
                                     .collection('users')
                                     .where('email', isEqualTo: data['taken_by'])
-                                    .get(),
+                                    .get()
+                                    .then((snapshot) => snapshot
+                                        .docs), // Mengonversi ke List<DocumentSnapshot>
                                 builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    AsyncSnapshot<List<DocumentSnapshot>>
+                                        snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return Text(
-                                        'Loading...'); // Teks sementara saat data masih dimuat
+                                    return Text('Loading...');
                                   }
                                   if (snapshot.hasError) {
                                     return Text('Error: ${snapshot.error}');
                                   }
-                                  if (snapshot.data == null ||
-                                      snapshot.data!.docs.isEmpty) {
-                                    return Text(
-                                        'Belum mendapatkan Handyman'); // Teks jika pengguna tidak ditemukan
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    return Text('Belum mendapatkan Handyman');
                                   }
 
                                   // Ambil data nama pengguna dari snapshot
-                                  String userName = snapshot.data!.docs.first[
-                                      'nama']; // Ganti 'nama' dengan nama field yang sesuai
-                                  return Text(
-                                      userName); // Tampilkan nama pengguna di ListTile
+                                  String userName = snapshot.data!.first[
+                                      'nama']; // Ganti 'nama' dengan field yang sesuai
+                                  return Text(userName);
                                 },
                               ),
-                              subtitle: StreamBuilder(
+                              subtitle: StreamBuilder<List<DocumentSnapshot>>(
                                 stream: FirebaseFirestore.instance
                                     .collection('rating_user')
                                     .where('nama_user',
                                         isEqualTo: data['taken_by'])
-                                    .snapshots(),
+                                    .snapshots()
+                                    .map((query) => query
+                                        .docs), // Konversi QuerySnapshot ke List<DocumentSnapshot>
                                 builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    AsyncSnapshot<List<DocumentSnapshot>>
+                                        snapshot) {
                                   if (snapshot.hasData &&
-                                      snapshot.data!.docs.isNotEmpty) {
+                                      snapshot.data!.isNotEmpty) {
                                     double totalRating = 0;
-                                    int count = snapshot.data!.docs.length;
+                                    int count = snapshot.data!.length;
 
-                                    snapshot.data!.docs
-                                        .forEach((DocumentSnapshot document) {
+                                    for (var document in snapshot.data!) {
                                       totalRating += double.parse(
                                           document['nilai_Rating'].toString());
-                                    });
+                                    }
 
                                     double averageRating = totalRating / count;
 
@@ -248,23 +254,28 @@ class _showAll_listState extends State<showAll_list> {
                                       ],
                                     );
                                   } else {
-                                    return Container(); // Widget placeholder jika data rating belum tersedia
+                                    return Container(); // Placeholder jika data rating belum tersedia
                                   }
                                 },
                               ),
-                              trailing: IconButton(
-                                onPressed: () {
-                                  // Handle navigation to other page here
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ChatPage(
-                                              pengirimHandyman,
-                                              pengirimUser,
-                                              uid_pemesanan)));
-                                },
-                                icon: Icon(Icons.message),
-                              ),
+                              trailing: (pengirimHandyman != null &&
+                                      pengirimHandyman != "")
+                                  ? IconButton(
+                                      onPressed: () {
+                                        // Handle navigation to other page here
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ChatPage(
+                                                pengirimHandyman,
+                                                pengirimUser,
+                                                uid_pemesanan),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(Icons.message),
+                                    )
+                                  : null, // Tidak menampilkan ikon jika tidak ada handyman // Tidak menampilkan ikon jika tidak ada handyman
                             ),
                           ),
                         ],

@@ -111,7 +111,6 @@ class _ModulePemesananState extends State<ModulePemesanan> {
             .expand((options) => options)
             .toList();
       });
-      print("Option Layanan: $optionLayanan");
     } catch (e) {
       print("Error fetching option data: $e");
     }
@@ -251,10 +250,8 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           : null;
 
       if (lastOrderDate != null && lastOrderDate.day == DateTime.now().day) {
-        print('masuk');
         lastOrderNumber += BigInt.one; // Tambahkan satu digit terakhir
       } else {
-        print('tidak msk');
         Timestamp timestamps = lastOrder.docs.first.get('created_date');
 
 // Konversi Timestamp menjadi String dengan format yang diinginkan
