@@ -2,10 +2,16 @@
   "configVersion": 2,
   "packages": [
     {
-      "name": "_flutterfire_internals",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/_flutterfire_internals-1.3.16",
+      "name": "_discoveryapis_commons",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/_discoveryapis_commons-1.0.6",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "_flutterfire_internals",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/_flutterfire_internals-1.3.25",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "adaptivex",
@@ -21,7 +27,7 @@
     },
     {
       "name": "ansicolor",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/ansicolor-2.0.2",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/ansicolor-2.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -63,7 +69,7 @@
     },
     {
       "name": "cached_network_image_web",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cached_network_image_web-1.1.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cached_network_image_web-1.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -117,21 +123,21 @@
     },
     {
       "name": "cloud_firestore",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore-4.13.6",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore-4.15.8",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "cloud_firestore_platform_interface",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore_platform_interface-6.0.10",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore_platform_interface-6.1.9",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "cloud_firestore_web",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore_web-3.8.10",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_firestore_web-3.10.8",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.2"
     },
     {
       "name": "collection",
@@ -159,9 +165,9 @@
     },
     {
       "name": "cupertino_icons",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.6",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.8",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "d_chart",
@@ -177,7 +183,7 @@
     },
     {
       "name": "deep_pick",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/deep_pick-1.0.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/deep_pick-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -213,39 +219,63 @@
     },
     {
       "name": "firebase_analytics",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics-10.8.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics-10.8.9",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "firebase_analytics_platform_interface",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_platform_interface-3.9.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_platform_interface-3.9.9",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "firebase_analytics_web",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_web-0.5.5+12",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_web-0.5.5+21",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "firebase_core",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core-2.24.2",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core-2.27.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "firebase_core_platform_interface",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-5.0.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-5.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_core_web",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.11.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_messaging",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging-14.7.19",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
-      "name": "firebase_core_web",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.10.0",
+      "name": "firebase_messaging_platform_interface",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_platform_interface-4.5.27",
       "packageUri": "lib/",
       "languageVersion": "2.18"
+    },
+    {
+      "name": "firebase_messaging_web",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_web-3.6.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "fixnum",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
     },
     {
       "name": "fl_chart",
@@ -273,7 +303,7 @@
     },
     {
       "name": "flutter_riverpod",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_riverpod-2.4.9",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_riverpod-2.6.1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -294,6 +324,18 @@
       "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/flutterfire_cli-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "googleapis",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/googleapis-13.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "googleapis_auth",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/googleapis_auth-1.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
     },
     {
       "name": "http",
@@ -375,9 +417,9 @@
     },
     {
       "name": "octo_image",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/octo_image-2.0.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/octo_image-2.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "path",
@@ -387,21 +429,21 @@
     },
     {
       "name": "path_provider",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider-2.1.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.2",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.4",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.2"
     },
     {
       "name": "path_provider_foundation",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.3.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.3.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "path_provider_linux",
@@ -411,15 +453,15 @@
     },
     {
       "name": "path_provider_platform_interface",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.1.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "path_provider_windows",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.2.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.3.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "petitparser",
@@ -429,13 +471,13 @@
     },
     {
       "name": "platform",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.4",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.6",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.2"
     },
     {
       "name": "plugin_platform_interface",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.7",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -453,7 +495,7 @@
     },
     {
       "name": "provider",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -477,13 +519,13 @@
     },
     {
       "name": "quiver",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/quiver-3.2.1",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/quiver-3.2.2",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "responsive_builder",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/responsive_builder-0.7.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/responsive_builder-0.7.1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -495,7 +537,7 @@
     },
     {
       "name": "riverpod",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod-2.4.9",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod-2.6.1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -525,13 +567,13 @@
     },
     {
       "name": "sqflite",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.3.0",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.3.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "sqflite_common",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.0+2",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -609,9 +651,9 @@
     },
     {
       "name": "uuid",
-      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.2.2",
+      "rootUri": "file:///C:/Users/kevin/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.0"
     },
     {
       "name": "vector_math",
@@ -656,7 +698,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-06-03T14:36:47.332238Z",
+  "generated": "2024-10-24T14:01:36.502317Z",
   "generator": "pub",
   "generatorVersion": "3.2.0"
 }

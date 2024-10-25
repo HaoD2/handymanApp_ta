@@ -413,8 +413,8 @@ class _history_pemesananState extends State<history_pemesanan> {
                         .collection('rating_layanan')
                         .add({
                           'uid_pemesanan': uidPemesanan,
-                          'tipe_pekerjaan': namaPekerjaan,
-                          'rate': _rating,
+                          'nama_layanan': namaPekerjaan,
+                          'nilai_Rating': _rating,
                           'rate_now': true,
                         })
                         .then((value) => {

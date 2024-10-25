@@ -49,6 +49,9 @@ dependencies:
   flutterfire_cli: ^1.0.0
   d_chart: ^2.6.9
   syncfusion_flutter_charts: ^20.2.43
+  firebase_messaging: ^14.7.19
+  googleapis: ^13.1.0
+  googleapis_auth: 1.4.1
 
 dev_dependencies:
   flutter_test:

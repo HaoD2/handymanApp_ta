@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handyman_ta/pages/Admin/showReqHandyman.dart';
 import 'package:handyman_ta/pages/User/UI/favourites.dart';
@@ -28,7 +30,14 @@ class _profileState extends State<profile> {
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
 
-  getData() async {
+  Future<void> _refresh() {
+    setState(() {
+      getData();
+    });
+    return Future.delayed(Duration(seconds: 2));
+  }
+
+  Future getData() async {
     QuerySnapshot querySnapshot = await _users
         .where("email", isEqualTo: FirebaseAuth.instance.currentUser?.email)
         .get();
@@ -73,6 +82,46 @@ class _profileState extends State<profile> {
     await FirebaseAuth.instance.signOut();
   }
 
+  // Future insertDummy() async {
+  //   // List of job types
+  //   List<String> jobTypes = [
+  //     "Pembersihan Ruang",
+  //     "Pembersihan Barang",
+  //     "perbaikan otomotif",
+  //     "pembuatan pc",
+  //     "perbaikan rumah"
+  //   ];
+
+  //   // Firestore collection reference
+  //   CollectionReference ratingCollection =
+  //       FirebaseFirestore.instance.collection('rating_layanan');
+
+  //   // Random number generator for ratings
+  //   Random random = Random();
+
+  //   // Loop to insert 30 dummy records
+  //   for (int i = 0; i < 30; i++) {
+  //     // Pick a random job type
+  //     String job = jobTypes[random.nextInt(jobTypes.length)];
+
+  //     // Generate a random rating between 2 and 5
+  //     int rating = random.nextInt(4) + 2; // 2 to 5
+
+  //     // Create the dummy data
+  //     Map<String, dynamic> dummyData = {
+  //       "komentar":
+  //           "", // Empty comment for now, can add random text here if needed
+  //       "nama_layanan": job,
+  //       "nilai_Rating": rating
+  //     };
+
+  //     // Insert into Firestore
+  //     await ratingCollection.add(dummyData);
+  //   }
+
+  //   print("30 dummy records inserted successfully.");
+  // }
+
   @override
   void initState() {
     super.initState();
@@ -87,390 +136,408 @@ class _profileState extends State<profile> {
           return CircularProgressIndicator();
         } else {
           if (snapshot.hasData) {
-            return Container(
-              child: Container(
-                child: ListView(
-                  children: <Widget>[
-                    Container(
-                      constraints: BoxConstraints(
-                        minWidth: 0,
-                        maxWidth: MediaQuery.of(context).size.width,
-                        maxHeight: 200,
-                      ),
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              AssetImage('assets/images/home_decoration.png'),
-                          fit: BoxFit.fill,
-                          alignment: Alignment.topCenter,
-                        ),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.all(15),
-                        child: Column(
-                          children: [
-                            FutureBuilder<dynamic>(
-                              initialData: const {},
-                              future: getData(),
-                              builder:
-                                  (context, AsyncSnapshot<dynamic> snapshot) {
-                                if (!snapshot.hasData ||
-                                    snapshot.data == null ||
-                                    snapshot.data.isEmpty ||
-                                    snapshot.hasError) {
-                                  if (snapshot.data == {}) {
-                                    return Container();
-                                  }
-                                }
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: snapshot.data.length,
-                                  itemBuilder: (_, index) {
-                                    final data = snapshot.data[index];
-                                    final status = data['status'];
-                                    final nama = data['nama'];
-                                    final statusHandyman =
-                                        data['status_handyman'];
-                                    if (data == null) {
-                                      logout();
+            return RefreshIndicator(
+                child: Container(
+                  child: Container(
+                    child: ListView(
+                      children: <Widget>[
+                        Container(
+                          constraints: BoxConstraints(
+                            minWidth: 0,
+                            maxWidth: MediaQuery.of(context).size.width,
+                            maxHeight: 200,
+                          ),
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                  'assets/images/home_decoration.png'),
+                              fit: BoxFit.fill,
+                              alignment: Alignment.topCenter,
+                            ),
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(15),
+                            child: Column(
+                              children: [
+                                FutureBuilder<dynamic>(
+                                  initialData: const {},
+                                  future: getData(),
+                                  builder: (context,
+                                      AsyncSnapshot<dynamic> snapshot) {
+                                    if (!snapshot.hasData ||
+                                        snapshot.data == null ||
+                                        snapshot.data.isEmpty ||
+                                        snapshot.hasError) {
+                                      if (snapshot.data == {}) {
+                                        return Container();
+                                      }
                                     }
-                                    // Menampilkan berdasarkan status
-                                    if (status == 1 && statusHandyman == 1) {
-                                      return Container(
-                                        child: Column(
-                                          children: [
-                                            ListTile(
-                                              leading: CircleAvatar(
-                                                backgroundImage: AssetImage(
-                                                    "assets/images/icon_profile.png"),
-                                                radius:
-                                                    20, // Atur sesuai kebutuhan Anda
-                                              ),
-                                              title: Text("$nama",
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 15,
-                                                  )),
-                                              trailing: IconButton(
-                                                icon: Icon(Icons.edit),
-                                                onPressed: () {
-                                                  // Tambahkan logika untuk tombol edit di sini
-                                                  Navigator.of(context,
-                                                          rootNavigator: true)
-                                                      .pushAndRemoveUntil(
-                                                    MaterialPageRoute(
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return changepassword(
-                                                            email: FirebaseAuth
-                                                                .instance
-                                                                .currentUser
-                                                                ?.email);
-                                                      },
-                                                    ),
-                                                    (_) => false,
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: Icon(Icons.verified),
-                                              title: Text('Verified'),
-                                            ),
-                                            ListTile(
-                                              leading: Icon(Icons.verified),
-                                              title: Text('Handyman Verified'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    } else if (status == 1 &&
-                                        statusHandyman == 0) {
-                                      return Container(
-                                        child: Column(
-                                          children: [
-                                            ListTile(
-                                              leading: CircleAvatar(
-                                                backgroundImage: AssetImage(
-                                                    "assets/images/icon_profile.png"),
-                                                radius:
-                                                    20, // Atur sesuai kebutuhan Anda
-                                              ),
-                                              title: Text("$nama",
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 15,
-                                                  )),
-                                              trailing: IconButton(
-                                                icon: Icon(Icons.edit),
-                                                onPressed: () {
-                                                  // Tambahkan logika untuk tombol edit di sini
-                                                  Navigator.of(context,
-                                                          rootNavigator: true)
-                                                      .pushAndRemoveUntil(
-                                                    MaterialPageRoute(
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return changepassword(
-                                                            email: FirebaseAuth
-                                                                .instance
-                                                                .currentUser
-                                                                ?.email);
-                                                      },
-                                                    ),
-                                                    (_) => false,
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: Icon(Icons.verified),
-                                              title: Text('Verified'),
-                                            ),
-                                            ListTile(
-                                              leading: Icon(Icons.warning),
-                                              title:
-                                                  Text('Handyman Unverified'),
-                                              onTap: () {
-                                                Navigator.of(context,
-                                                        rootNavigator: true)
-                                                    .pushAndRemoveUntil(
-                                                  MaterialPageRoute(
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return formRequestHandyman(
-                                                          email: FirebaseAuth
-                                                              .instance
-                                                              .currentUser
-                                                              ?.email);
+                                    return ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: snapshot.data.length,
+                                      itemBuilder: (_, index) {
+                                        final data = snapshot.data[index];
+                                        final status = data['status'];
+                                        final nama = data['nama'];
+                                        final statusHandyman =
+                                            data['status_handyman'];
+                                        if (data == null) {
+                                          logout();
+                                        }
+                                        // Menampilkan berdasarkan status
+                                        if (status == 1 &&
+                                            statusHandyman == 1) {
+                                          return Container(
+                                            child: Column(
+                                              children: [
+                                                ListTile(
+                                                  leading: CircleAvatar(
+                                                    backgroundImage: AssetImage(
+                                                        "assets/images/icon_profile.png"),
+                                                    radius:
+                                                        20, // Atur sesuai kebutuhan Anda
+                                                  ),
+                                                  title: Text("$nama",
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black,
+                                                        fontSize: 15,
+                                                      )),
+                                                  trailing: IconButton(
+                                                    icon: Icon(Icons.edit),
+                                                    onPressed: () {
+                                                      // Tambahkan logika untuk tombol edit di sini
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return changepassword(
+                                                                email: FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser
+                                                                    ?.email);
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
                                                     },
                                                   ),
-                                                  (_) => false,
-                                                );
-                                              },
+                                                ),
+                                                ListTile(
+                                                  leading: Icon(Icons.verified),
+                                                  title: Text('Verified'),
+                                                ),
+                                                ListTile(
+                                                  leading: Icon(Icons.verified),
+                                                  title:
+                                                      Text('Handyman Verified'),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  },
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 5),
-                      decoration: const BoxDecoration(
-                          border: Border(
-                              bottom:
-                                  BorderSide(color: Colors.black54, width: 1))),
-                    ),
-                    Container(
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.history_rounded),
-                              ),
-                              title: const Text(
-                                'History Pemesanan',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return history_pemesanan();
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                                trailing: Container(
-                                  margin: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.contact_support),
-                                ),
-                                title: const Text(
-                                  'Contact Support',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                  ),
-                                )),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.favorite),
-                              ),
-                              title: const Text(
-                                'My Favourites',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return favourite_page();
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.star_rate),
-                              ),
-                              title: const Text(
-                                'Rate Us',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Rate Us'),
-                                      content: SingleChildScrollView(
-                                        child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Text(
-                                                  'Would you like to rate our app on the store?'),
-                                              const SizedBox(height: 20),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  for (int i = 1; i <= 5; i++)
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        i <= 3
-                                                            ? Icons.star
-                                                            : Icons.star_border,
-                                                        size: 20,
-                                                        color: Colors.orange,
+                                          );
+                                        } else if (status == 1 &&
+                                            statusHandyman == 0) {
+                                          return Container(
+                                            child: Column(
+                                              children: [
+                                                ListTile(
+                                                  leading: CircleAvatar(
+                                                    backgroundImage: AssetImage(
+                                                        "assets/images/icon_profile.png"),
+                                                    radius:
+                                                        20, // Atur sesuai kebutuhan Anda
+                                                  ),
+                                                  title: Text("$nama",
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black,
+                                                        fontSize: 15,
+                                                      )),
+                                                  trailing: IconButton(
+                                                    icon: Icon(Icons.edit),
+                                                    onPressed: () {
+                                                      // Tambahkan logika untuk tombol edit di sini
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute(
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return changepassword(
+                                                                email: FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser
+                                                                    ?.email);
+                                                          },
+                                                        ),
+                                                        (_) => false,
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                                ListTile(
+                                                  leading: Icon(Icons.verified),
+                                                  title: Text('Verified'),
+                                                ),
+                                                ListTile(
+                                                  leading: Icon(Icons.warning),
+                                                  title: Text(
+                                                      'Handyman Unverified'),
+                                                  onTap: () {
+                                                    Navigator.of(context,
+                                                            rootNavigator: true)
+                                                        .pushAndRemoveUntil(
+                                                      MaterialPageRoute(
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return formRequestHandyman(
+                                                              email: FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser
+                                                                  ?.email);
+                                                        },
                                                       ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 10),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child:
-                                                    const Text('Maybe Later'),
-                                              ),
-                                            ]),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                                trailing: Container(
-                                  margin: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.exit_to_app),
-                                ),
-                                title: const Text(
-                                  'Keluar',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                onTap: () async {
-                                  return showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Konfirmasi Logout"),
-                                        content:
-                                            Text("Anda yakin ingin logout?"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () async {
-                                              await logout();
-                                              Navigator.of(context,
-                                                      rootNavigator: true)
-                                                  .pushAndRemoveUntil(
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return const userHomepage();
+                                                      (_) => false,
+                                                    );
                                                   },
                                                 ),
-                                                (_) => false,
-                                              );
-                                            },
-                                            child: Text("Ya"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              // Jika user memilih "Tidak", maka tutup dialog box
-                                              Navigator.of(context).pop(false);
-                                            },
-                                            child: Text("Tidak"),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                }),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
-                    )
-                  ],
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 5),
+                          decoration: const BoxDecoration(
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color: Colors.black54, width: 1))),
+                        ),
+                        Container(
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(5),
+                                child: ListTile(
+                                  trailing: Container(
+                                    margin: const EdgeInsets.all(5),
+                                    child: const Icon(Icons.history_rounded),
+                                  ),
+                                  title: const Text(
+                                    'History Pemesanan',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    // insertDummy();
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return history_pemesanan();
+                                        },
+                                      ),
+                                      (_) => false,
+                                    );
+                                  },
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.all(5),
+                                child: ListTile(
+                                    trailing: Container(
+                                      margin: const EdgeInsets.all(5),
+                                      child: const Icon(Icons.contact_support),
+                                    ),
+                                    title: const Text(
+                                      'Contact Support',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                      ),
+                                    )),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.all(5),
+                                child: ListTile(
+                                  trailing: Container(
+                                    margin: const EdgeInsets.all(5),
+                                    child: const Icon(Icons.favorite),
+                                  ),
+                                  title: const Text(
+                                    'My Favourites',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return favourite_page();
+                                        },
+                                      ),
+                                      (_) => false,
+                                    );
+                                  },
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.all(5),
+                                child: ListTile(
+                                  trailing: Container(
+                                    margin: const EdgeInsets.all(5),
+                                    child: const Icon(Icons.star_rate),
+                                  ),
+                                  title: const Text(
+                                    'Rate Us',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Rate Us'),
+                                          content: SingleChildScrollView(
+                                            child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Text(
+                                                      'Would you like to rate our app on the store?'),
+                                                  const SizedBox(height: 20),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      for (int i = 1;
+                                                          i <= 5;
+                                                          i++)
+                                                        IconButton(
+                                                          icon: Icon(
+                                                            i <= 3
+                                                                ? Icons.star
+                                                                : Icons
+                                                                    .star_border,
+                                                            size: 20,
+                                                            color:
+                                                                Colors.orange,
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: const Text(
+                                                        'Maybe Later'),
+                                                  ),
+                                                ]),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.all(5),
+                                child: ListTile(
+                                    trailing: Container(
+                                      margin: const EdgeInsets.all(5),
+                                      child: const Icon(Icons.exit_to_app),
+                                    ),
+                                    title: const Text(
+                                      'Keluar',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    onTap: () async {
+                                      return showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text("Konfirmasi Logout"),
+                                            content: Text(
+                                                "Anda yakin ingin logout?"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  await logout();
+                                                  Navigator.of(context,
+                                                          rootNavigator: true)
+                                                      .pushAndRemoveUntil(
+                                                    MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return const userHomepage();
+                                                      },
+                                                    ),
+                                                    (_) => false,
+                                                  );
+                                                },
+                                                child: Text("Ya"),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  // Jika user memilih "Tidak", maka tutup dialog box
+                                                  Navigator.of(context)
+                                                      .pop(false);
+                                                },
+                                                child: Text("Tidak"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            );
+                onRefresh: _refresh);
           } else {
             return Stack(
               children: [

@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:25940658453:android:96352fa1ae7e9f9112011c",
+        "mobilesdk_app_id": "1:25940658453:android:f394e63a1ad9c30312011c",
         "android_client_info": {
           "package_name": "com.example.handyman_ta"
         }
@@ -39,6 +39,64 @@
         "mobilesdk_app_id": "1:25940658453:android:96352fa1ae7e9f9112011c",
         "android_client_info": {
           "package_name": "com.example.myhandyman_handyman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "25940658453-q5r70rk2t987993iser8iq8b0hmtsi0r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBObdDd_lFNzKPCzJZXJLImKqxHIzLFu2g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "25940658453-q5r70rk2t987993iser8iq8b0hmtsi0r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25940658453:android:c337e7213e60f7e912011c",
+        "android_client_info": {
+          "package_name": "com.handyman.myhandyman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "25940658453-q5r70rk2t987993iser8iq8b0hmtsi0r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBObdDd_lFNzKPCzJZXJLImKqxHIzLFu2g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "25940658453-q5r70rk2t987993iser8iq8b0hmtsi0r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25940658453:android:fe35e63f4d707a3212011c",
+        "android_client_info": {
+          "package_name": "com.handyman_ta.android"
         }
       },
       "oauth_client": [

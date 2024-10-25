@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:admin_flutter/constants/app_colors.dart';
+import 'package:admin_flutter/messagingService.dart';
 import 'package:admin_flutter/navigation/navigation_header/nav_responsive.dart';
 import 'package:admin_flutter/navigation/navigation_side/nav_responsive.dart';
 import 'package:admin_flutter/route/dashboard/detail_dashboard/detail_main.dart';
@@ -21,7 +22,7 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
       FirebaseFirestore.instance.collection('handyman_req_forms');
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
-
+  final Mesagging = MessagingService();
   Future<void> updateData(String email) async {
     try {
       // Update handymar_req_form collection
@@ -86,35 +87,11 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
             actions: [
               TextButton(
                 onPressed: () async {
-                  final res = await http.post(
-                      Uri.parse("https://fcm.googleapis.com/fcm/send"),
-                      headers: <String, String>{
-                        'Content-Type': 'application/json',
-                        'Authorization':
-                            'key=AAAABgovCRU:APA91bF15_FRtWqDNVDRCh4pVO8jZ02d_HgZ_NJ3QwlNSV-xdUfVgHMCvU9yBqXOGISrAIIdTfwyQjDd_q79A2ngZb_wqHWbgpbh6MnJXz535dlZdSSZQuHswin78LEmYuZowrtvAv-D'
-                      },
-                      body: jsonEncode(<String, dynamic>{
-                        'priority': 'high',
-                        'data': {
-                          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-                          'status': 'done',
-                          'body': 'MyHandyman',
-                          'title': 'Request Handymanmu Diterima, selamat!',
-                        },
-                        'notification': {
-                          'body': 'MyHandyman',
-                          'title': 'Request Handymanmu Diterima, selamat!',
-                          'android_channel_id': "dbFood"
-                        },
-                        "to": token_sent
-                      }));
-                  if (res.statusCode == 200) {
-                    print('>>>>>>>>>>>>>>>>>>>>success');
-                  } else {
-                    print(res.body);
-                    print(res.statusCode.toString() + ">>>>>");
-                    print('>>>>>>>>>>>>>>>>>>>>gagal');
-                  }
+                  Mesagging.sendFCMMessage(
+                      token_sent,
+                      token_sent,
+                      "Request Handyman",
+                      "Request Handymanmu Diterima, selamat!");
                   Navigator.of(context).pop();
                 },
                 child: Text("OK"),

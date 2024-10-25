@@ -71,6 +71,7 @@ dependencies:
   provider: ^6.1.2
   googleapis: ^13.1.0
   googleapis_auth: ^1.5.1
+  swipe_refresh: ^1.1.2
 
 
 dev_dependencies:

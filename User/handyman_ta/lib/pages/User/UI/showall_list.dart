@@ -19,6 +19,14 @@ class _showAll_listState extends State<showAll_list> {
 
   final NumberFormat formatCurrency =
       NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
+
+  Future<void> _refresh() {
+    setState(() {
+      getDataReqList();
+    });
+    return Future.delayed(Duration(seconds: 2));
+  }
+
   Future<List<DocumentSnapshot>?> getDataReqList() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -58,247 +66,254 @@ class _showAll_listState extends State<showAll_list> {
         title: const Text("Details"),
         centerTitle: true,
       ),
-      body: Container(
-        constraints: BoxConstraints(
-          minWidth: 0,
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: 700,
-        ),
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(
-              'assets/images/home_decoration.png',
-            ),
-            fit: BoxFit.fill,
-            alignment: Alignment.topCenter,
+      body: RefreshIndicator(
+        child: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 700,
           ),
-        ),
-        child: FutureBuilder<List<DocumentSnapshot>?>(
-          future: getDataReqList(),
-          builder: (context, AsyncSnapshot<List<DocumentSnapshot>?> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData &&
-                snapshot.data != null &&
-                snapshot.data!.isNotEmpty) {
-              List<DocumentSnapshot> documents = snapshot.data!;
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          child: FutureBuilder<List<DocumentSnapshot>?>(
+            future: getDataReqList(),
+            builder:
+                (context, AsyncSnapshot<List<DocumentSnapshot>?> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  snapshot.data!.isNotEmpty) {
+                List<DocumentSnapshot> documents = snapshot.data!;
 
-              return ListView.builder(
-                itemCount: documents.length,
-                itemBuilder: (context, index) {
-                  var data = documents[index].data() as Map<String, dynamic>;
-                  String pengirimHandyman = data['taken_by'] ?? "";
-                  String pengirimUser = data['user'];
-                  String uid_pemesanan = data['uid'];
-                  // Set icon based on the status name
+                return ListView.builder(
+                  itemCount: documents.length,
+                  itemBuilder: (context, index) {
+                    var data = documents[index].data() as Map<String, dynamic>;
+                    String pengirimHandyman = data['taken_by'] ?? "";
+                    String pengirimUser = data['user'];
+                    String uid_pemesanan = data['uid'];
+                    // Set icon based on the status name
 
-                  return Card(
-                    margin: EdgeInsets.all(15),
-                    child: Container(
-                      height: 400,
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.all(10),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '${data['uid']}',
+                    return Card(
+                      margin: EdgeInsets.all(15),
+                      child: Container(
+                        height: 400,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.all(10),
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${data['uid']}',
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 12,
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(5),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '${data['tipe_pekerjaan']}',
+                            SizedBox(
+                              height: 12,
                             ),
-                          ),
-                          SizedBox(
-                            height: 12,
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(5),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Option: ${data['Option'].join(', ')}',
+                            Container(
+                              margin: EdgeInsets.all(5),
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${data['tipe_pekerjaan']}',
+                              ),
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'Harga: ',
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Container(
+                              margin: EdgeInsets.all(5),
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Option: ${data['Option'].join(', ')}',
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Harga: ',
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  alignment: Alignment.centerRight,
-                                  child: Text(formatCurrency.format(
-                                      int.parse(data['price'].toString()))),
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    alignment: Alignment.centerRight,
+                                    child: Text(formatCurrency.format(
+                                        int.parse(data['price'].toString()))),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-
-                          // ... (Repeat the process for other Text widgets)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildProgressIndicator(
-                                  'Pending',
-                                  data['status'] == 'pending',
-                                  Icons.pending_actions),
-                              _buildProgressLine(),
-                              _buildProgressIndicator(
-                                  'On Progress',
-                                  data['status'] == 'on-progress',
-                                  Icons.hourglass_empty),
-                              _buildProgressLine(),
-                              _buildProgressIndicator(
-                                  'Success',
-                                  data['status'] == 'success',
-                                  Icons.check_circle),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 40,
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(5),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Taken By',
-                              style: TextStyle(fontSize: 12),
+                              ],
                             ),
-                          ),
 
-                          // This is the Card you want below
-                          Card(
-                            elevation: 3,
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                // Example icon, you can replace this with your own icon
-                                child: Icon(Icons.person_2_rounded),
+                            // ... (Repeat the process for other Text widgets)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildProgressIndicator(
+                                    'Pending',
+                                    data['status'] == 'pending',
+                                    Icons.pending_actions),
+                                _buildProgressLine(),
+                                _buildProgressIndicator(
+                                    'On Progress',
+                                    data['status'] == 'on-progress',
+                                    Icons.hourglass_empty),
+                                _buildProgressLine(),
+                                _buildProgressIndicator(
+                                    'Success',
+                                    data['status'] == 'success',
+                                    Icons.check_circle),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            Container(
+                              margin: EdgeInsets.all(5),
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Taken By',
+                                style: TextStyle(fontSize: 12),
                               ),
-                              title: FutureBuilder<List<DocumentSnapshot>>(
-                                future: FirebaseFirestore.instance
-                                    .collection('users')
-                                    .where('email', isEqualTo: data['taken_by'])
-                                    .get()
-                                    .then((snapshot) => snapshot
-                                        .docs), // Mengonversi ke List<DocumentSnapshot>
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<List<DocumentSnapshot>>
-                                        snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Text('Loading...');
-                                  }
-                                  if (snapshot.hasError) {
-                                    return Text('Error: ${snapshot.error}');
-                                  }
-                                  if (!snapshot.hasData ||
-                                      snapshot.data!.isEmpty) {
-                                    return Text('Belum mendapatkan Handyman');
-                                  }
+                            ),
 
-                                  // Ambil data nama pengguna dari snapshot
-                                  String userName = snapshot.data!.first[
-                                      'nama']; // Ganti 'nama' dengan field yang sesuai
-                                  return Text(userName);
-                                },
-                              ),
-                              subtitle: StreamBuilder<List<DocumentSnapshot>>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('rating_user')
-                                    .where('nama_user',
-                                        isEqualTo: data['taken_by'])
-                                    .snapshots()
-                                    .map((query) => query
-                                        .docs), // Konversi QuerySnapshot ke List<DocumentSnapshot>
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<List<DocumentSnapshot>>
-                                        snapshot) {
-                                  if (snapshot.hasData &&
-                                      snapshot.data!.isNotEmpty) {
-                                    double totalRating = 0;
-                                    int count = snapshot.data!.length;
-
-                                    for (var document in snapshot.data!) {
-                                      totalRating += double.parse(
-                                          document['nilai_Rating'].toString());
+                            // This is the Card you want below
+                            Card(
+                              elevation: 3,
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  // Example icon, you can replace this with your own icon
+                                  child: Icon(Icons.person_2_rounded),
+                                ),
+                                title: FutureBuilder<List<DocumentSnapshot>>(
+                                  future: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .where('email',
+                                          isEqualTo: data['taken_by'])
+                                      .get()
+                                      .then((snapshot) => snapshot
+                                          .docs), // Mengonversi ke List<DocumentSnapshot>
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<List<DocumentSnapshot>>
+                                          snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text('Loading...');
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    }
+                                    if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return Text('Belum mendapatkan Handyman');
                                     }
 
-                                    double averageRating = totalRating / count;
+                                    // Ambil data nama pengguna dari snapshot
+                                    String userName = snapshot.data!.first[
+                                        'nama']; // Ganti 'nama' dengan field yang sesuai
+                                    return Text(userName);
+                                  },
+                                ),
+                                subtitle: StreamBuilder<List<DocumentSnapshot>>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('rating_user')
+                                      .where('nama_user',
+                                          isEqualTo: data['taken_by'])
+                                      .snapshots()
+                                      .map((query) => query
+                                          .docs), // Konversi QuerySnapshot ke List<DocumentSnapshot>
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<List<DocumentSnapshot>>
+                                          snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty) {
+                                      double totalRating = 0;
+                                      int count = snapshot.data!.length;
 
-                                    return Row(
-                                      children: [
-                                        Icon(Icons.star,
-                                            color: Colors.blueAccent),
-                                        SizedBox(width: 4),
-                                        Text(
-                                            'Rating: ${averageRating.toStringAsFixed(1)}'),
-                                      ],
-                                    );
-                                  } else {
-                                    return Container(); // Placeholder jika data rating belum tersedia
-                                  }
-                                },
+                                      for (var document in snapshot.data!) {
+                                        totalRating += double.parse(
+                                            document['nilai_Rating']
+                                                .toString());
+                                      }
+
+                                      double averageRating =
+                                          totalRating / count;
+
+                                      return Row(
+                                        children: [
+                                          Icon(Icons.star,
+                                              color: Colors.blueAccent),
+                                          SizedBox(width: 4),
+                                          Text(
+                                              'Rating: ${averageRating.toStringAsFixed(1)}'),
+                                        ],
+                                      );
+                                    } else {
+                                      return Container(); // Placeholder jika data rating belum tersedia
+                                    }
+                                  },
+                                ),
+                                trailing: (pengirimHandyman != null &&
+                                        pengirimHandyman != "")
+                                    ? IconButton(
+                                        onPressed: () {
+                                          // Handle navigation to other page here
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChatPage(
+                                                  pengirimHandyman,
+                                                  pengirimUser,
+                                                  uid_pemesanan),
+                                            ),
+                                          );
+                                        },
+                                        icon: Icon(Icons.message),
+                                      )
+                                    : null, // Tidak menampilkan ikon jika tidak ada handyman // Tidak menampilkan ikon jika tidak ada handyman
                               ),
-                              trailing: (pengirimHandyman != null &&
-                                      pengirimHandyman != "")
-                                  ? IconButton(
-                                      onPressed: () {
-                                        // Handle navigation to other page here
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ChatPage(
-                                                pengirimHandyman,
-                                                pengirimUser,
-                                                uid_pemesanan),
-                                          ),
-                                        );
-                                      },
-                                      icon: Icon(Icons.message),
-                                    )
-                                  : null, // Tidak menampilkan ikon jika tidak ada handyman // Tidak menampilkan ikon jika tidak ada handyman
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                    );
+                  },
+                );
+              } else {
+                return Center(
+                  child: Text(
+                    'Belum ada Pesanan',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: Colors.black87,
+                      fontFamily: 'OpenSans',
                     ),
-                  );
-                },
-              );
-            } else {
-              return Center(
-                child: Text(
-                  'Belum ada Pesanan',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Colors.black87,
-                    fontFamily: 'OpenSans',
                   ),
-                ),
-              );
-            }
-          },
+                );
+              }
+            },
+          ),
         ),
+        onRefresh: _refresh,
       ),
     );
   }

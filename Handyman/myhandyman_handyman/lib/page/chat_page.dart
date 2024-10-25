@@ -196,6 +196,7 @@ class _ChatPageState extends State<ChatPage> {
       'nama_layanan': namaLayanan,
       'nilai_Rating': nilaiRating,
       'komentar': komentar,
+      'rate_now': true,
     });
   }
 

@@ -54,7 +54,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   }
 
 // Fungsi untuk mengambil data rating layanan
-  Future<Map<String, int>> _fetchDataRatingLayanan() async {
+  Future<Map<String, double>> _fetchDataRatingLayanan() async {
     try {
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('rating_layanan').get();
@@ -75,12 +75,12 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
         }
       }
 
-      Map<String, int> layananAverageRatings = {};
+      Map<String, double> layananAverageRatings = {};
       layananRatings.forEach((key, value) {
-        layananAverageRatings[key] = (value / layananCount[key]!).round();
+        layananAverageRatings[key] = value / layananCount[key]!;
       });
 
-      return layananAverageRatings;
+      return layananAverageRatings; // Mengembalikan Map<String, double>
     } catch (e) {
       print("Error fetching data: $e");
       throw e;
@@ -237,8 +237,9 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                           child: Center(
                             child: Container(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: FutureBuilder<Map<String, int>>(
-                                future: _fetchDataRatingLayanan(),
+                              child: FutureBuilder<Map<String, double>>(
+                                future:
+                                    _fetchDataRatingLayanan(), // Tipe data future disesuaikan dengan fungsi
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
@@ -253,13 +254,15 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                     return Center(
                                         child: Text('No data available'));
                                   } else {
-                                    Map<String, int> ratingData =
+                                    Map<String, double> ratingData =
                                         snapshot.data!;
+                                    // Menggunakan double di sini
                                     List<BarSeriesData> chartData =
                                         ratingData.entries
                                             .map((entry) => BarSeriesData(
                                                   x: entry.key,
-                                                  y: entry.value.toDouble(),
+                                                  y: entry
+                                                      .value, // Sudah berupa double
                                                 ))
                                             .toList();
 
