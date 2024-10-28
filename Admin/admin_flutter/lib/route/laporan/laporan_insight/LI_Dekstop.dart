@@ -14,6 +14,9 @@ class LaporanInsightDekstop extends StatefulWidget {
   State<LaporanInsightDekstop> createState() => _LaporanInsightDekstopState();
 }
 
+final currencyFormat =
+    NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+
 class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -87,83 +90,53 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
     }
   }
 
-  Future<Map<String, Map<String, double>>> _fetchDataMoney() async {
+  Future<Map<String, Map<String, dynamic>>> _fetchDataMoney() async {
     try {
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('request_handyman').get();
 
-      Map<String, Map<String, double>> monthlyRevenue = {
+      Map<String, Map<String, dynamic>> monthlyRevenue = {
         'pending': {
-          'Jan': 0.0,
-          'Feb': 0.0,
-          'Mar': 0.0,
-          'Apr': 0.0,
-          'May': 0.0,
-          'Jun': 0.0,
-          'Jul': 0.0,
-          'Aug': 0.0,
-          'Sep': 0.0,
-          'Oct': 0.0,
-          'Nov': 0.0,
-          'Dec': 0.0,
-        },
-        'on-progress': {
-          'Jan': 0.0,
-          'Feb': 0.0,
-          'Mar': 0.0,
-          'Apr': 0.0,
-          'May': 0.0,
-          'Jun': 0.0,
-          'Jul': 0.0,
-          'Aug': 0.0,
-          'Sep': 0.0,
-          'Oct': 0.0,
-          'Nov': 0.0,
-          'Dec': 0.0,
+          'Jan': {'revenue': 0.0, 'transactions': 0},
+          'Feb': {'revenue': 0.0, 'transactions': 0},
+          'Mar': {'revenue': 0.0, 'transactions': 0},
+          'Apr': {'revenue': 0.0, 'transactions': 0},
+          'May': {'revenue': 0.0, 'transactions': 0},
+          'Jun': {'revenue': 0.0, 'transactions': 0},
+          'Jul': {'revenue': 0.0, 'transactions': 0},
+          'Aug': {'revenue': 0.0, 'transactions': 0},
+          'Sep': {'revenue': 0.0, 'transactions': 0},
+          'Oct': {'revenue': 0.0, 'transactions': 0},
+          'Nov': {'revenue': 0.0, 'transactions': 0},
+          'Dec': {'revenue': 0.0, 'transactions': 0},
         },
         'success': {
-          'Jan': 0.0,
-          'Feb': 0.0,
-          'Mar': 0.0,
-          'Apr': 0.0,
-          'May': 0.0,
-          'Jun': 0.0,
-          'Jul': 0.0,
-          'Aug': 0.0,
-          'Sep': 0.0,
-          'Oct': 0.0,
-          'Nov': 0.0,
-          'Dec': 0.0,
+          'Jan': {'revenue': 0.0, 'transactions': 0},
+          'Feb': {'revenue': 0.0, 'transactions': 0},
+          'Mar': {'revenue': 0.0, 'transactions': 0},
+          'Apr': {'revenue': 0.0, 'transactions': 0},
+          'May': {'revenue': 0.0, 'transactions': 0},
+          'Jun': {'revenue': 0.0, 'transactions': 0},
+          'Jul': {'revenue': 0.0, 'transactions': 0},
+          'Aug': {'revenue': 0.0, 'transactions': 0},
+          'Sep': {'revenue': 0.0, 'transactions': 0},
+          'Oct': {'revenue': 0.0, 'transactions': 0},
+          'Nov': {'revenue': 0.0, 'transactions': 0},
+          'Dec': {'revenue': 0.0, 'transactions': 0},
         },
-        'cancel': {
-          'Jan': 0.0,
-          'Feb': 0.0,
-          'Mar': 0.0,
-          'Apr': 0.0,
-          'May': 0.0,
-          'Jun': 0.0,
-          'Jul': 0.0,
-          'Aug': 0.0,
-          'Sep': 0.0,
-          'Oct': 0.0,
-          'Nov': 0.0,
-          'Dec': 0.0,
-        }
       };
 
       for (var doc in querySnapshot.docs) {
         Timestamp timestamp = doc['created_date'];
-        String priceString =
-            doc['price']; // Ambil harga dari database sebagai string
-        double price =
-            double.tryParse(priceString) ?? 0.0; // Konversi ke double
+        String priceString = doc['price'];
+        double price = double.tryParse(priceString) ?? 0.0;
         DateTime date = timestamp.toDate();
         String monthAbbreviation = DateFormat('MMM').format(date);
         String status = doc['status'];
 
         if (monthlyRevenue.containsKey(status)) {
-          monthlyRevenue[status]!
-              .update(monthAbbreviation, (value) => value + price);
+          monthlyRevenue[status]![monthAbbreviation]!['revenue'] += price;
+          monthlyRevenue[status]![monthAbbreviation]!['transactions'] += 1;
         }
       }
 
@@ -261,8 +234,8 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                         ratingData.entries
                                             .map((entry) => BarSeriesData(
                                                   x: entry.key,
-                                                  y: entry
-                                                      .value, // Sudah berupa double
+                                                  y: double.parse(entry.value
+                                                      .toStringAsFixed(2)),
                                                 ))
                                             .toList();
 
@@ -293,8 +266,9 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                               ),
                                             ],
                                             legend: Legend(isVisible: true),
-                                            tooltipBehavior:
-                                                TooltipBehavior(enable: true),
+                                            tooltipBehavior: TooltipBehavior(
+                                              enable: false,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -388,10 +362,9 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                   Container(
                                     child: Text('Data Pendapatan (RP)'),
                                   ),
-                                  // DropdownButton
                                   Expanded(
                                     child: FutureBuilder<
-                                        Map<String, Map<String, double>>>(
+                                        Map<String, Map<String, dynamic>>>(
                                       future: _fetchDataMoney(),
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
@@ -408,43 +381,96 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                           return Center(
                                               child: Text('No data available'));
                                         } else {
-                                          Map<String, Map<String, double>>
+                                          Map<String, Map<String, dynamic>>
                                               revenueData = snapshot.data!;
-                                          List<ChartData> pendingData =
-                                              _generateChartData(
-                                                  revenueData['pending']!);
-                                          List<ChartData> successData =
-                                              _generateChartData(
-                                                  revenueData['success']!);
-
+                                          List<ChartDataMoney> pendingData =
+                                              ChartDataMoney
+                                                  ._generateChartDataMoney(
+                                                      revenueData['pending']!);
+                                          List<ChartDataMoney> successData =
+                                              ChartDataMoney
+                                                  ._generateChartDataMoney(
+                                                      revenueData['success']!);
+                                          print(successData.toString());
                                           return SfCartesianChart(
-                                            primaryXAxis:
-                                                CategoryAxis(), // Since we're only showing yearly data
+                                            primaryXAxis: CategoryAxis(),
+                                            tooltipBehavior: TooltipBehavior(
+                                              enable: true,
+                                              builder: (dynamic data,
+                                                  dynamic point,
+                                                  dynamic series,
+                                                  int pointIndex,
+                                                  int seriesIndex) {
+                                                final chartData =
+                                                    data as ChartDataMoney;
+                                                return Container(
+                                                  width: 150,
+                                                  height: 150,
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4),
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '${series.name} (${chartData.x})',
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      SizedBox(height: 4),
+                                                      Text(
+                                                        'Revenue: ${currencyFormat.format(chartData.revenue)}',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                      Text(
+                                                        'Transactions: ${chartData.transactions}',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                             series: <ChartSeries>[
-                                              ColumnSeries<ChartData, dynamic>(
+                                              ColumnSeries<ChartDataMoney,
+                                                  String>(
                                                 name: 'Pending',
                                                 dataSource: pendingData,
                                                 xValueMapper:
-                                                    (ChartData data, _) =>
+                                                    (ChartDataMoney data, _) =>
                                                         data.x,
                                                 yValueMapper:
-                                                    (ChartData data, _) =>
-                                                        data.y,
+                                                    (ChartDataMoney data, _) =
+                                                        data.revenue,
+                                                color: Colors.red,
                                               ),
-                                              ColumnSeries<ChartData, dynamic>(
+                                              ColumnSeries<ChartDataMoney,
+                                                  String>(
                                                 name: 'Success',
                                                 dataSource: successData,
                                                 xValueMapper:
-                                                    (ChartData data, _) =>
+                                                    (ChartDataMoney data, _) =>
                                                         data.x,
                                                 yValueMapper:
-                                                    (ChartData data, _) =>
-                                                        data.y,
+                                                    (ChartDataMoney data, _) =>
+                                                        data.revenue,
+                                                color: Colors.green,
                                               ),
                                             ],
                                             legend: Legend(isVisible: true),
-                                            tooltipBehavior:
-                                                TooltipBehavior(enable: true),
                                           );
                                         }
                                       },
@@ -478,4 +504,28 @@ class ChartData {
   ChartData({required this.x, required this.y});
   final String x;
   final double y;
+}
+
+class ChartDataMoney {
+  final String x;
+  final double revenue;
+  final int transactions;
+
+  @override
+  String toString() {
+    return 'ChartDataMoney(x: $x, revenue: $revenue, transactions: $transactions)';
+  }
+
+  static List<ChartDataMoney> _generateChartDataMoney(
+      Map<String, dynamic> dataMap) {
+    return dataMap.entries.map((entry) {
+      String month = entry.key;
+      double revenue = (entry.value['revenue'] as num).toDouble();
+      int transactions = (entry.value['transactions'] as num).toInt();
+
+      return ChartDataMoney(month, revenue, transactions);
+    }).toList();
+  }
+
+  ChartDataMoney(this.x, this.revenue, this.transactions);
 }
