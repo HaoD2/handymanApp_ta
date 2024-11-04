@@ -13,6 +13,7 @@ import 'package:handyman_ta/pages/service/changepassword.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:handyman_ta/pages/service/dummyOnly.dart';
 import 'package:handyman_ta/pages/service/loginRoute.dart';
 
 class profile extends StatefulWidget {
@@ -348,6 +349,7 @@ class _profileState extends State<profile> {
                                   ),
                                   onTap: () {
                                     // insertDummy();
+                                    RequestHandymanService.addDummyRequests();
                                     Navigator.of(context, rootNavigator: true)
                                         .pushAndRemoveUntil(
                                       MaterialPageRoute(

@@ -70,6 +70,7 @@ class _Kontak_UserState extends State<Kontak_User> {
                       .where('uid', isEqualTo: uid_pemesanan.toString())
                       .where('user',
                           isEqualTo: FirebaseAuth.instance.currentUser?.email)
+                      .where('status_done', isEqualTo: false)
                       .get(),
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.hasError) {
@@ -90,7 +91,7 @@ class _Kontak_UserState extends State<Kontak_User> {
 
                     if (requestData == null) {
                       // Debugging
-                      return Container();
+                      return Container(child: Text('Tidak ada Kontak'));
                     }
                     // Akses data dari dokumen
                     var tipe_pekerjaan = requestData['tipe_pekerjaan'];

@@ -193,28 +193,6 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextButton(
-                      onPressed: () async {
-                        loginCheck();
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        backgroundColor:
-                            Colors.blue, // warna latar belakang biru
-                      ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(
-                          color: Colors.white, // warna teks putih
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 200),
-                    TextButton(
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
                           context,
@@ -234,6 +212,28 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         "Register",
+                        style: TextStyle(
+                          color: Colors.white, // warna teks putih
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 200),
+                    TextButton(
+                      onPressed: () async {
+                        loginCheck();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor:
+                            Colors.blue, // warna latar belakang biru
+                      ),
+                      child: const Text(
+                        "Login",
                         style: TextStyle(
                           color: Colors.white, // warna teks putih
                         ),

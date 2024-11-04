@@ -57,6 +57,7 @@ class _KontakPageState extends State<KontakPage> {
                       .where('uid', isEqualTo: uid_pemesanan.toString())
                       .where('taken_by',
                           isEqualTo: FirebaseAuth.instance.currentUser?.email)
+                      .where('status_done', isEqualTo: false)
                       .get(),
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.hasError) {

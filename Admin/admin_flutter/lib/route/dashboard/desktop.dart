@@ -76,8 +76,10 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
 
         // Mendapatkan nilai token_messaging dari data pengguna
         token_sent = userData?['token_messaging'];
+        Mesagging.sendFCMMessage(token_sent, token_sent, "Request Handyman",
+            "Request Handymanmu Diterima, selamat!");
       }
-      // Show success AlertDialog
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -87,11 +89,6 @@ class _DashboardDekstopState extends State<DashboardDekstop> {
             actions: [
               TextButton(
                 onPressed: () async {
-                  Mesagging.sendFCMMessage(
-                      token_sent,
-                      token_sent,
-                      "Request Handyman",
-                      "Request Handymanmu Diterima, selamat!");
                   Navigator.of(context).pop();
                 },
                 child: Text("OK"),

@@ -90,6 +90,25 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
     }
   }
 
+  String formatTextWithLineBreaks(String text) {
+    // Pisahkan teks berdasarkan spasi
+    List<String> words = text.split(' ');
+
+    // Tentukan format kata berdasarkan jumlah kata
+    if (words.length == 1) {
+      return words[0]; // Jika hanya satu kata
+    } else if (words.length == 2) {
+      return "${words[0]}\n${words[1]}"; // Dua kata, dipisah satu baris
+    } else if (words.length == 3) {
+      return "${words[0]}\n${words[1]} ${words[2]}"; // Tiga kata, dua kata di baris bawah
+    } else if (words.length > 3) {
+      // Jika lebih dari tiga kata, pisahkan tiga kata pertama sesuai format yang diinginkan
+      return "${words[0]}\n${words[1]} ${words[2]}\n${words.sublist(3).join(' ')}";
+    }
+
+    return text; // Jika terjadi sesuatu yang tidak terduga, kembalikan teks asli
+  }
+
   Future<Map<String, Map<String, dynamic>>> _fetchDataMoney() async {
     try {
       QuerySnapshot querySnapshot =
@@ -97,6 +116,20 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
 
       Map<String, Map<String, dynamic>> monthlyRevenue = {
         'pending': {
+          'Jan': {'revenue': 0.0, 'transactions': 0},
+          'Feb': {'revenue': 0.0, 'transactions': 0},
+          'Mar': {'revenue': 0.0, 'transactions': 0},
+          'Apr': {'revenue': 0.0, 'transactions': 0},
+          'May': {'revenue': 0.0, 'transactions': 0},
+          'Jun': {'revenue': 0.0, 'transactions': 0},
+          'Jul': {'revenue': 0.0, 'transactions': 0},
+          'Aug': {'revenue': 0.0, 'transactions': 0},
+          'Sep': {'revenue': 0.0, 'transactions': 0},
+          'Oct': {'revenue': 0.0, 'transactions': 0},
+          'Nov': {'revenue': 0.0, 'transactions': 0},
+          'Dec': {'revenue': 0.0, 'transactions': 0},
+        },
+        'cancel': {
           'Jan': {'revenue': 0.0, 'transactions': 0},
           'Feb': {'revenue': 0.0, 'transactions': 0},
           'Mar': {'revenue': 0.0, 'transactions': 0},
@@ -267,7 +300,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                             ],
                                             legend: Legend(isVisible: true),
                                             tooltipBehavior: TooltipBehavior(
-                                              enable: false,
+                                              enable: true,
                                             ),
                                           ),
                                         ),
@@ -279,8 +312,6 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                             ),
                           ),
                         ),
-
-// FutureBuilder untuk mengambil data jumlah pekerjaan
                         Container(
                           height: 400,
                           width: screenWidth,
@@ -316,7 +347,8 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                     return Column(
                                       children: [
                                         Container(
-                                          child: Text('Data Jumlah Pekerjaan'),
+                                          child: Text(
+                                              'Data Jumlah Layanan Yang Digunakan'),
                                         ),
                                         Container(
                                           width: screenWidth,
@@ -326,11 +358,13 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                             series: <ChartSeries>[
                                               ColumnSeries<BarSeriesData,
                                                   String>(
-                                                name: 'Jumlah Pekerjaan',
+                                                name: 'Jumlah Pekerjaan : ',
                                                 dataSource: chartData,
-                                                xValueMapper:
-                                                    (BarSeriesData data, _) =>
-                                                        data.x,
+                                                xValueMapper: (BarSeriesData
+                                                            data,
+                                                        _) =>
+                                                    formatTextWithLineBreaks(
+                                                        data.x.toLowerCase()),
                                                 yValueMapper:
                                                     (BarSeriesData data, _) =>
                                                         data.y,
@@ -339,8 +373,12 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                               ),
                                             ],
                                             legend: Legend(isVisible: true),
-                                            tooltipBehavior:
-                                                TooltipBehavior(enable: true),
+                                            tooltipBehavior: TooltipBehavior(
+                                              enable: true,
+                                              header: '',
+                                              format:
+                                                  'point.x : point.y', // Gunakan `formatTextWithLineBreaks` di sini jika perlu
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -391,6 +429,10 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                               ChartDataMoney
                                                   ._generateChartDataMoney(
                                                       revenueData['success']!);
+                                          List<ChartDataMoney> cancelData =
+                                              ChartDataMoney
+                                                  ._generateChartDataMoney(
+                                                      revenueData['cancel']!);
                                           print(successData.toString());
                                           return SfCartesianChart(
                                             primaryXAxis: CategoryAxis(),
@@ -453,7 +495,7 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                     (ChartDataMoney data, _) =>
                                                         data.x,
                                                 yValueMapper:
-                                                    (ChartDataMoney data, _) =
+                                                    (ChartDataMoney data, _) =>
                                                         data.revenue,
                                                 color: Colors.red,
                                               ),
@@ -468,6 +510,18 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                                     (ChartDataMoney data, _) =>
                                                         data.revenue,
                                                 color: Colors.green,
+                                              ),
+                                              ColumnSeries<ChartDataMoney,
+                                                  String>(
+                                                name: 'cancel',
+                                                dataSource: cancelData,
+                                                xValueMapper:
+                                                    (ChartDataMoney data, _) =>
+                                                        data.x,
+                                                yValueMapper:
+                                                    (ChartDataMoney data, _) =>
+                                                        data.revenue,
+                                                color: Colors.black,
                                               ),
                                             ],
                                             legend: Legend(isVisible: true),

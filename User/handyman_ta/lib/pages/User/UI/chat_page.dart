@@ -542,9 +542,6 @@ class _ChatPageState extends State<ChatPage> {
                   style: ButtonStyle(
                     backgroundColor:
                         MaterialStateProperty.all<Color>(Colors.blue),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-                    ),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius:
@@ -615,6 +612,17 @@ class _ChatPageState extends State<ChatPage> {
           });
         });
       },
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+        padding: MaterialStateProperty.all<EdgeInsets>(
+          EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+        ),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0), // Rounded corners
+          ),
+        ),
+      ),
       child: Text('Konfirmasi'),
     );
   }
@@ -663,134 +671,142 @@ class _ChatPageState extends State<ChatPage> {
                 var isRatingDone =
                     snapshot.data!.docs.first['isRatingDoneUser'] ?? false;
 
-                return isRatingDone
-                    ? buildMessageOnly()
-                    : Column(
+                if (isRatingDone) {
+                  Future.microtask(() {
+                    Navigator.of(context, rootNavigator: true)
+                        .pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => userHomepage(
+                          email: FirebaseAuth.instance.currentUser?.email,
+                        ),
+                      ),
+                      (_) => false,
+                    );
+                  });
+                  return Container(); // Tempatkan widget kosong saat halaman berpindah
+                }
+
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('log_pesan')
+                            .where('pengirimHandyman',
+                                isEqualTo: this.widget.pengirimHandyman)
+                            .where('pengirimUser',
+                                isEqualTo: this.widget.pengirimUser)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return CircularProgressIndicator();
+                          }
+                          var messages = snapshot.data!.docs;
+                          messages.sort((b, a) {
+                            Timestamp timeA = a['waktu'] as Timestamp;
+                            Timestamp timeB = b['waktu'] as Timestamp;
+                            return timeA.compareTo(
+                                timeB); // Mengurutkan dari yang terbaru ke yang terlama
+                          });
+                          return ListView.builder(
+                              reverse: true,
+                              itemCount: messages.length,
+                              itemBuilder: (context, index) {
+                                var message = messages[index];
+                                var isiPesan = message['isiPesan'];
+                                var sent = message['sent'];
+                                var pengirimUID = message['pengirimHandyman'];
+                                var waktu = message['waktu'];
+                                bool isCurrentUser = sent ==
+                                    FirebaseAuth.instance.currentUser!.email;
+
+                                var reversedIndex =
+                                    (messages.length - 1) - index;
+                                return Align(
+                                  alignment: isCurrentUser
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: isCurrentUser
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        bottomRight: Radius.circular(30),
+                                        topRight: Radius.circular(30),
+                                      ),
+                                    ),
+                                    margin: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: isCurrentUser
+                                          ? CrossAxisAlignment.start
+                                          : CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          isiPesan,
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          formatTimeAgo(waktu),
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        // Tambahkan bagian lain seperti informasi pengirim, status, dll. sesuai kebutuhan
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
                         children: <Widget>[
                           Expanded(
                             child: StreamBuilder<QuerySnapshot>(
                               stream: FirebaseFirestore.instance
-                                  .collection('log_pesan')
-                                  .where('pengirimHandyman',
-                                      isEqualTo: this.widget.pengirimHandyman)
-                                  .where('pengirimUser',
-                                      isEqualTo: this.widget.pengirimUser)
+                                  .collection('kontak')
+                                  .where('uid_pemesanan',
+                                      isEqualTo: widget.uid_pemesanan)
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
                                   return CircularProgressIndicator();
                                 }
-                                var messages = snapshot.data!.docs;
-                                messages.sort((b, a) {
-                                  Timestamp timeA = a['waktu'] as Timestamp;
-                                  Timestamp timeB = b['waktu'] as Timestamp;
-                                  return timeA.compareTo(
-                                      timeB); // Mengurutkan dari yang terbaru ke yang terlama
-                                });
-                                return ListView.builder(
-                                    reverse: true,
-                                    itemCount: messages.length,
-                                    itemBuilder: (context, index) {
-                                      var message = messages[index];
-                                      var isiPesan = message['isiPesan'];
-                                      var sent = message['sent'];
-                                      var pengirimUID =
-                                          message['pengirimHandyman'];
-                                      var waktu = message['waktu'];
-                                      bool isCurrentUser = sent ==
-                                          FirebaseAuth
-                                              .instance.currentUser!.email;
+                                var contacts = snapshot.data!.docs;
+                                bool isDoneHandyman = false;
 
-                                      var reversedIndex =
-                                          (messages.length - 1) - index;
-                                      return Align(
-                                        alignment: isCurrentUser
-                                            ? Alignment.topRight
-                                            : Alignment.topLeft,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: isCurrentUser
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(30),
-                                              bottomRight: Radius.circular(30),
-                                              topRight: Radius.circular(30),
-                                            ),
-                                          ),
-                                          margin: const EdgeInsets.all(10),
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: isCurrentUser
-                                                ? CrossAxisAlignment.start
-                                                : CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                isiPesan,
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Text(
-                                                formatTimeAgo(waktu),
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              // Tambahkan bagian lain seperti informasi pengirim, status, dll. sesuai kebutuhan
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    });
+                                if (contacts.isNotEmpty) {
+                                  isDoneHandyman =
+                                      contacts.first['isDoneHandyman'];
+                                  confirmation = contacts.first['isDoneUser'];
+                                }
+
+                                // Tampilkan tombol berdasarkan nilai isDone
+                                if (isDoneHandyman) {
+                                  if (confirmation) {
+                                    return buildRatingAndReportButtons();
+                                  } else {
+                                    return konfirmasiButton();
+                                  }
+                                } else {
+                                  return buildSubmitButton();
+                                }
                               },
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: StreamBuilder<QuerySnapshot>(
-                                    stream: FirebaseFirestore.instance
-                                        .collection('kontak')
-                                        .where('uid_pemesanan',
-                                            isEqualTo: widget.uid_pemesanan)
-                                        .snapshots(),
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) {
-                                        return CircularProgressIndicator();
-                                      }
-                                      var contacts = snapshot.data!.docs;
-                                      bool isDoneHandyman = false;
-
-                                      if (contacts.isNotEmpty) {
-                                        isDoneHandyman =
-                                            contacts.first['isDoneHandyman'];
-                                        confirmation =
-                                            contacts.first['isDoneUser'];
-                                      }
-
-                                      // Tampilkan tombol berdasarkan nilai isDone
-                                      if (isDoneHandyman) {
-                                        if (confirmation) {
-                                          return buildRatingAndReportButtons();
-                                        } else {
-                                          return konfirmasiButton();
-                                        }
-                                      } else {
-                                        return buildSubmitButton();
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
-                      );
+                      ),
+                    ),
+                  ],
+                );
               }
             }));
   }
