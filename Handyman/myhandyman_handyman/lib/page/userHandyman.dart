@@ -68,11 +68,8 @@ class _mainMenuState extends State<mainMenu> {
   @override
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
-      print('Auth User Home ada');
       mainContext = context;
-    } else {
-      print('Auth User tidak ada');
-    }
+    } else {}
     _controller = PersistentTabController(initialIndex: 0);
 
     return PersistentTabView(
@@ -122,13 +119,22 @@ class home extends StatefulWidget {
 
 class _homeState extends State<home> {
   List<Pekerjaan> data = [];
-
   Position? _currentPosition;
   double maxDistanceFilter = 100.0;
   double selectedDistance = 0.0;
   List<Pekerjaan> dataToDisplay = [];
   TextEditingController queryController = TextEditingController();
   bool filterByDistance = false;
+
+  final NumberFormat formatCurrency =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLocationData(); // Pastikan posisi tersedia sebelum memanggil fetchData
+  }
+
   Future<void> fetchLocationData() async {
     PermissionStatus permissionStatus = await Permission.location.request();
 
@@ -140,15 +146,17 @@ class _homeState extends State<home> {
 
         setState(() {
           _currentPosition = position;
-          print(_currentPosition);
+          print("Posisi diperoleh: $_currentPosition");
         });
+
+        // Panggil fetchData setelah mendapatkan posisi
+        fetchData();
       } catch (e) {
         print('Error getting location: $e');
       }
     } else if (permissionStatus.isDenied ||
         permissionStatus.isPermanentlyDenied) {
       bool isPermissionGranted = await openAppSettings();
-
       if (isPermissionGranted) {
         fetchLocationData();
       }
@@ -156,52 +164,124 @@ class _homeState extends State<home> {
   }
 
   Future<void> fetchData() async {
+    if (_currentPosition == null) {
+      print("Menunggu posisi...");
+      return;
+    }
+
     data.clear();
-    FirebaseDataService().getRequestData().then((dataList) {
+    print("Mengambil data berdasarkan posisi: $_currentPosition");
+
+    try {
+      final dataList =
+          await FirebaseDataService().getRequestData(_currentPosition!);
       setState(() {
         data = dataList;
+        print("Data berhasil diperoleh: $data");
+      });
+    } catch (e) {
+      print("Error saat mengambil data: $e");
+    }
+  }
+
+  Future<void> _refresh() {
+    return Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        fetchLocationData();
       });
     });
   }
 
-  @override
-  void dispose() {
-    // Membersihkan semua sumber daya dan referensi di sini
-    super.dispose();
-  }
-
   void FilteredByDistance() async {
-    data.clear();
-    // Panggil fetchAndFilterData
-    List<Pekerjaan> filteredData = await FirebaseDataService()
-        .filterDataSearchdanDistance(
-            selectedDistance, queryController.text, _currentPosition!);
+    if (_currentPosition == null) {
+      print("Posisi belum tersedia untuk filter berdasarkan jarak.");
+      return;
+    }
 
-    // Setelah mendapatkan data yang telah difilter, perbarui state widget ini dengan data tersebut
-    setState(() {
-      data = filteredData;
-    });
+    data.clear();
+    try {
+      List<Pekerjaan> filteredData = await FirebaseDataService()
+          .filterDataSearchdanDistance(
+              selectedDistance, queryController.text, _currentPosition!);
+      setState(() {
+        data = filteredData;
+      });
+    } catch (e) {
+      print("Error saat memfilter data berdasarkan jarak: $e");
+    }
   }
 
   void FilteredBySearch() async {
-    // Panggil fetchAndFilterData
-    List<Pekerjaan> SearchfilteredData =
-        await FirebaseDataService().searchPekerjaan(dataToDisplay as String);
-    print(dataToDisplay);
-    // Setelah mendapatkan data yang telah difilter, perbarui state widget ini dengan data tersebut
-    setState(() {
-      data = SearchfilteredData;
-    });
+    if (_currentPosition == null) {
+      print("Posisi belum tersedia untuk filter pencarian.");
+      return;
+    }
+
+    try {
+      List<Pekerjaan> searchFilteredData = await FirebaseDataService()
+          .searchPekerjaan(queryController.text, _currentPosition!);
+      setState(() {
+        data = searchFilteredData;
+      });
+    } catch (e) {
+      print("Error saat memfilter data berdasarkan pencarian: $e");
+    }
   }
 
-  final NumberFormat formatCurrency =
-      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                'Location services are disabled. Please enable the services')),
+      );
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location permissions are denied')),
+        );
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                'Location permissions are permanently denied, we cannot request permissions.')),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _getCurrentPosition() async {
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) return;
+
+    try {
+      final Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _currentPosition = position;
+      });
+      print("Posisi: $_currentPosition");
+    } catch (e) {
+      print("Error mendapatkan posisi: $e");
+    }
+  }
+
   @override
-  void initState() {
-    super.initState();
-    fetchLocationData();
-    fetchData();
-    print(data);
+  void dispose() {
+    queryController.dispose();
+    super.dispose();
   }
 
   @override
@@ -211,8 +291,9 @@ class _homeState extends State<home> {
         actions: <Widget>[
           Row(
             children: [
+              Text('Home'),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(12.0),
                 child: Container(
                   width: 200, // Sesuaikan ukuran sesuai kebutuhan
                   child: TextField(
@@ -231,7 +312,7 @@ class _homeState extends State<home> {
                         FilteredByDistance();
                       } else {
                         FirebaseDataService()
-                            .searchPekerjaan(keyword)
+                            .searchPekerjaan(keyword, _currentPosition!)
                             .then((searchResults) {
                           setState(() {
                             data.clear();
@@ -240,7 +321,6 @@ class _homeState extends State<home> {
                           });
                         });
                       }
-                      print(keyword);
                     },
                   ),
                 ),
@@ -275,7 +355,6 @@ class _homeState extends State<home> {
                                       onChanged: (value) {
                                         setState(() {
                                           filterByDistance = value!;
-                                          print(filterByDistance);
                                         });
                                       },
                                     ),
@@ -301,133 +380,138 @@ class _homeState extends State<home> {
           ),
         ],
       ),
-      body: Container(
-        constraints: BoxConstraints(
-          minWidth: 0,
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: 600,
-        ),
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(
-              'assets/images/home_decoration.png',
+      body: RefreshIndicator(
+        child: Container(
+          constraints: BoxConstraints(
+            minWidth: 0,
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: 600,
+          ),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/home_decoration.png',
+              ),
+              fit: BoxFit.fill,
+              alignment: Alignment.topCenter,
             ),
-            fit: BoxFit.fill,
-            alignment: Alignment.topCenter,
+          ),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    final item = data[index];
+                    double calculatedDistance = Geolocator.distanceBetween(
+                          _currentPosition?.latitude ?? 0.0,
+                          _currentPosition?.longitude ?? 0.0,
+                          item.location.latitude,
+                          item.location.longitude,
+                        ) /
+                        1000;
+
+                    return ListTile(
+                      // Menggabungkan multiple values dengan koma
+                      subtitle: Card(
+                        // Define the shape of the card
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        // Define how the card's content should be clipped
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        // Define the child widget of the card
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            // Add padding around the row widget
+                            Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Text(
+                                '${item.optionMenu.join(', ')}',
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  // Add an image widget to display an image
+                                  item.image != null && item.image.isNotEmpty
+                                      ? Image.network(
+                                          item.image,
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.asset(
+                                          'assets/images/no-photos.jpg',
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+
+                                  // Add some spacing between the image and the text
+                                  Container(width: 20),
+                                  // Add an expanded widget to take up the remaining horizontal space
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        // Add some spacing between the top of the card and the title
+                                        Container(height: 5),
+                                        // Add a title widget
+                                        Text(
+                                          item.tipe_Pekerjaan,
+                                        ),
+                                        // Add some spacing between the title and the subtitle
+                                        Container(height: 5),
+                                        // Add a subtitle widget
+                                        Text(
+                                          formatCurrency.format(
+                                              int.parse(item.price.toString())),
+                                        ),
+                                        // Add some spacing between the subtitle and the text
+                                        Container(height: 10),
+                                        // Add a text widget to display some text
+                                        Text(
+                                          '${calculatedDistance.toStringAsFixed(1)} kilometer',
+                                          maxLines: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return pemesanan_details(
+                                  data: item.id,
+                                  email: item.user,
+                                  uid: item.uid);
+                            },
+                          ),
+                          (_) => false,
+                        );
+                      },
+                      // Tambahkan logika untuk menangani item yang diklik di sini
+                    );
+                  },
+                  childCount: data.length,
+                ),
+              ),
+              // Tambahkan lebih banyak Sliver sesuai kebutuhan di sini
+            ],
           ),
         ),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  final item = data[index];
-                  double calculatedDistance = Geolocator.distanceBetween(
-                        _currentPosition?.latitude ?? 0.0,
-                        _currentPosition?.longitude ?? 0.0,
-                        item.location.latitude,
-                        item.location.longitude,
-                      ) /
-                      1000;
-
-                  return ListTile(
-                    // Menggabungkan multiple values dengan koma
-                    subtitle: Card(
-                      // Define the shape of the card
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      // Define how the card's content should be clipped
-                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                      // Define the child widget of the card
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          // Add padding around the row widget
-                          Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Text(
-                              '${item.optionMenu.join(', ')}',
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                // Add an image widget to display an image
-                                item.image != null && item.image.isNotEmpty
-                                    ? Image.network(
-                                        item.image,
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Image.asset(
-                                        'assets/images/no-photos.jpg',
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-
-                                // Add some spacing between the image and the text
-                                Container(width: 20),
-                                // Add an expanded widget to take up the remaining horizontal space
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      // Add some spacing between the top of the card and the title
-                                      Container(height: 5),
-                                      // Add a title widget
-                                      Text(
-                                        item.tipe_Pekerjaan,
-                                      ),
-                                      // Add some spacing between the title and the subtitle
-                                      Container(height: 5),
-                                      // Add a subtitle widget
-                                      Text(
-                                        formatCurrency.format(
-                                            int.parse(item.price.toString())),
-                                      ),
-                                      // Add some spacing between the subtitle and the text
-                                      Container(height: 10),
-                                      // Add a text widget to display some text
-                                      Text(
-                                        '${calculatedDistance.toStringAsFixed(1)} kilometer',
-                                        maxLines: 2,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return pemesanan_details(
-                                data: item.id, email: item.user, uid: item.uid);
-                          },
-                        ),
-                        (_) => false,
-                      );
-                    },
-                    // Tambahkan logika untuk menangani item yang diklik di sini
-                  );
-                },
-                childCount: data.length,
-              ),
-            ),
-            // Tambahkan lebih banyak Sliver sesuai kebutuhan di sini
-          ],
-        ),
+        onRefresh: _refresh,
       ),
     );
   }

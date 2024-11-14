@@ -52,6 +52,12 @@ dependencies:
   firebase_messaging: ^14.7.19
   googleapis: ^13.1.0
   googleapis_auth: 1.4.1
+  flutter_form_builder: ^8.0.0
+  form_builder_validators: ^9.0.0-dev.1
+  firebase_auth: ^4.17.8
+
+dependency_overrides:
+    intl: ^0.17.0-nullsafety.2
 
 dev_dependencies:
   flutter_test:

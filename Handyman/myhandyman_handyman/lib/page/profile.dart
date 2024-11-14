@@ -25,11 +25,48 @@ class _profileHandymanState extends State<profileHandyman> {
   final NumberFormat formatCurrency =
       NumberFormat.currency(locale: 'id_ID', symbol: 'Rp');
   int tempSaldo = 0;
-
+  double rating = 0;
   TextEditingController saldoController = TextEditingController();
   TextEditingController norekController = TextEditingController();
   String bankValue = 'BCA';
   final AuthService _authService = AuthService();
+
+  void _rating() async {
+    try {
+      // Mendapatkan data rating berdasarkan email user saat ini
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('rating_user')
+          .where('nama_user',
+              isEqualTo: FirebaseAuth.instance.currentUser?.email ?? '')
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        double totalRating = 0;
+        int count = querySnapshot.docs.length;
+
+        for (var document in querySnapshot.docs) {
+          totalRating += double.parse(document['nilai_Rating'].toString());
+        }
+
+        // Menghitung rata-rata rating
+        setState(() {
+          rating = totalRating / count;
+        });
+        print(rating);
+      } else {
+        // Jika tidak ada data rating
+        setState(() {
+          rating = 0;
+        });
+      }
+    } catch (e) {
+      print("Error fetching rating: $e");
+      setState(() {
+        rating = 0; // Menangani error dengan mengatur rating ke 0
+      });
+    }
+  }
+
   void _checkAuthentication() {
     final User? user = _auth.currentUser;
 
@@ -56,6 +93,14 @@ class _profileHandymanState extends State<profileHandyman> {
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
 
     return allData;
+  }
+
+  Future<void> _refresh() {
+    setState(() {
+      getData();
+      _rating();
+    });
+    return Future.delayed(Duration(seconds: 2));
   }
 
   Future logout() async {
@@ -99,385 +144,405 @@ class _profileHandymanState extends State<profileHandyman> {
     setState(() {});
     // Periksa status otentikasi pengguna saat halaman diinisialisasi
     _checkAuthentication();
+    _rating();
     getData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User?>(
-      future: _authService.getCurrentUser(),
-      builder: ((context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else {
-          if (snapshot.hasData) {
-            return Container(
-              child: Container(
-                child: ListView(
-                  children: <Widget>[
-                    Container(
-                      constraints: BoxConstraints(
-                        minWidth: 0,
-                        maxWidth: MediaQuery.of(context).size.width,
-                        maxHeight: 300,
-                      ),
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              AssetImage('assets/images/home_decoration.png'),
-                          fit: BoxFit.fill,
-                          alignment: Alignment.topCenter,
+    return RefreshIndicator(
+      child: FutureBuilder<User?>(
+        future: _authService.getCurrentUser(),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else {
+            if (snapshot.hasData) {
+              return Container(
+                child: Container(
+                  child: ListView(
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints(
+                          minWidth: 0,
+                          maxWidth: MediaQuery.of(context).size.width,
+                          maxHeight: 300,
                         ),
-                      ),
-                      child: ListTile(
-                        title: Column(
-                          children: [
-                            StreamBuilder<QuerySnapshot>(
-                              stream: _users
-                                  .where("email",
-                                      isEqualTo: FirebaseAuth
-                                          .instance.currentUser?.email)
-                                  .snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return CircularProgressIndicator(); // Tampilkan indikator loading jika data masih diambil
-                                }
-                                if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                }
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image:
+                                AssetImage('assets/images/home_decoration.png'),
+                            fit: BoxFit.fill,
+                            alignment: Alignment.topCenter,
+                          ),
+                        ),
+                        child: ListTile(
+                          title: Column(
+                            children: [
+                              StreamBuilder<QuerySnapshot>(
+                                stream: _users
+                                    .where("email",
+                                        isEqualTo: FirebaseAuth
+                                            .instance.currentUser?.email)
+                                    .snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator(); // Tampilkan indikator loading jika data masih diambil
+                                  }
+                                  if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  }
 
-                                if (snapshot.data == null ||
-                                    snapshot.data!.docs.isEmpty) {
-                                  return Text('No data available');
-                                }
+                                  if (snapshot.data == null ||
+                                      snapshot.data!.docs.isEmpty) {
+                                    return Text('No data available');
+                                  }
 
-                                final List<DocumentSnapshot> documents =
-                                    snapshot.data!.docs;
-                                final allData =
-                                    documents.map((doc) => doc.data()).toList();
+                                  final List<DocumentSnapshot> documents =
+                                      snapshot.data!.docs;
+                                  final allData = documents
+                                      .map((doc) => doc.data())
+                                      .toList();
 
-                                return Container(
-                                  margin: const EdgeInsets.only(top: 15),
-                                  child: Column(
-                                    children: [
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        itemCount: allData.length,
-                                        itemBuilder: (_, index) {
-                                          final List<
-                                                  QueryDocumentSnapshot<
-                                                      Object?>> documents =
-                                              snapshot.data!.docs;
-                                          if (index >= documents.length) {
-                                            // Handle case when index is out of bounds
-                                            return Container();
-                                          }
-                                          final Map<String, dynamic>? data =
-                                              documents[index].data()
-                                                  as Map<String, dynamic>?;
-                                          if (data == null) {
-                                            // Handle case when data is null
-                                            return Container();
-                                          }
-                                          final saldo = data['saldo'];
-                                          final status = data['status'];
-                                          final nama = data['nama'];
-                                          final statusHandyman =
-                                              data['status_handyman'];
+                                  return Container(
+                                    margin: const EdgeInsets.only(top: 15),
+                                    child: Column(
+                                      children: [
+                                        ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: allData.length,
+                                          itemBuilder: (_, index) {
+                                            final List<
+                                                    QueryDocumentSnapshot<
+                                                        Object?>> documents =
+                                                snapshot.data!.docs;
+                                            if (index >= documents.length) {
+                                              // Handle case when index is out of bounds
+                                              return Container();
+                                            }
+                                            final Map<String, dynamic>? data =
+                                                documents[index].data()
+                                                    as Map<String, dynamic>?;
+                                            if (data == null) {
+                                              // Handle case when data is null
+                                              return Container();
+                                            }
+                                            final saldo = data['saldo'];
+                                            final status = data['status'];
+                                            final nama = data['nama'];
+                                            final statusHandyman =
+                                                data['status_handyman'];
 
-                                          // Menampilkan berdasarkan status
-                                          if (status == 1 &&
-                                              statusHandyman == 1) {
-                                            return Container(
-                                              child: Column(
-                                                children: [
-                                                  ListTile(
-                                                    leading: CircleAvatar(
-                                                      backgroundImage: AssetImage(
-                                                          "assets/images/icon_profile.png"),
-                                                      radius: 20,
-                                                    ),
-                                                    title: Text(
-                                                      "${nama}",
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.black,
-                                                        fontSize: 15,
+                                            // Menampilkan berdasarkan status
+                                            if (status == 1 &&
+                                                statusHandyman == 1) {
+                                              return Container(
+                                                child: Column(
+                                                  children: [
+                                                    ListTile(
+                                                      leading: CircleAvatar(
+                                                        backgroundImage: AssetImage(
+                                                            "assets/images/icon_profile.png"),
+                                                        radius: 20,
+                                                      ),
+                                                      title: Text(
+                                                        "${nama}",
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black,
+                                                          fontSize: 15,
+                                                        ),
+                                                      ),
+                                                      trailing: IconButton(
+                                                        icon: Icon(Icons.edit),
+                                                        onPressed: () {
+                                                          // Tambahkan logika untuk tombol edit di sini
+                                                        },
                                                       ),
                                                     ),
-                                                    trailing: IconButton(
-                                                      icon: Icon(Icons.edit),
-                                                      onPressed: () {
-                                                        // Tambahkan logika untuk tombol edit di sini
+                                                    ListTile(
+                                                      leading:
+                                                          Icon(Icons.verified),
+                                                      title: Text('Verified'),
+                                                    ),
+                                                    ListTile(
+                                                      leading:
+                                                          Icon(Icons.verified),
+                                                      title: Text(
+                                                          'Handyman Verified'),
+                                                    ),
+                                                    ListTile(
+                                                      leading: Icon(
+                                                          Icons.rate_review),
+                                                      title: Text(
+                                                        'Rating : ' +
+                                                            (rating == 0.0
+                                                                ? 'Belum ada rating'
+                                                                : rating
+                                                                    .toStringAsFixed(
+                                                                        2)
+                                                                    .toString()),
+                                                      ),
+                                                    ),
+                                                    ListTile(
+                                                      leading: Icon(
+                                                          Icons.money_sharp),
+                                                      title: Text('Saldo : ' +
+                                                          formatCurrency.format(
+                                                              int.parse(saldo
+                                                                  .toString()))),
+                                                      onTap: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return Dialog(
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                              ),
+                                                              elevation: 0,
+                                                              backgroundColor:
+                                                                  Colors
+                                                                      .transparent,
+                                                              child: SaldoBox(
+                                                                  context,
+                                                                  saldo),
+                                                            );
+                                                          },
+                                                        );
                                                       },
                                                     ),
-                                                  ),
-                                                  ListTile(
-                                                    leading:
-                                                        Icon(Icons.verified),
-                                                    title: Text('Verified'),
-                                                  ),
-                                                  ListTile(
-                                                    leading:
-                                                        Icon(Icons.verified),
-                                                    title: Text(
-                                                        'Handyman Verified'),
-                                                  ),
-                                                  ListTile(
-                                                    leading:
-                                                        Icon(Icons.money_sharp),
-                                                    title: Text('Saldo : ' +
-                                                        formatCurrency.format(
-                                                            int.parse(saldo
-                                                                .toString()))),
-                                                    onTap: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return Dialog(
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                            ),
-                                                            elevation: 0,
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            child: SaldoBox(
-                                                                context, saldo),
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          } else if (status == 1 &&
-                                              statusHandyman == 0) {
-                                            return Container(
-                                              child: Column(
-                                                children: [
-                                                  ListTile(
-                                                    leading:
-                                                        Icon(Icons.verified),
-                                                    title: Text('Verified'),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }
+                                                  ],
+                                                ),
+                                              );
+                                            } else if (status == 1 &&
+                                                statusHandyman == 0) {
+                                              return Container(
+                                                child: Column(
+                                                  children: [
+                                                    ListTile(
+                                                      leading:
+                                                          Icon(Icons.verified),
+                                                      title: Text('Verified'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
 
-                                          return Container(); // Return a default empty container if conditions are not met
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                            return Container(); // Return a default empty container if conditions are not met
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 5),
-                      decoration: const BoxDecoration(
-                          border: Border(
-                              bottom:
-                                  BorderSide(color: Colors.black54, width: 1))),
-                    ),
-                    Container(
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.history_rounded),
-                              ),
-                              title: const Text(
-                                'History Pemesanan',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return history_pemesanan();
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
+                      Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        decoration: const BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Colors.black54, width: 1))),
+                      ),
+                      Container(
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: ListTile(
                                 trailing: Container(
                                   margin: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.contact_support),
+                                  child: const Icon(Icons.history_rounded),
                                 ),
                                 title: const Text(
-                                  'Contact Support',
+                                  'History Pemesanan',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                     fontSize: 15,
                                   ),
-                                )),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.lock),
-                              ),
-                              title: const Text(
-                                'Change Password',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
                                 ),
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return history_pemesanan();
+                                      },
+                                    ),
+                                    (_) => false,
+                                  );
+                                },
                               ),
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return changepassword(
-                                          email: FirebaseAuth
-                                              .instance.currentUser?.email);
-                                    },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
                             ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.star_rate),
-                              ),
-                              title: const Text(
-                                'Rate Us',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: ListTile(
+                                  trailing: Container(
+                                    margin: const EdgeInsets.all(5),
+                                    child: const Icon(Icons.contact_support),
+                                  ),
+                                  title: const Text(
+                                    'Contact Support',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                    ),
+                                  )),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: ListTile(
+                                trailing: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  child: const Icon(Icons.lock),
                                 ),
+                                title: const Text(
+                                  'Change Password',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return changepassword(
+                                            email: FirebaseAuth
+                                                .instance.currentUser?.email);
+                                      },
+                                    ),
+                                    (_) => false,
+                                  );
+                                },
                               ),
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Rate Us'),
-                                      content: SingleChildScrollView(
-                                        child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Text(
-                                                  'Would you like to rate our app on the store?'),
-                                              const SizedBox(height: 20),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  for (int i = 1; i <= 5; i++)
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        i <= 3
-                                                            ? Icons.star
-                                                            : Icons.star_border,
-                                                        size: 20,
-                                                        color: Colors.orange,
+                            ),
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: ListTile(
+                                trailing: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  child: const Icon(Icons.star_rate),
+                                ),
+                                title: const Text(
+                                  'Rate Us',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Rate Us'),
+                                        content: SingleChildScrollView(
+                                          child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Text(
+                                                    'Would you like to rate our app on the store?'),
+                                                const SizedBox(height: 20),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    for (int i = 1; i <= 5; i++)
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          i <= 3
+                                                              ? Icons.star
+                                                              : Icons
+                                                                  .star_border,
+                                                          size: 20,
+                                                          color: Colors.orange,
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
                                                       ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 10),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child:
-                                                    const Text('Maybe Later'),
-                                              ),
-                                            ]),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(5),
-                            child: ListTile(
-                              trailing: Container(
-                                margin: const EdgeInsets.all(5),
-                                child: const Icon(Icons.exit_to_app),
-                              ),
-                              title: const Text(
-                                'Keluar',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              onTap: () async {
-                                await logout();
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return const LoginPage();
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 10),
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child:
+                                                      const Text('Maybe Later'),
+                                                ),
+                                              ]),
+                                        ),
+                                      );
                                     },
-                                  ),
-                                  (_) => false,
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: ListTile(
+                                trailing: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  child: const Icon(Icons.exit_to_app),
+                                ),
+                                title: const Text(
+                                  'Keluar',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                onTap: () async {
+                                  await logout();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return const LoginPage();
+                                      },
+                                    ),
+                                    (_) => false,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            );
-          } else {
-            return LoginPage();
+              );
+            } else {
+              return LoginPage();
+            }
           }
-        }
-      }),
+        }),
+      ),
+      onRefresh: _refresh,
     );
   }
 

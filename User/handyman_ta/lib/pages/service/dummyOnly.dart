@@ -45,22 +45,26 @@ class RequestHandymanService {
     return 'ORDERLH${date.day.toString().padLeft(2, '0')}${date.month.toString().padLeft(2, '0')}${date.year}${index.toString().padLeft(6, '0')}';
   }
 
-  // Generate random GeoPoint within bounds
+  // Generate random GeoPoint within ~30 km radius around central Surabaya
+  // Generate random GeoPoint within ~15 km radius around central Surabaya
   static GeoPoint _generateGeoPoint() {
-    double latitude = 7.250445 + _random.nextDouble() * (7.350445 - 7.250445);
-    double longitude =
-        112.718845 + _random.nextDouble() * (112.768845 - 112.718845);
+    double latitude = -7.306963 +
+        _random.nextDouble() * 0.27 -
+        0.135; // Range -7.441963 to -7.171963
+    double longitude = 112.7382664 +
+        _random.nextDouble() * 0.3 -
+        0.15; // Range 112.5882664 to 112.8882664
     return GeoPoint(latitude, longitude);
   }
 
-  // Generate random date within the month
+  // Generate random date within the given month
   static DateTime _generateRandomDate(int month) {
     return DateTime(2024, month, _random.nextInt(28) + 1,
         _random.nextInt(8) + 9, _random.nextInt(59));
   }
 
   // Generate a single data entry
-  static Map<String, dynamic> _generateData(int index, int month) {
+  static Map<String, dynamic> _generateData(int index) {
     // Generate random type and option
     String tipePekerjaan =
         jobOptions.keys.elementAt(_random.nextInt(jobOptions.keys.length));
@@ -68,8 +72,9 @@ class RequestHandymanService {
     String selectedOption = options[_random.nextInt(options.length)];
 
     // Random date
-    DateTime createdDate = _generateRandomDate(month);
-    DateTime dateTime = createdDate.subtract(Duration(minutes: 1));
+    DateTime createdDate = _generateRandomDate(
+        _random.nextBool() ? 10 : 11); // October or November
+    DateTime dateTime = _generateRandomDate(12); // December
 
     // Random status
     String status = statusOptions[_random.nextInt(statusOptions.length)];
@@ -84,8 +89,8 @@ class RequestHandymanService {
     return {
       "Option": [selectedOption],
       "address": "Surabaya, Indonesia",
-      "created_date": Timestamp.fromDate(createdDate), // Save as Timestamp
-      "dateTime": Timestamp.fromDate(dateTime), // Save as Timestamp
+      "created_date": Timestamp.fromDate(createdDate), // October/November
+      "dateTime": Timestamp.fromDate(dateTime), // December
       "description": "",
       "end_time":
           "${_random.nextInt(5) + 14}:${(_random.nextInt(2) * 30).toString().padLeft(2, '0')}",
@@ -104,12 +109,11 @@ class RequestHandymanService {
     };
   }
 
-  // Function to add 70 dummy transactions to Firebase
+  // Function to add 10 dummy transactions to Firebase
   static Future<void> addDummyRequests() async {
     int index = 1;
-    for (int i = 0; i < 70; i++) {
-      int month = 6 + (i ~/ 30); // Distribute dates over June, July, August
-      Map<String, dynamic> data = _generateData(index, month);
+    for (int i = 0; i < 10; i++) {
+      Map<String, dynamic> data = _generateData(index);
       await _requests.add(data);
       index++;
     }

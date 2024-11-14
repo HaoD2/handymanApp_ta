@@ -64,6 +64,7 @@ router.post('/purchase', async (req, res) => {
         const transaction_token = transaction.token;
         const transaction_redirect = transaction.redirect_url;
 
+        console.log(transaction_redirect);
 
         return res.status(200).json(
             {

@@ -1,10 +1,12 @@
 import 'package:admin_flutter/constants/app_colors.dart';
+import 'package:admin_flutter/loginpage.dart';
 import 'package:admin_flutter/route/dashboard/main_dashboard.dart';
 import 'package:admin_flutter/route/laporan/laporan_insight/main_insight.dart';
 import 'package:admin_flutter/route/laporan/laporan_pelanggaran/main_pelanggaran.dart';
 import 'package:admin_flutter/route/menu/layanan_menu/main_LM.dart';
 import 'package:admin_flutter/route/menu/request_saldo/main_RS.dart';
 import 'package:admin_flutter/route/menu/view_listing/main_listing.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
@@ -96,7 +98,7 @@ class NavigationSideDekstop extends StatelessWidget {
             height: 10,
           ),
           ListTile(
-            leading: Icon(Icons.logout_outlined, color: Colors.white),
+            leading: Icon(Icons.data_array, color: Colors.white),
             title: Text('Laporan Listing',
                 style: TextStyle(
                     color: Colors.white, fontSize: sizeDesktopTextContent)),
@@ -111,7 +113,7 @@ class NavigationSideDekstop extends StatelessWidget {
             height: 10,
           ),
           ListTile(
-            leading: Icon(Icons.logout_outlined, color: Colors.white),
+            leading: Icon(Icons.work, color: Colors.white),
             title: Text('Laporan Pekerjaan',
                 style: TextStyle(
                     color: Colors.white, fontSize: sizeDesktopTextContent)),
@@ -130,8 +132,15 @@ class NavigationSideDekstop extends StatelessWidget {
             title: Text('Logout',
                 style: TextStyle(
                     color: Colors.white, fontSize: sizeDesktopTextContent)),
-            onTap: () {
+            onTap: () async {
               // Action for Settings
+              final FirebaseAuth auth = FirebaseAuth.instance;
+              await auth.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => loginPage()),
+                (Route<dynamic> route) => false,
+              );
             },
           ),
         ],

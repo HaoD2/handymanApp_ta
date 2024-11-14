@@ -38,6 +38,7 @@ router.post('/requestHandyman', async (req, res) => {
         return res.status(200).json(param);
     } catch (error) {
         return res.status(500).json({ message: ex.message });
+        print(ex.message);
     }
 })
 

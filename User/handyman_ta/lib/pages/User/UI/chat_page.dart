@@ -13,8 +13,10 @@ class ChatPage extends StatefulWidget {
   final String pengirimHandyman; //penerimaEmail
   final String pengirimUser; //pengirimEmail
   final String uid_pemesanan;
+  final String namaPengguna;
 
-  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan);
+  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan,
+      this.namaPengguna);
   @override
   _ChatPageState createState() => _ChatPageState();
 }
@@ -634,7 +636,7 @@ class _ChatPageState extends State<ChatPage> {
         appBar: AppBar(
           title: Column(
             children: [
-              Text('Chat dengan ${widget.pengirimHandyman}'),
+              Text('Chat dengan ${widget.namaPengguna}'),
             ],
           ),
           leading: IconButton(

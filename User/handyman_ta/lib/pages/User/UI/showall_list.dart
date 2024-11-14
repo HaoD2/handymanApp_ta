@@ -27,6 +27,7 @@ class _showAll_listState extends State<showAll_list> {
     return Future.delayed(Duration(seconds: 2));
   }
 
+  String userName = '';
   Future<List<DocumentSnapshot>?> getDataReqList() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -227,7 +228,7 @@ class _showAll_listState extends State<showAll_list> {
                                     }
 
                                     // Ambil data nama pengguna dari snapshot
-                                    String userName = snapshot.data!.first[
+                                    userName = snapshot.data!.first[
                                         'nama']; // Ganti 'nama' dengan field yang sesuai
                                     return Text(userName);
                                   },
@@ -282,7 +283,8 @@ class _showAll_listState extends State<showAll_list> {
                                               builder: (context) => ChatPage(
                                                   pengirimHandyman,
                                                   pengirimUser,
-                                                  uid_pemesanan),
+                                                  uid_pemesanan,
+                                                  userName),
                                             ),
                                           );
                                         },

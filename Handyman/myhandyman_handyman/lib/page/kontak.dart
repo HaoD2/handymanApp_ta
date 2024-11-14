@@ -23,9 +23,7 @@ class _KontakPageState extends State<KontakPage> {
         ),
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-              'assets/images/home_decoration.png',
-            ),
+            image: AssetImage('assets/images/home_decoration.png'),
             fit: BoxFit.fill,
             alignment: Alignment.topCenter,
           ),
@@ -37,136 +35,152 @@ class _KontakPageState extends State<KontakPage> {
                   isEqualTo: FirebaseAuth.instance.currentUser?.email)
               .snapshots(),
           builder: (context, kontakSnapshot) {
-            if (!kontakSnapshot.hasData) {
-              return CircularProgressIndicator();
+            if (kontakSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (kontakSnapshot.hasError) {
+              return Center(child: Text("Error: ${kontakSnapshot.error}"));
+            }
+            if (!kontakSnapshot.hasData || kontakSnapshot.data!.docs.isEmpty) {
+              return Center(child: Text('Tidak ada Kontak'));
             }
 
             var contacts = kontakSnapshot.data!.docs;
+            List<DocumentSnapshot> filteredContacts = [];
 
-            return ListView.builder(
-              itemCount: contacts.length,
-              itemBuilder: (context, index) {
-                var contact = contacts[index];
-                var pengirimHandyman = contact['pengirimHandyman'];
-                var pengirimUser = contact['pengirimUser'];
+            return FutureBuilder(
+              future: Future.wait(contacts.map((contact) async {
                 var uid_pemesanan = contact['uid_pemesanan'];
 
-                return FutureBuilder<QuerySnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('request_handyman')
-                      .where('uid', isEqualTo: uid_pemesanan.toString())
-                      .where('taken_by',
-                          isEqualTo: FirebaseAuth.instance.currentUser?.email)
-                      .where('status_done', isEqualTo: false)
-                      .get(),
-                  builder: (BuildContext context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}");
-                    }
+                var requestSnapshot = await FirebaseFirestore.instance
+                    .collection('request_handyman')
+                    .where('uid', isEqualTo: uid_pemesanan.toString())
+                    .where('taken_by',
+                        isEqualTo: FirebaseAuth.instance.currentUser?.email)
+                    .where('status_done', isEqualTo: false)
+                    .get();
 
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
+                // Hanya tambahkan data kontak yang memiliki request yang belum selesai
+                if (requestSnapshot.docs.isNotEmpty) {
+                  filteredContacts.add(contact);
+                }
+              })),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-                    // Ambil dokumen pertama dari QuerySnapshot
-                    var requestData = snapshot.data!.docs.isNotEmpty
-                        ? snapshot.data!.docs.first
-                        : null;
+                // Jika tidak ada kontak yang memenuhi syarat, tampilkan pesan "Tidak ada Kontak"
+                if (filteredContacts.isEmpty) {
+                  return Center(child: Text('Tidak ada Kontak'));
+                }
 
-                    print(
-                        'Snapshot data length: ${snapshot.data!.docs.length}'); // Debugging
+                return ListView.builder(
+                  itemCount: filteredContacts.length,
+                  itemBuilder: (context, index) {
+                    var contact = filteredContacts[index];
+                    var pengirimHandyman = contact['pengirimHandyman'];
+                    var pengirimUser = contact['pengirimUser'];
+                    var uid_pemesanan = contact['uid_pemesanan'];
 
-                    if (requestData == null) {
-                      // Debugging
-                      return Container();
-                    }
-                    // Akses data dari dokumen
-                    var tipe_pekerjaan = requestData['tipe_pekerjaan'];
-                    var uid = requestData['uid'];
-
-                    // Dapatkan nama pengguna dari koleksi 'users'
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .where('email', isEqualTo: pengirimUser)
-                          .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> userSnapshot) {
-                        if (userSnapshot.hasError) {
-                          return Text("Error: ${userSnapshot.error}");
-                        }
-
-                        if (userSnapshot.connectionState ==
+                    return FutureBuilder<QuerySnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('request_handyman')
+                          .where('uid', isEqualTo: uid_pemesanan.toString())
+                          .where('taken_by',
+                              isEqualTo:
+                                  FirebaseAuth.instance.currentUser?.email)
+                          .where('status_done', isEqualTo: false)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         }
+                        if (snapshot.hasError) {
+                          return Text("Error: ${snapshot.error}");
+                        }
 
-                        var users = userSnapshot.data!.docs;
-                        var namaPengguna = users.isNotEmpty
-                            ? users.first['nama']
-                            : 'Nama Tidak Ditemukan';
+                        var requestData = snapshot.data!.docs.first;
+                        var tipe_pekerjaan = requestData['tipe_pekerjaan'];
+                        var uid = requestData['uid'];
 
-                        return Padding(
-                          padding: EdgeInsets.only(
-                              left: 16.0,
-                              right: 16.0,
-                              top: 8.0,
-                              bottom: 8.0), // Tambahkan jarak vertikal di sini
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: AssetImage(
-                                      'assets/images/icon_profile.png'),
+                        return StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .where('email', isEqualTo: pengirimUser)
+                              .snapshots(),
+                          builder: (context, userSnapshot) {
+                            if (userSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            }
+                            if (userSnapshot.hasError) {
+                              return Text("Error: ${userSnapshot.error}");
+                            }
+
+                            var users = userSnapshot.data!.docs;
+                            var namaPengguna = users.isNotEmpty
+                                ? users.first['nama']
+                                : 'Nama Tidak Ditemukan';
+
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 30,
+                                      backgroundImage: AssetImage(
+                                          'assets/images/icon_profile.png'),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            title: Container(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                      height:
-                                          8), // Tambahkan jarak vertikal di sini
-                                  Text(
-                                    namaPengguna,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                title: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 8),
+                                    Text(
+                                      namaPengguna,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                      height:
-                                          4), // Tambahkan jarak vertikal di sini
-                                  Text(
-                                    '$tipe_pekerjaan - $uid',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                                    SizedBox(height: 4),
+                                    Text(
+                                      '$tipe_pekerjaan - $uid',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return ChatPage(
+                                            pengirimHandyman,
+                                            pengirimUser,
+                                            uid_pemesanan,
+                                            namaPengguna);
+                                      },
+                                    ),
+                                    (_) => false,
+                                  );
+                                },
                               ),
-                            ),
-                            onTap: () {
-                              Navigator.of(context, rootNavigator: true)
-                                  .pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return ChatPage(pengirimHandyman,
-                                        pengirimUser, uid_pemesanan);
-                                  },
-                                ),
-                                (_) => false,
-                              );
-                            },
-                          ),
+                            );
+                          },
                         );
                       },
                     );

@@ -78,28 +78,82 @@ class FirebaseDataService {
   final CollectionReference requestHandymanCollection =
       FirebaseFirestore.instance.collection('request_handyman');
 
-  Future<List<Pekerjaan>> getRequestData() async {
+  Future<List<Pekerjaan>> getRequestData(Position _currentPosition) async {
+    List<Pekerjaan> filteredData = [];
+
     try {
+      print("Fetching pending requests...");
+
       QuerySnapshot querySnapshot = await requestHandymanCollection
           .where('status', isEqualTo: 'pending')
           .get();
-      requestData.clear();
-      querySnapshot.docs.forEach((doc) {
+
+      print("Number of pending requests fetched: ${querySnapshot.docs.length}");
+
+      for (var doc in querySnapshot.docs) {
         final pekerjaanData = doc.data() as Map<String, dynamic>;
-        final pekerjaan =
-            Pekerjaan.fromMap(doc.id, pekerjaanData); // Menambahkan ID dokumen
-        requestData.add(pekerjaan);
+        final pekerjaan = Pekerjaan.fromMap(doc.id, pekerjaanData);
+
+        print("Processing job with ID: ${doc.id}");
+
+        // Hitung jarak antara lokasi saat ini dengan lokasi pekerjaan
+        double distance = Geolocator.distanceBetween(
+              _currentPosition.latitude,
+              _currentPosition.longitude,
+              pekerjaan.location.latitude,
+              pekerjaan.location.longitude,
+            ) /
+            1000; // convert meter to kilometer
+
+        print("Distance to job (in km): $distance");
+
+        // Filter pekerjaan yang berada dalam jarak 100 km dan belum melewati tenggat waktu
+        bool withinDistance = distance <= 100;
+        bool beforeDeadline =
+            pekerjaan.datetime.toDate().isAfter(DateTime.now());
+
+        print("Within distance (<=100 km): $withinDistance");
+        print("Before deadline: $beforeDeadline");
+        print("Current time: ${DateTime.now()}");
+        print("Job deadline: ${pekerjaan.datetime.toDate()}");
+
+        if (withinDistance && beforeDeadline) {
+          print("Job meets criteria and is added to filtered list.");
+          filteredData.add(pekerjaan);
+        }
+      }
+
+      // Urutkan hasil filter berdasarkan jarak terkecil
+      print("Sorting filtered jobs by distance...");
+      filteredData.sort((a, b) {
+        double distanceA = Geolocator.distanceBetween(
+              _currentPosition.latitude,
+              _currentPosition.longitude,
+              a.location.latitude,
+              a.location.longitude,
+            ) /
+            1000;
+        double distanceB = Geolocator.distanceBetween(
+              _currentPosition.latitude,
+              _currentPosition.longitude,
+              b.location.latitude,
+              b.location.longitude,
+            ) /
+            1000;
+        return distanceA.compareTo(distanceB);
       });
+      print("Sorted jobs by distance.");
     } catch (e) {
-      print(e.toString());
+      print("Error fetching data: $e");
     }
 
-    return requestData;
+    print("Total filtered jobs returned: ${filteredData.length}");
+    return filteredData;
   }
 
   Future<List<Pekerjaan>> filterDataSearchdanDistance(
       double maxDistance, String keyword, Position _currentPosition) async {
-    List<Pekerjaan> allData = await getRequestData();
+    List<Pekerjaan> allData = await getRequestData(_currentPosition);
 
     List<Pekerjaan> filteredData = [];
 
@@ -165,7 +219,7 @@ class FirebaseDataService {
 
   Future<List<Pekerjaan>> fetchAndFilterData(
       double maxDistance, Position _currentPosition) async {
-    List<Pekerjaan> allData = await getRequestData();
+    List<Pekerjaan> allData = await getRequestData(_currentPosition);
 
     List<Pekerjaan> filteredData = [];
     if (_currentPosition != null) {
@@ -191,9 +245,8 @@ class FirebaseDataService {
   }
 
   Future<List<Pekerjaan>> searchPekerjaan(
-    String keyword,
-  ) async {
-    List<Pekerjaan> allData = await getRequestData();
+      String keyword, Position _currentPosition) async {
+    List<Pekerjaan> allData = await getRequestData(_currentPosition);
 
     List<Pekerjaan> searchfilteredData = [];
 

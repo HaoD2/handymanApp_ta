@@ -348,8 +348,7 @@ class _profileState extends State<profile> {
                                     ),
                                   ),
                                   onTap: () {
-                                    // insertDummy();
-                                    RequestHandymanService.addDummyRequests();
+                                    // RequestHandymanService.addDummyRequests();
                                     Navigator.of(context, rootNavigator: true)
                                         .pushAndRemoveUntil(
                                       MaterialPageRoute(

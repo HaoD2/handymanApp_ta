@@ -398,7 +398,8 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                               child: Column(
                                 children: [
                                   Container(
-                                    child: Text('Data Pendapatan (RP)'),
+                                    child: Text(
+                                        'Data Transaksi Penggunaan Layanan Handyman (RP)'),
                                   ),
                                   Expanded(
                                     child: FutureBuilder<
@@ -433,98 +434,146 @@ class _LaporanInsightDekstopState extends State<LaporanInsightDekstop> {
                                               ChartDataMoney
                                                   ._generateChartDataMoney(
                                                       revenueData['cancel']!);
-                                          print(successData.toString());
-                                          return SfCartesianChart(
-                                            primaryXAxis: CategoryAxis(),
-                                            tooltipBehavior: TooltipBehavior(
-                                              enable: true,
-                                              builder: (dynamic data,
-                                                  dynamic point,
-                                                  dynamic series,
-                                                  int pointIndex,
-                                                  int seriesIndex) {
-                                                final chartData =
-                                                    data as ChartDataMoney;
-                                                return Container(
-                                                  width: 150,
-                                                  height: 150,
-                                                  padding: EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(
+                                          int totalTransactions = pendingData
+                                                  .fold<num>(
+                                                      0,
+                                                      (num sum, data) =>
+                                                          sum +
+                                                          data.transactions)
+                                                  .toInt() +
+                                              successData
+                                                  .fold<num>(
+                                                      0,
+                                                      (num sum, data) =>
+                                                          sum +
+                                                          data.transactions)
+                                                  .toInt() +
+                                              cancelData
+                                                  .fold<num>(
+                                                      0,
+                                                      (num sum, data) =>
+                                                          sum +
+                                                          data.transactions)
+                                                  .toInt();
+
+                                          return Column(
+                                            children: [
+                                              // Display total revenue
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  'Total Transactions: ${totalTransactions}',
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+
+                                              // Display chart
+                                              SfCartesianChart(
+                                                primaryXAxis: CategoryAxis(),
+                                                tooltipBehavior:
+                                                    TooltipBehavior(
+                                                  enable: true,
+                                                  builder: (dynamic data,
+                                                      dynamic point,
+                                                      dynamic series,
+                                                      int pointIndex,
+                                                      int seriesIndex) {
+                                                    final chartData =
+                                                        data as ChartDataMoney;
+                                                    return Container(
+                                                      width: 150,
+                                                      height: 150,
+                                                      padding:
+                                                          EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.black,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(4),
+                                                      ),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            '${series.name} (${chartData.x})',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          SizedBox(height: 4),
+                                                          Text(
+                                                            'Revenue: ${currencyFormat.format(chartData.revenue)}',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                          Text(
+                                                            'Transactions: ${chartData.transactions}',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                series: <ChartSeries>[
+                                                  ColumnSeries<ChartDataMoney,
+                                                      String>(
+                                                    name: 'Pending',
+                                                    dataSource: pendingData,
+                                                    xValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.x,
+                                                    yValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.revenue,
+                                                    color: Colors.red,
+                                                  ),
+                                                  ColumnSeries<ChartDataMoney,
+                                                      String>(
+                                                    name: 'Success',
+                                                    dataSource: successData,
+                                                    xValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.x,
+                                                    yValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.revenue,
+                                                    color: Colors.green,
+                                                  ),
+                                                  ColumnSeries<ChartDataMoney,
+                                                      String>(
+                                                    name: 'Cancel',
+                                                    dataSource: cancelData,
+                                                    xValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.x,
+                                                    yValueMapper:
+                                                        (ChartDataMoney data,
+                                                                _) =>
+                                                            data.revenue,
                                                     color: Colors.black,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4),
                                                   ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        '${series.name} (${chartData.x})',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      SizedBox(height: 4),
-                                                      Text(
-                                                        'Revenue: ${currencyFormat.format(chartData.revenue)}',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                      Text(
-                                                        'Transactions: ${chartData.transactions}',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            series: <ChartSeries>[
-                                              ColumnSeries<ChartDataMoney,
-                                                  String>(
-                                                name: 'Pending',
-                                                dataSource: pendingData,
-                                                xValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.x,
-                                                yValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.revenue,
-                                                color: Colors.red,
-                                              ),
-                                              ColumnSeries<ChartDataMoney,
-                                                  String>(
-                                                name: 'Success',
-                                                dataSource: successData,
-                                                xValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.x,
-                                                yValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.revenue,
-                                                color: Colors.green,
-                                              ),
-                                              ColumnSeries<ChartDataMoney,
-                                                  String>(
-                                                name: 'cancel',
-                                                dataSource: cancelData,
-                                                xValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.x,
-                                                yValueMapper:
-                                                    (ChartDataMoney data, _) =>
-                                                        data.revenue,
-                                                color: Colors.black,
+                                                ],
+                                                legend: Legend(isVisible: true),
                                               ),
                                             ],
-                                            legend: Legend(isVisible: true),
                                           );
                                         }
                                       },

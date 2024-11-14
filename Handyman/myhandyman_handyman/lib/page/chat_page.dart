@@ -14,8 +14,10 @@ class ChatPage extends StatefulWidget {
   final String pengirimUser;
   final String pengirimHandyman;
   final String uid_pemesanan;
+  final String namaPengguna;
 
-  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan);
+  const ChatPage(this.pengirimHandyman, this.pengirimUser, this.uid_pemesanan,
+      this.namaPengguna);
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -493,7 +495,7 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Chat dengan ${widget.pengirimUser}'),
+          title: Text('Chat dengan ${widget.namaPengguna}'),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -507,6 +509,7 @@ class _ChatPageState extends State<ChatPage> {
               ); // Kembali ke halaman sebelumnya
             },
           ),
+          backgroundColor: Colors.yellow,
           actions: [
             PopupMenuButton(
               icon: Icon(Icons.more_vert),
@@ -682,14 +685,16 @@ class _ChatPageState extends State<ChatPage> {
                                       }
                                       var contacts = snapshot.data!.docs;
                                       bool isDone = false;
-
+                                      bool isDoneUser = false;
                                       if (contacts.isNotEmpty) {
                                         isDone =
                                             contacts.first['isDoneHandyman'];
+                                        isDoneUser =
+                                            contacts.first['isDoneUser'];
                                       }
 
                                       // Tampilkan tombol berdasarkan nilai isDone
-                                      if (isDone) {
+                                      if (isDone && isDoneUser) {
                                         return buildRatingAndReportButtons();
                                       } else {
                                         return buildSubmitButton();

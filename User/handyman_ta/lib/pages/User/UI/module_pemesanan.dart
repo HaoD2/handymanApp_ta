@@ -223,8 +223,11 @@ class _ModulePemesananState extends State<ModulePemesanan> {
       String end_time = endTimeController.text;
       Timestamp timestamp = Timestamp.fromDate(dateTime);
       String price = PriceController.text;
+
+      //database
       final CollectionReference requestCollection =
           FirebaseFirestore.instance.collection('request_handyman');
+      //format date
       String today = DateFormat('ddMMyyyy').format(DateTime.now());
 
 // Dapatkan nomor urut terakhir dari database
@@ -289,6 +292,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
             ? await uploadImageToFirebaseStorage(requestImage!)
             : null,
       };
+
       Map<String, dynamic> requestAPI = {
         'transaction_detail': {"order_id": uniqueCode, "gross_amount": price},
         'credit_card': {"secure": true},
@@ -371,6 +375,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           requestImage = null;
         });
       } else {
+        print(res.body);
         showDialog(
           context: context,
           builder: (BuildContext context) {
