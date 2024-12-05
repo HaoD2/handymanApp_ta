@@ -52,7 +52,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
   List<String> optionLayanan = [];
   TimeOfDay selectedTimeEnd = TimeOfDay.now();
   TextEditingController addressController = TextEditingController();
-  DateTime? selectedDateTime;
+  DateTime? selectedDateTime = DateTime.now();
   String uid = "";
 
   String getToken = "";
@@ -77,7 +77,6 @@ class _ModulePemesananState extends State<ModulePemesanan> {
   @override
   void initState() {
     super.initState();
-    selectedDateTime = DateTime.now();
     _getCurrentLocation();
     getOptionData();
     getDatas();
@@ -267,7 +266,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
 
       // Gabungkan semuanya untuk membuat kode unik
       String uniqueCode =
-          'ORDERLH${DateFormat('ddMMyyyy').format(DateTime.now())}${lastOrderNumber.toString().padLeft(5, '0')}';
+          'ORDERLHABC${DateFormat('ddMMyyyy').format(DateTime.now())}${lastOrderNumber.toString().padLeft(5, '0')}';
 
       // Lakukan operasi form submission sesuai kebutuhan Anda
       Map<String, dynamic> requestData = {
@@ -278,7 +277,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
         'status': "pending",
         'status_done': false,
         'address': address,
-        'dateTime': dateTime,
+        'dateTime': selectedDateTime,
         'start_time': start_time,
         'price': price,
         'end_time': end_time,
@@ -300,7 +299,7 @@ class _ModulePemesananState extends State<ModulePemesanan> {
           'id': uniqueCode,
           'price': price,
           'Option_Name': selectedOptions.toList(),
-          'dateTime': dateTime.toString(),
+          'dateTime': selectedDateTime.toString(),
           'start_time': start_time.toString(),
           'end_time': end_time.toString(),
           'otherOption': other.toString(),
@@ -501,17 +500,18 @@ class _ModulePemesananState extends State<ModulePemesanan> {
                       ),
                       initialValue: selectedDateTime,
                       inputType: InputType.date,
-                      firstDate: DateTime.now().subtract(Duration(days: 1)),
+                      firstDate: DateTime.now().subtract(Duration(days: 2)),
                       lastDate: DateTime(2100),
                       controller: dateController,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                       ]),
-                      valueTransformer: (DateTime? value) {
+                      onChanged: (value) {
                         if (value != null) {
-                          return value.toString();
+                          setState(() {
+                            selectedDateTime = value;
+                          });
                         }
-                        return null;
                       },
                     ),
                   ),

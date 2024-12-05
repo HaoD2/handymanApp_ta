@@ -120,7 +120,7 @@ class home extends StatefulWidget {
 class _homeState extends State<home> {
   List<Pekerjaan> data = [];
   Position? _currentPosition;
-  double maxDistanceFilter = 100.0;
+  double maxDistanceFilter = 30.0;
   double selectedDistance = 0.0;
   List<Pekerjaan> dataToDisplay = [];
   TextEditingController queryController = TextEditingController();

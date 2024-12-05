@@ -80,22 +80,13 @@ class FirebaseDataService {
 
   Future<List<Pekerjaan>> getRequestData(Position _currentPosition) async {
     List<Pekerjaan> filteredData = [];
-
     try {
-      print("Fetching pending requests...");
-
       QuerySnapshot querySnapshot = await requestHandymanCollection
           .where('status', isEqualTo: 'pending')
           .get();
-
-      print("Number of pending requests fetched: ${querySnapshot.docs.length}");
-
       for (var doc in querySnapshot.docs) {
         final pekerjaanData = doc.data() as Map<String, dynamic>;
         final pekerjaan = Pekerjaan.fromMap(doc.id, pekerjaanData);
-
-        print("Processing job with ID: ${doc.id}");
-
         // Hitung jarak antara lokasi saat ini dengan lokasi pekerjaan
         double distance = Geolocator.distanceBetween(
               _currentPosition.latitude,
@@ -103,20 +94,10 @@ class FirebaseDataService {
               pekerjaan.location.latitude,
               pekerjaan.location.longitude,
             ) /
-            1000; // convert meter to kilometer
-
-        print("Distance to job (in km): $distance");
-
-        // Filter pekerjaan yang berada dalam jarak 100 km dan belum melewati tenggat waktu
-        bool withinDistance = distance <= 100;
+            1000;
+        bool withinDistance = distance <= 30;
         bool beforeDeadline =
             pekerjaan.datetime.toDate().isAfter(DateTime.now());
-
-        print("Within distance (<=100 km): $withinDistance");
-        print("Before deadline: $beforeDeadline");
-        print("Current time: ${DateTime.now()}");
-        print("Job deadline: ${pekerjaan.datetime.toDate()}");
-
         if (withinDistance && beforeDeadline) {
           print("Job meets criteria and is added to filtered list.");
           filteredData.add(pekerjaan);
